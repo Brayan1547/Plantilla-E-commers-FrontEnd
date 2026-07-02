@@ -13,6 +13,8 @@ export const routes: Routes = [
 
     { path: 'checkout', loadComponent: () => import('./features/checkout/checkout').then(m => m.Checkout) },
 
+    {path: 'category-new', loadComponent:() => import('./features/categories/category-new-form/category-new-form').then(m => m.CategoryNewForm)},
+
     { path: '404', loadComponent: () => import('./features/page-not-foud/page-not-foud').then(m => m.PageNotFoud) },
 
     { path: 'product/detalls', loadComponent: () => import('./features/product-detalls/product-detalls').then(m => m.ProductDetalls) },

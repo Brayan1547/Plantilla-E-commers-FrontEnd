@@ -1,0 +1,22 @@
+<form [formGroup]="formData" (ngSubmit)="onSubmit()" >
+
+    <h2>Agregar Sección</h2>
+
+    <div>
+        <label for="name">Nombre de la categoría</label>
+        <input formControlName="name" type="text" id="name" placeholder="Ej: Nueva Colección">
+    </div>
+
+    <div>
+        <label for="slug">Enlace permanente </label>
+        <input formControlName="slug" type="text" id="slug" placeholder="ej: nueva-coleccion">
+    </div>
+
+    <div>
+        <label for="description">Descripción</label>
+        <input formControlName="description" type="text" id="description" placeholder="Prendas exclusivas de la temporada">
+    </div>
+
+    <button type="submit">Guardar Categoría</button>
+
+</form>
