@@ -7,6 +7,10 @@ import { Home } from './features/home/home';
 export const routes: Routes = [
     { path: 'home', component: Home },
 
+    { path: 'user-new',
+        loadComponent:()=> import('./feature/users/user-new-form/user-new-form').then(m=>m.UserNewForm)
+    },
+
     { path: 'login', loadComponent: () => import('./features/login/login').then(m => m.Login) },
     
     { path: 'register', loadComponent: () => import('./features/register/register').then(m => m.Register) },
@@ -20,9 +24,6 @@ export const routes: Routes = [
     { path: 'coleccion-nino', loadComponent: () => import('./features/collection-nino/collection-nino').then(m => m.CollectionNino) },
 
     { path: 'coleccion-elegante', loadComponent: () => import('./features/collection-elegante/collection-elegante').then(m => m.CollectionElegante) },
-
-    { path: 'user/list', loadComponent: () => import('./features/users/user-list/user-list').then(m => m.UserList) },
-
     { path: '', redirectTo: 'home', pathMatch: 'full' },
     { path: '**', redirectTo: '404', pathMatch: 'full' }
 
