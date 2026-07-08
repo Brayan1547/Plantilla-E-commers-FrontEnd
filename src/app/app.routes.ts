@@ -11,6 +11,8 @@ export const routes: Routes = [
         loadComponent:()=> import('./feature/users/user-new-form/user-new-form').then(m=>m.UserNewForm)
     },
 
+    { path: 'products-dising', loadComponent: () => import('./features/product-disign/product-disign').then(m => m.ProductDisign) },
+
     { path: 'login', loadComponent: () => import('./features/login/login').then(m => m.Login) },
     
     { path: 'register', loadComponent: () => import('./features/register/register').then(m => m.Register) },

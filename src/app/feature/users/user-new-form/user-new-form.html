@@ -1,5 +1,7 @@
 <form [formGroup] ="formData" (ngSubmit)= "onSubmint()">
 
+  <pre>{{ roleList$ | async | json}}</pre>
+
   <!-- Nombre -->
   <div>
     <label for="name">Nombre</label>
@@ -70,6 +72,8 @@
       <option value="author">Author</option>
       <option value="editor">Editor</option>
       <option value="administrator">Administrator</option>
+
+    @for( role of roleList$ | async; track $index ) {}
 
     </select>
   </div>
