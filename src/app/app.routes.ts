@@ -15,13 +15,11 @@ export const routes: Routes = [
 
     {path: 'category-new', loadComponent:() => import('./features/categories/category-new-form/category-new-form').then(m => m.CategoryNewForm)},
 
+    {path: 'product-new', loadComponent:() => import('./features/products/product-new-form/product-new-form').then(m =>m.ProductNewForm)},
+
     { path: '404', loadComponent: () => import('./features/page-not-foud/page-not-foud').then(m => m.PageNotFoud) },
 
-    { path: 'product/detalls', loadComponent: () => import('./features/product-detalls/product-detalls').then(m => m.ProductDetalls) },
-
-    { path: 'coleccion-nino', loadComponent: () => import('./features/collection-nino/collection-nino').then(m => m.CollectionNino) },
-
-    { path: 'coleccion-elegante', loadComponent: () => import('./features/collection-elegante/collection-elegante').then(m => m.CollectionElegante) },
+    { path: 'product/detalls', loadComponent: () => import('./features/products/product-detalls/product-detalls').then(m => m.ProductDetalls) },
 
     { path: 'user/list', loadComponent: () => import('./features/users/user-list/user-list').then(m => m.UserList) },
 

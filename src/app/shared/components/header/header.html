@@ -1,31 +1,33 @@
-<header class="header-dusck">
-  <div class="header-contenedor">
-    
-    <div class="logo-marca">
-      <a routerLink="/home">DUSCK</a>
+<header>
+  <div class="announcement-bar">
+    <span *ngIf="animate">{{ messages[currentMessageIndex] }}</span>
+  </div>
+
+  <nav class="navbar">
+    <div class="nav-left">
+      <button [routerLink]="" (click)="toggleMenu('TIENDA')">TIENDA</button>
+      <button [routerLink]="" (click)="toggleMenu('HOMBRE')">HOMBRE</button>
+      <button [routerLink]="" (click)="toggleMenu('MUJER')">MUJER</button>
     </div>
 
-    <nav class="menu-navegacion">
-      <ul>
-        <li><a routerLink="/home" class="activo">Inicio</a></li>
-        <li><a routerLink="/coleccion-nino">Colección Niño</a></li>
-        <li><a routerLink="/coleccion-elegante">Estilo Elegante</a></li>
-        <li><a routerLink="">Línea Urbana</a></li>
-        <li><a routerLink="/user/list">user/list</a></li>
-      </ul>
-    </nav>
+    <div class="logo">DUSK</div>
 
-    <div class="acciones-header">
-      <div class="buscador-caja">
-        <input type="text" placeholder="Buscar prendas...">
-        <span class="icono-buscar">🔍</span>
+    <div class="nav-right">
+      <div class="search-box">
+        <input type="text" placeholder="Buscar...">
+        <span class="search-icon">🔍</span>
       </div>
-      
-      <a routerLink="/login" class="btn-icono" title="Mi Cuenta">👤</a>
-      <a routerLink="/checkout" class="btn-icono mi-carrito" title="Carrito">
-        🛒 <span class="badge-carrito">0</span>
-      </a>
+      <span class="icon">👤</span>
+      <span class="icon">🛒</span>
     </div>
+  </nav>
 
+  <div class="mega-menu" *ngIf="activeMenu">
+    <h3>{{ activeMenu }}</h3>
+    <ul>
+      <li>Novedades</li>
+      <li>Más vendidos</li>
+      <li>Accesorios</li>
+    </ul>
   </div>
 </header>
