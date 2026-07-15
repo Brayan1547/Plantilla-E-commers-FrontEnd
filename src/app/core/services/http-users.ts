@@ -17,5 +17,9 @@ export class HttpUsers {
                 return res.data;
             })
         );
-    }       
+    } 
+    
+    createUser(newUser: any){
+        return this.http.post('http://localhost:3000/api/users', newUser)
+    }
 }

@@ -8,7 +8,7 @@ export const routes: Routes = [
     { path: 'home', component: Home },
 
     { path: 'user-new',
-        loadComponent:()=> import('./feature/users/user-new-form/user-new-form').then(m=>m.UserNewForm)
+        loadComponent:()=> import('./features/users/user-new-form/user-new-form').then(m=>m.UserNewForm)
     },
 
     { path: 'products-dising', loadComponent: () => import('./features/product-disign/product-disign').then(m => m.ProductDisign) },
@@ -20,6 +20,10 @@ export const routes: Routes = [
     { path: 'checkout', loadComponent: () => import('./features/checkout/checkout').then(m => m.Checkout) },
 
     { path: '404', loadComponent: () => import('./features/page-not-foud/page-not-foud').then(m => m.PageNotFoud) },
+
+    { path: 'user/list',
+        loadComponent: () => import ( './features/users/user-list/user-list' )
+    },
 
     { path: 'product/detalls', loadComponent: () => import('./features/product-detalls/product-detalls').then(m => m.ProductDetalls) },
 
