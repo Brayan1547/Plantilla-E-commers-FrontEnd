@@ -33,19 +33,10 @@ export const routes: Routes = [
      },
 
      {
-          path: 'product-new',
-          loadComponent: () => import('./features/products/product-new-form/product-new-form')
-     },
-
-     {
           path: '404',
           loadComponent: () => import('./features/page-not-foud/page-not-foud')
      },
 
-     {
-          path: 'product/detalls',
-          loadComponent: () => import('./features/products/product-detalls/product-detalls')
-     },
 
      {
           path: 'user/list',
@@ -57,6 +48,22 @@ export const routes: Routes = [
           loadComponent: () => import('./features/categories/category-edit-form/category-edit-form')
      },
 
+     {
+          path: 'product-new',
+          loadComponent: () => import('./features/products/product-new-form/product-new-form')
+     },
+
+     {
+          path: 'product-list',
+          loadComponent: () => import('./features/products/product-list/product-list')
+     },
+
+     {
+          path: 'product-edit',
+          loadComponent: () => import('./features/products/product-edit-form/product-edit-form')
+     },
+
+     //Redirecciones
      { path: '', redirectTo: 'home', pathMatch: 'full' },
      { path: '**', redirectTo: '404', pathMatch: 'full' }
 

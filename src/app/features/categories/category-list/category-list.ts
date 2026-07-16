@@ -12,7 +12,7 @@ import { Router, RouterLink } from '@angular/router';
   templateUrl: './category-list.html',
   styleUrl: './category-list.css',
 })
-export default class CategoryList implements OnInit, OnDestroy {
+export default class CategoryList {
   subscribeCategory!: Subscription;
   public categoryList$ = new BehaviorSubject<any>([]);
 

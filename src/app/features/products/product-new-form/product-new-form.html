@@ -1,1 +1,50 @@
-<p>product-new-form works!</p>
+<div class="page page-product"> 
+
+    <h2>Register product</h2>
+    <form [formGroup]="formData" class="form" (ngSubmit)="onSubmit()">
+
+        <div class="field">
+            <label for="product-name">product name</label>
+            <input type="text" formControlName="name" id="product-name">
+        </div>
+
+        <div class="field">
+            <label for="product-slug">product slug</label>
+            <input type="text" formControlName="slug" id="product-slug">
+        </div>
+
+        <div class="field">
+            <label for="product-description">Description</label>
+            <textarea formControlName="description" id="product-description"></textarea>
+        </div>
+
+        <div class="field">
+            <label for="product-price">price</label>
+            <input type="number" formControlName="price" id="product-price">
+        </div>
+
+        <div class="field">
+            <label for="product-stock">Stock</label>
+            <input type="number" formControlName="stock" id="product-stock">
+        </div>
+
+        <div class="field">
+            <label for="product-images">Imagenes</label>
+            <input type="text" formControlName="images" id="product-images">
+        </div>
+
+        <div class="field">
+            <label for="product-category">Categoria</label>
+            <select formControlName="category" id="product-category">
+                <option value="">select...</option>
+                <option value="">categoria 1</option>
+                <option value="">categoria 2</option>
+                <option value="">categoria 3</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <button type="submit">Registrar Producto</button>
+        </div>
+    </form>
+</div>
