@@ -1,0 +1,35 @@
+<div class="container">
+    <div class="header">
+        <h2>Categorías</h2>
+        <button>+ Nueva Categoría</button>
+    </div>
+
+    <pre>{{categoryList$ | async | json}}</pre>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Slug</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (category of ( categoryList$ | async); track $index) {
+            <tr>
+                <td>{{category.name}}</td>
+                <td>{{category.slug}}</td>
+                <td>{{category.description}}</td>
+                <td><span class="activo">Activo</span></td>
+                <td>
+                    <a [routerLink]="['/category-edit', category._id]">Editar</a>
+                    <button (click)="onEdit( category._id)">Editar</button>
+                    <button class="onDelete" (click)="onDelete(category._id)">Eliminar</button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

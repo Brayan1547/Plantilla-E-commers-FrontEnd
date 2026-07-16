@@ -1,0 +1,30 @@
+<form [formGroup]="formData" (ngSubmit)="onSubmit()" >
+
+    <h2>Editar Formulario</h2>
+
+    <div>
+        <label for="name">Nombre de la categoría</label>
+        <input formControlName="name" type="text" id="name" placeholder="Ej: Nueva Colección">
+        <!-- @if (formData.invalid && (formData.dirty || formData.touched) ) { -->
+            <!-- @if (formData.get              ) -->
+        <!-- } -->
+        <small class="error">aqui va el mensaje del error</small>
+    </div>
+
+    <div>
+        <label for="slug">Enlace permanente </label>
+        <input formControlName="slug" type="text" id="slug" placeholder="ej: nueva-coleccion">
+        <small class="error">aqui va el mensaje del error</small>
+
+    </div>
+
+    <div>
+        <label for="description">Descripción</label>
+        <input formControlName="description" type="text" id="description" placeholder="Prendas exclusivas de la temporada">
+        <small class="error">aqui va el mensaje del error</small>
+
+    </div>
+
+    <button type="submit">Guardar Categoría</button>
+
+</form>

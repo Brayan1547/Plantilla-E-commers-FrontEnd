@@ -6,4 +6,4 @@ import { Component } from '@angular/core';
   templateUrl: './page-not-foud.html',
   styleUrl: './page-not-foud.css',
 })
-export class PageNotFoud {}
+export default class PageNotFoud {}

@@ -10,7 +10,7 @@ import { JsonPipe } from '@angular/common';
   templateUrl: './user-list.html',
   styleUrl: './user-list.css',
 })
-export class UserList {
+export default class UserList {
   users: any = {} ;
 
   //Inyectar una dependencia

@@ -6,4 +6,4 @@ import { Component } from '@angular/core';
   templateUrl: './product-new-form.html',
   styleUrl: './product-new-form.css',
 })
-export class ProductNewForm {}
+export default class ProductNewForm {}

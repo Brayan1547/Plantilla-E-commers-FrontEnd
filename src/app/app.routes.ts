@@ -5,25 +5,59 @@ import { Home } from './features/home/home';
 
 
 export const routes: Routes = [
-    { path: 'home', component: Home },
+     { path: 'home', component: Home },
 
-    { path: 'login', loadComponent: () => import('./features/login/login').then(m => m.Login) },
-    
-    { path: 'register', loadComponent: () => import('./features/register/register').then(m => m.Register) },
+     {
+          path: 'login',
+          loadComponent: () => import('./features/login/login')
+     },
 
-    { path: 'checkout', loadComponent: () => import('./features/checkout/checkout').then(m => m.Checkout) },
+     {
+          path: 'register',
+          loadComponent: () => import('./features/register/register')
+     },
 
-    {path: 'category-new', loadComponent:() => import('./features/categories/category-new-form/category-new-form').then(m => m.CategoryNewForm)},
+     {
+          path: 'checkout',
+          loadComponent: () => import('./features/checkout/checkout')
+     },
 
-    {path: 'product-new', loadComponent:() => import('./features/products/product-new-form/product-new-form').then(m =>m.ProductNewForm)},
+     {
+          path: 'category-new',
+          loadComponent: () => import('./features/categories/category-new-form/category-new-form')
+     },
 
-    { path: '404', loadComponent: () => import('./features/page-not-foud/page-not-foud').then(m => m.PageNotFoud) },
+     {
+          path: 'category-list',
+          loadComponent: () => import('./features/categories/category-list/category-list')
+     },
 
-    { path: 'product/detalls', loadComponent: () => import('./features/products/product-detalls/product-detalls').then(m => m.ProductDetalls) },
+     {
+          path: 'product-new',
+          loadComponent: () => import('./features/products/product-new-form/product-new-form')
+     },
 
-    { path: 'user/list', loadComponent: () => import('./features/users/user-list/user-list').then(m => m.UserList) },
+     {
+          path: '404',
+          loadComponent: () => import('./features/page-not-foud/page-not-foud')
+     },
 
-    { path: '', redirectTo: 'home', pathMatch: 'full' },
-    { path: '**', redirectTo: '404', pathMatch: 'full' }
+     {
+          path: 'product/detalls',
+          loadComponent: () => import('./features/products/product-detalls/product-detalls')
+     },
+
+     {
+          path: 'user/list',
+          loadComponent: () => import('./features/users/user-list/user-list')
+     },
+
+     {
+          path: 'category-edit/:id',
+          loadComponent: () => import('./features/categories/category-edit-form/category-edit-form')
+     },
+
+     { path: '', redirectTo: 'home', pathMatch: 'full' },
+     { path: '**', redirectTo: '404', pathMatch: 'full' }
 
 ];

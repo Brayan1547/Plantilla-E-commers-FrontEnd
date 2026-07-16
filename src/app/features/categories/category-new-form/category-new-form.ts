@@ -10,7 +10,7 @@ import { HttpCategory } from '../../../core/services/http-category';
   templateUrl: './category-new-form.html',
   styleUrl: './category-new-form.css',
 })
-export class CategoryNewForm {
+export default class CategoryNewForm {
   formData: FormGroup;
   private httpCategory = inject(HttpCategory);
 
