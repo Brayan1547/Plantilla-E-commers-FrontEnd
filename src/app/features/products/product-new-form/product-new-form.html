@@ -1,6 +1,9 @@
 <div class="page page-product"> 
 
     <h2>Register product</h2>
+
+    <pre>{{ categoryList$ | async | json }} </pre>
+
     <form [formGroup]="formData" class="form" (ngSubmit)="onSubmit()">
 
         <div class="field">
@@ -36,10 +39,9 @@
         <div class="field">
             <label for="product-category">Categoria</label>
             <select formControlName="category" id="product-category">
-                <option value="">select...</option>
-                <option value="">categoria 1</option>
-                <option value="">categoria 2</option>
-                <option value="">categoria 3</option>
+                @for (category of (categoryList$ | async); track $index) {
+                <option [value]="category._id">{{ category.name }}</option>
+                }
             </select>
         </div>
 

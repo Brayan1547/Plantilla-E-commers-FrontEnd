@@ -31,8 +31,16 @@ export default class CategoryEditForm implements OnInit {
 
         //Invocar al servicio que actualiza
     this.httpCategory.getCategoryById( this.selecteId ).subscribe({
-      next: (data) => {
-        console.log(data);
+      next: (data: any) => {
+        console.log(data.data.name);
+
+        const {data: {name, slug, description } } = data;
+        //Llenar los campos del formulario con los datos obtenidos por el ID de URL
+        this.formData.patchValue({
+          name ,
+          slug ,
+          description
+        })
       },
       error: (err) => {
         console.error(err);

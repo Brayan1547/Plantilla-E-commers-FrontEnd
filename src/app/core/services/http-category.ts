@@ -15,7 +15,7 @@ export class HttpCategory {
         return this.http.get<any>( 'http://localhost:3000/api/category' );
     }
 
-    getCategoryById(id: string) {
+    getCategoryById(id: any) {
         return this.http.get( `http://localhost:3000/api/category/${id}`);
     }
 
