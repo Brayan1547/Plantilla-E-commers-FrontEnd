@@ -1,9 +1,43 @@
 <div class="page page-product">
 
     <h2>product List</h2>
+    <pre>{{ productList$ | async | json }}</pre>
 
     <div class="option">
         <a routerLink="/product-new">new product</a>
     </div>
-    
+
+    <table>
+        <thead>
+            <tr>
+                <th>image</th>
+                <th>product Name</th>
+                <th>Contact</th>
+                <th>Country</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @for ( product of (productList$ | async ); track $index) {
+            <tr>
+                <td>
+                    <img class="product-image" [src]="product.images" [alt]="product.name" {title}="product.name">
+                </td>
+                <td>{{product.name}}</td>
+                <td>
+                    <hugeicons-icon [icon]="notificationIcon" [size]="24" color="currentColor"
+                        [strokeWidth]="1.5"></hugeicons-icon>
+
+                    <hugeicons-icon [icon]="BadgeXIcon" [size]="24" color="#fe0a0a"
+                        [strokeWidth]="1.5"></hugeicons-icon>
+                </td>
+                <td>Germany</td>
+            </tr>
+            }
+
+        </tbody>
+        <tfoot></tfoot>
+
+    </table>
+
 </div>

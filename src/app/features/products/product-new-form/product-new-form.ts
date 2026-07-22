@@ -1,8 +1,11 @@
 import { Component, inject } from '@angular/core';
-import { FormControl, FormGroup, ɵInternalFormsSharedModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ɵInternalFormsSharedModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpCategory } from '../../../core/services/http-category';
 import { BehaviorSubject } from 'rxjs';
 import { AsyncPipe, JsonPipe } from '@angular/common';
+import { HttpProduct } from '../../../core/services/http-product';
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-product-new-form',
@@ -12,18 +15,20 @@ import { AsyncPipe, JsonPipe } from '@angular/common';
 })
 export default class ProductNewForm {
   categoryList$ = new BehaviorSubject<any>([]);
-  private httpCategory = inject( HttpCategory );    //Injectamos una dependencia 
+  private httpCategory = inject( HttpCategory );    //Injectamos una dependencia  (para obtener el listad)
+  private httpProduct = inject( HttpProduct );    //Injectamos una dependencia para registrar producto
+  private router = inject( Router);
   formData!: FormGroup;
 
   constructor(){
     this.formData = new FormGroup({
-      name: new FormControl(),
-      slug: new FormControl(),
-      description: new FormControl(),
-      price: new FormControl(),
-      stock: new FormControl(),
+      name: new FormControl( '', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]),
+      slug: new FormControl('', [Validators.required, Validators.pattern(/^[a-z0-9-]+$/ ) ]),
+      description: new FormControl( '', [Validators.maxLength(500) ] ),
+      price: new FormControl( 0, [Validators.required, Validators.min(0)]),
+      stock: new FormControl( 0, [Validators.required, Validators.min(0)]),
       images:new FormControl(),
-      category: new FormControl()
+      category: new FormControl('', [Validators.required])
     });
   }
 
@@ -45,6 +50,53 @@ export default class ProductNewForm {
   }
 
   onSubmit() {
-    console.log(this.formData.value);   //Muestra todos los valores del formulario
+    //Verificando si el formulario es valido
+    if (this.formData.valid) {
+      console.log( this.formData.value)
+
+      this.httpProduct.createProduct( this.formData.value).subscribe({
+        next: ( data ) => {
+          console.log ( data );
+          this.formData.reset();    //limpiar el formulario
+          this.router.navigateByUrl('/product-list')  //redirecciono 
+        },
+        error: (err) => {
+          console.error( err );
+        },
+        complete: () =>{
+          console.log('Registra un producto')
+        }
+      });
+    } else {
+      console.log('El formulario no es valido', this.formData.value) //muestra todos los valores del formulario
+
+  
+    }
+  }
+
+  //Getters
+  get name() {
+    return this.formData.get('name')
+  }
+
+  get slug() {
+    return this.formData.get('slug')
+  }
+
+  get description() {
+    return this.formData.get('description')
+  }
+
+  get price() {
+    return this.formData.get('price')
+  }
+
+  get stock() {
+    return this.formData.get('stock')
+  }
+
+  get category() {
+    return this.formData.get('category')
   }
 }
+

@@ -9,7 +9,7 @@ import { HttpCategory } from '../../../core/services/http-category';
   templateUrl: './category-edit-form.html',
   styleUrl: './category-edit-form.css',
 })
-export default class CategoryEditForm implements OnInit {
+export default class CategoryEditForm {
   selecteId!:  any;   //Evita que typeScript me obligue a definir el valor del atributo
   formData!: FormGroup;
 
@@ -53,5 +53,38 @@ export default class CategoryEditForm implements OnInit {
 
   onSubmit() {
 
+    //Validas que el formulario (y sus campos) sean validos
+    if ( this.formData.valid) {
+      console.log ( this.formData.value );
+
+      //Ejecutar el servicio que me permite actalizar los datos que se encuentran registrados en el formulario
+      this.httpCategory.updateCategotyById(this.selecteId,this.formData.value ).subscribe({
+        next: ( data ) => {
+          console.log( data );
+        },
+        error: ( err ) => {
+          console.error(err)
+        },
+        complete: () => {
+          console.log ( 'actualiza la categoria')
+        }
+      })
+    }
+    else {
+      console.log( 'formulario invalido')
+    }
+  }
+
+  // Getters
+  get name() {
+    return this.formData.get('name')
+  }
+
+  get slug() {
+    return this.formData.get('slug')
+  }
+
+  get description() {
+    return this.formData.get('description')
   }
 }
