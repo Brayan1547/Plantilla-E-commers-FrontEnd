@@ -5,6 +5,8 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { AsyncPipe, JsonPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 
+import Swal from 'sweetalert2';
+
 
 @Component({
   selector: 'app-category-list',
@@ -17,7 +19,7 @@ export default class CategoryList {
   public categoryList$ = new BehaviorSubject<any>([]);
 
   private httpcategory = inject(HttpCategory);
-  private router =inject(Router )
+  private router = inject(Router)
 
   // Hook: Saber cuando se inicializa el componente
   ngOnInit() {
@@ -54,20 +56,43 @@ export default class CategoryList {
     //redirecciona
     this.router.navigate(['/category-edit', id]);
   }
-
   onDelete(id: string) {
-    // console.log('Delete', id);
-    this.httpcategory.deleteCategoryById(id).subscribe({
-      next: (data) => {
-        console.log(data);
-        this.loadcategory();
-      },
-      error: (err) => {
-        console.error(err);
-      },
-      complete: () => {
-        console.log('Peticion al API para eliminar el usuairio ')
+    // 2. Implementar la ventana Modal de SweetAlert2
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "¿Deseas eliminar esta categoría?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, ¡bórralo!",
+      cancelButtonText: "Cancelar"
+    }).then((result) => {
+      // 3. Validar si el usuario confirmó la acción
+      if (result.isConfirmed) {
+        // Ejecutar el servicio de eliminación dentro del bloque de confirmación
+        this.httpcategory.deleteCategoryById(id).subscribe({
+          next: (data) => {
+            console.log(data);
+
+            // Mostrar la alerta de éxito opcional
+            Swal.fire({
+              title: "¡Eliminado!",
+              text: "La categoría ha sido eliminada con éxito.",
+              icon: "success"
+            });
+
+            this.loadcategory();
+          },
+          error: (err) => {
+            console.error(err);
+          },
+          complete: () => {
+            console.log('Peticion al API para eliminar el usuairio ')
+          }
+        });
       }
-    })
+    });
+
   }
 }
