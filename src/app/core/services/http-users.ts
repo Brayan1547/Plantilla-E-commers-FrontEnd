@@ -1,25 +1,40 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Service } from '@angular/core';
-import { map, tap } from 'rxjs';
-import { ResponseUsers } from '../models/users';
+import { inject, Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment.development';
 
-@Service()
+@Injectable({
+  providedIn: 'root'
+})
 export class HttpUsers {
-    //inyectar una dependencia
-    private http = inject( HttpClient);
-    
-    //Meotodo para realizar a mi API donde tengo lista de usuario
-    getUsers() {
-        return this.http.get<ResponseUsers> ('http://localhost:3000/api/users').pipe(
-            tap((res) => { console.log('tap', res); }), 
-            map((res) => {
-                console.log('map',res.data);
-                return res.data;
-            })
-        );
-    } 
-    
-    createUser(newUser: any){
-        return this.http.post('http://localhost:3000/api/users', newUser)
-    }
-}
+
+  private http = inject(HttpClient);
+
+  BASE_URL: string = environment.apiUrl;
+
+
+  // Obtener todos los usuarios
+  getUsers() {
+    return this.http.get<any>(`${this.BASE_URL}/users`);
+  }
+
+  // Obtener un usuario por ID
+  getUserById(id: string) {
+    return this.http.get<any>(`${this.BASE_URL}/users/${id}`);
+  }
+
+  // Crear usuario
+  createUser(newUser: any) {
+    return this.http.post<any>(`${this.BASE_URL}/user`, newUser);
+  }
+
+  // Actualizar usuario
+  updateUser(id: string, user: any) {
+    return this.http.patch<any>(`${this.BASE_URL}/users/${id}`, user);
+  }
+
+  // Eliminar usuario
+  deleteUser(id: string) {
+    return this.http.delete<any>(`${this.BASE_URL}/users/${id}`);
+  }
+
+}   
