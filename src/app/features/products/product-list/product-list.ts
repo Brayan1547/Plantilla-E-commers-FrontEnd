@@ -7,7 +7,10 @@ import { AsyncPipe, JsonPipe } from '@angular/common';
 
 //IMportamos la libreria de iconos de HugeIcons
 import { HugeiconsIconComponent } from '@hugeicons/angular'
-import { BadgeXIcon, Notification03Icon } from '@hugeicons/core-free-icons'
+import { BadgeXIcon, Notification03Icon, CheckmarkBadge03Icon } from '@hugeicons/core-free-icons'
+
+import { ToggleOffIcon, ToggleOnIcon } from '@hugeicons/core-free-icons';
+
 
 @Component({
   selector: 'app-product-list',
@@ -21,6 +24,11 @@ export default class ProductList {
   //Define el atributo publico que desplegara el icono 
    notificationIcon = Notification03Icon ;
    BadgeXIcon = BadgeXIcon;
+   CheckmarkBadge03Icon = CheckmarkBadge03Icon
+
+   ToggleOffIcon = ToggleOffIcon;
+   ToggleOnIcon = ToggleOnIcon;
+
 
   // (0) Siempre inyectar la dependencia
   private httpProduct = inject(HttpProduct);

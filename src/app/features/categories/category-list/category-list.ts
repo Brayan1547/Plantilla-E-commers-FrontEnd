@@ -1,20 +1,27 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { HttpCategory } from '../../../core/services/http-category';
-
-import { BehaviorSubject, Subscription } from 'rxjs';
 import { AsyncPipe, JsonPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { BehaviorSubject, Subscription } from 'rxjs';
 
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import Swal from 'sweetalert2';
+import { faCoffee, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+
+import { HttpCategory } from '../../../core/services/http-category';
 
 
 @Component({
   selector: 'app-category-list',
-  imports: [AsyncPipe, JsonPipe, RouterLink],
+  imports: [AsyncPipe, JsonPipe, RouterLink, FontAwesomeModule],
   templateUrl: './category-list.html',
   styleUrl: './category-list.css',
 })
 export default class CategoryList {
+  //atributos de iconos con fontawesomw
+  faCoffee = faCoffee;
+  faPenToSquare = faPenToSquare ;
+
+  //Atributos de la logica del componente
   subscribeCategory!: Subscription;
   public categoryList$ = new BehaviorSubject<any>([]);
 

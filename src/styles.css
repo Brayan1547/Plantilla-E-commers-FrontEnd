@@ -20,3 +20,15 @@ tr:nth-child(even) {
   width: 3rem;
   border-radius: .7rem;
 }
+
+/* Tables: Status */
+.toggle-icon {
+  border: 1px dotted;
+  width: 100%;
+}
+.toggle-on-icon {
+  color: green;
+}
+/* .toggle-off-icon {
+  color: gray;
+} */

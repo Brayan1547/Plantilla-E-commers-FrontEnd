@@ -12,8 +12,8 @@
             <tr>
                 <th>image</th>
                 <th>product Name</th>
-                <th>Contact</th>
-                <th>Country</th>
+                <th>status</th>
+                <th>actions</th>
             </tr>
         </thead>
 
@@ -25,13 +25,21 @@
                 </td>
                 <td>{{product.name}}</td>
                 <td>
-                    <hugeicons-icon [icon]="notificationIcon" [size]="24" color="currentColor"
+                    @if( product.isActive) {
+                    <hugeicons-icon class="toggle-icon toggle-on-icon" [icon]="ToggleOnIcon" [size]="24" color="currentColor" [strokeWidth]="1.5">
+                    </hugeicons-icon>
+                    }
+                    @else {
+                    <hugeicons-icon class="toggle-icon toggle-off-icon" [icon]="ToggleOffIcon" [size]="24" color="#fe0a0a"
                         [strokeWidth]="1.5"></hugeicons-icon>
+                    }
 
-                    <hugeicons-icon [icon]="BadgeXIcon" [size]="24" color="#fe0a0a"
-                        [strokeWidth]="1.5"></hugeicons-icon>
                 </td>
-                <td>Germany</td>
+                <td>
+                    <div class="option"></div>
+                    <a href="#">Edit</a>
+                    <a href="#">Delete</a>
+                </td>
             </tr>
             }
 

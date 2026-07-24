@@ -19,12 +19,18 @@
         <tbody>
             @for (category of ( categoryList$ | async); track $index) {
             <tr>
-                <td>{{category.name}}</td>
+                <td>
+                    {{category.name}}
+                    <fa-icon [icon]="faCoffee" />
+                </td>
                 <td>{{category.slug}}</td>
                 <td>{{category.description}}</td>
                 <td><span class="activo">Activo</span></td>
                 <td>
-                    <a [routerLink]="['/category-edit', category._id]">Editar</a>
+                    <a [routerLink]="['/category-edit', category._id]">
+                        <fa-icon [icon]="faPenToSquare" />
+                        Editar
+                    </a>
                     <button (click)="onEdit( category._id)">Editar</button>
                     <button class="onDelete" (click)="onDelete(category._id)">Eliminar</button>
                 </td>
