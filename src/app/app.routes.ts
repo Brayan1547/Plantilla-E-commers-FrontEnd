@@ -56,7 +56,7 @@ export const routes: Routes = [
      },
 
      {
-          path: 'product-edit',
+          path: 'product-edit/:id',
           loadComponent: () => import('./features/products/product-edit-form/product-edit-form')
      },
 

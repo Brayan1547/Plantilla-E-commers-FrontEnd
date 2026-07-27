@@ -17,7 +17,7 @@ export class Header implements OnDestroy {
   private intervalId: any;
 
   messages = [
-    "¡Los estudiantes tienen 10% de descuento!",
+    "Nueva Colección Disponible - Quiet Luxury",
     "Envío estándar gratuito > $75"
   ];
 

@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink } from "@angular/router";
+import { Router, RouterLink } from "@angular/router";
 import { HttpProduct } from '../../../core/services/http-product';
 import { error } from 'console';
 import { BehaviorSubject } from 'rxjs';
@@ -32,10 +32,15 @@ export default class ProductList {
 
   // (0) Siempre inyectar la dependencia
   private httpProduct = inject(HttpProduct);
+  private router = inject( Router)
 
   //Hook: Reconoce cuando se inicializa el componente
   ngOnInit() {
-    //Obtener el listado de productos usando el servicio 
+    this.onLoadData();
+  }
+
+  onLoadData() {
+        //Obtener el listado de productos usando el servicio 
     this.httpProduct.getProduct().subscribe({
       next: ( data ) =>{
         console.log( data.data );
@@ -46,6 +51,27 @@ export default class ProductList {
       },
       complete: () => {
         console.log ( 'Listar Productos' )
+      }
+    });
+  }
+
+  onEdit(id: string) {
+    console.log( 'Editar', id);
+    this.router.navigateByUrl (`/product-edit/${id}`)   //Redireccion Enviando el ID por la ruta
+  }
+
+  onDelete(id: string) {
+    console.log( 'Eliminar' , id);
+    this.httpProduct.deleteProduct( id ).subscribe({
+      next: ( res ) => {
+        console.log( res);
+        this.onLoadData();
+      },
+      error: ( err ) => {
+        console.error( err );
+      },
+      complete: () => {
+        console.log( 'Execute Complete' );
       }
     });
   }

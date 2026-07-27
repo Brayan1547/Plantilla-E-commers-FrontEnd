@@ -19,4 +19,9 @@ export class HttpProduct {
         //http siemprem devuelve los datos dentro de un Observable
         return this.http.get<any>( 'http://localhost:3000/api/product')
     }
+
+    deleteProduct( id: string | null) {
+        //http siemprem devuelve los datos dentro de un Observable
+        return this.http.delete( `http://localhost:3000/api/product/${id}` );
+    }
 }
