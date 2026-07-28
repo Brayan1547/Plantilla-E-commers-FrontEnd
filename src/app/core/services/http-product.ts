@@ -12,7 +12,7 @@ export class HttpProduct {
     
     createProduct( newProduct: any) {
         //http siempre devuelve los datos dentro de un Observable
-        return this.http.post( 'http://localhost:3000/api/product', newProduct);
+        return this.http.post<any>( 'http://localhost:3000/api/product', newProduct);
     }
 
     getProduct() {
@@ -22,6 +22,15 @@ export class HttpProduct {
 
     deleteProduct( id: string | null) {
         //http siemprem devuelve los datos dentro de un Observable
-        return this.http.delete( `http://localhost:3000/api/product/${id}` );
+        return this.http.delete<any>( `http://localhost:3000/api/product/${id}` );
+    }
+
+    getProductById( id: string | null) {
+        //http siemprem devuelve los datos dentro de un Observable
+        return this.http.get<any>(`http://localhost:3000/api/product/${id}`);
+    }
+
+    updateProductById( id: string | null,  updateProduct: any ) {
+        return this.http.patch<any>(`http://localhost:3000/api/product/${id}`, updateProduct) ;
     }
 }

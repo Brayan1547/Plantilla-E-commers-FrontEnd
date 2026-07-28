@@ -2,7 +2,7 @@
 .footer-dusck {
   background-color:  #EFE9E1; 
   color: #040404; 
-  padding: 60px 20px 0 20px; /* Espacio interno */
+  padding: 60px 0 0 0; /* Espacio interno */
   font-family: 'Arial', sans-serif;
   margin-top: 50px; /* Separa el footer de las fotos del Main */
   width: 100%;
@@ -47,7 +47,7 @@
 .footer-derechos {
 background-color: #000000; /* <-- AQUÍ CAMBIAS EL COLOR DE FONDO DE ESTA CAJA INFERIOR */
   width: 100%; /* Hace que la caja de abajo ocupe todo el ancho de la pantalla */
-  padding: 25px 20px; /* Espacio interno para que no quede pegado el texto */
+  padding: 25px 0; /* Espacio interno para que no quede pegado el texto */
   margin-top: 40px;
   margin-bottom: 0; /* Evita espacios blancos debajo de la barra negra */
   border-top: 1px solid #000000;
@@ -60,6 +60,7 @@ max-width: 1200px;
   margin: 0 auto;
   font-size: 0.8rem; 
   color: #fffbfb;
+  padding: 0 15px;
 }
 
 /* ========================================
@@ -74,6 +75,7 @@ max-width: 1200px;
   }
   
   .footer-dusck {
-    padding: 40px 15px 0 15px; /* Reduce márgenes laterales para que no sobrepase la pantalla */
+    padding: 40px 0 0 0; /* Reduce márgenes laterales para que no sobrepase la pantalla */
+    margin: 60px 0 0 0;
   }
 }
