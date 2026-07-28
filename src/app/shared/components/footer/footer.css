@@ -1,10 +1,13 @@
 /* 1. FONDO Y MARGENES DEL FOOTER */
 .footer-dusck {
-  background-color: #111111; 
-  color: #ffffff; 
-  padding: 60px 20px 20px 20px; /* Espacio interno */
+  background-color:  #EFE9E1; 
+  color: #040404; 
+  padding: 60px 20px 0 20px; /* Espacio interno */
   font-family: 'Arial', sans-serif;
   margin-top: 50px; /* Separa el footer de las fotos del Main */
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0;
 }
 
 /* Contenedor que centra y alinea las dos columnas */
@@ -35,22 +38,42 @@
 /* Párrafos de texto y datos de contacto */
 .footer-columna p {
   font-size: 0.9rem;
-  color: #cccccc; /* Gris claro para que no canse la vista sobre el negro */
+  color: #040404; /* Gris claro para que no canse la vista sobre el negro */
   line-height: 1.6; /* Separa los renglones para que no se vean amontonados */
   margin: 10px 0;
 }
 
 /* barra de derechos de autos */
 .footer-derechos {
-  max-width: 1200px;
-  margin: 40px auto 0 auto; /* Espacio arriba para separarlo de las columnas */
-  padding-top: 20px;
-  border-top: 1px solid #333333;
-  text-align: center; /* Centra el texto en la mitad */
+background-color: #000000; /* <-- AQUÍ CAMBIAS EL COLOR DE FONDO DE ESTA CAJA INFERIOR */
+  width: 100%; /* Hace que la caja de abajo ocupe todo el ancho de la pantalla */
+  padding: 25px 20px; /* Espacio interno para que no quede pegado el texto */
+  margin-top: 40px;
+  margin-bottom: 0; /* Evita espacios blancos debajo de la barra negra */
+  border-top: 1px solid #000000;
+  text-align: center; 
+  box-sizing: border-box;
 }
 
 .footer-derechos p {
-  font-size: 0.8rem; /* Letra pequeña discreta */
-  color: #777777; /* Gris oscuro para que no resalte tanto */
-  margin: 0;
+max-width: 1200px;
+  margin: 0 auto;
+  font-size: 0.8rem; 
+  color: #fffbfb;
+}
+
+/* ========================================
+   Responsil para cel
+======================================== */
+@media (max-width: 768px) {
+  .footer-contenedor {
+    flex-direction: column; /* Pone una columna debajo de la otra en celular */
+    align-items: center;    /* Centra los elementos */
+    text-align: center;     /* Centra los textos */
+    gap: 30px;
+  }
+  
+  .footer-dusck {
+    padding: 40px 15px 0 15px; /* Reduce márgenes laterales para que no sobrepase la pantalla */
+  }
 }

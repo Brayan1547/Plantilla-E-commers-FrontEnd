@@ -228,3 +228,42 @@ header {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ========================================
+   Responsil cel
+======================================== */
+@media (max-width: 768px) {
+.navbar {
+    display: flex;
+    flex-direction: column; /* Pone los elementos uno debajo de otro */
+    height: auto;
+    padding: 15px;
+    gap: 15px;
+  }
+
+  /* El logo queda arriba centrado */
+  .logo-container {
+    order: 1; 
+  }
+
+  /* Los iconos de la derecha (buscar, usuario, carrito) pasan al centro o lado del logo */
+  .nav-right {
+    order: 2;
+    width: 100%;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  /* El menú de texto (TIENDA, HOMBRE, etc.) se queda visible abajo del todo */
+  .nav-left {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap; /* Si son muchos, bajan ordenados sin salirse */
+    gap: 15px;
+  }
+
+  .brand-logo {
+    height: 40px;
+  }
+}

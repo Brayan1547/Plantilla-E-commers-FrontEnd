@@ -117,24 +117,80 @@ tbody tr:hover{
     background:#b91c1c;
 }
 
-@media (max-width:768px){
+/* ==========================================
+    Quitar eso caundo quite el objeto json
+============================================= */
+pre{
+    white-space: pre-wrap;   /* permite que el texto haga salto de línea */
+    word-break: break-word;  /* corta palabras/strings largos si hace falta */
+    overflow-x: auto;        /* si aun así algo es muy largo, scroll solo ahí, no en toda la página */
+    background:#f4f6f9;
+    padding:10px;
+    border-radius:6px;
+    font-size:13px;
+}
+
+/* ========================================
+   Responsivo para celular
+======================================== */
+
+@media (max-width: 768px) {
 
     body{
-        padding:15px;
+        padding: 15px;
     }
 
     .container{
-        overflow-x:auto;
-    }
-
-    table{
-        min-width:900px;
+        width: 100%;
+        padding: 15px;
     }
 
     .header{
-        flex-direction:column;
-        align-items:flex-start;
-        gap:15px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
     }
 
+    .header button{
+        width: 100%;
+    }
+
+    /* Convertimos la tabla en tarjetas apiladas */
+    thead{
+        display: none; /* ocultamos el encabezado original */
+    }
+
+    table, tbody, tr, td{
+        display: block;
+        width: 100%;
+    }
+
+    tbody tr{
+        margin-bottom: 15px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    tbody td{
+        border-bottom: none;
+        padding: 10px 5px;
+        text-align: right; /* el valor a la derecha */
+    }
+
+    /* Mostramos una etiqueta antes de cada dato, usando el nombre de columna */
+    tbody td::before{
+        content: attr(data-label);
+        float: left;
+        font-weight: bold;
+        color: #111827;
+    }
+
+    tbody td:last-child{
+        text-align: left; /* los botones de acción se ven mejor a la izquierda */
+    }
+
+    tbody td:last-child > * {
+        margin-bottom: 8px;
+    }
 }

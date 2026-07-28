@@ -1,3 +1,9 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 /* 1. Modificamos el body para que cree un contenedor central vertical */
 body {
     display: flex;
@@ -83,4 +89,35 @@ form h2 {
     color: #111111;
     text-align: center;
     margin-bottom: 25px;
+}
+
+/* ========================================
+   Responsivo para celular
+======================================== */
+
+@media (max-width: 480px) {
+
+    div {
+        width: 95%; /* un poco más de ancho aprovechado en pantallas muy chicas */
+    }
+
+    label {
+        padding-left: 8px; /* el padding-left:18px original se ve muy corrido en pantallas chicas */
+        font-size: 12px;
+    }
+
+    input[type="text"] {
+        padding: 12px 16px; /* reducimos un poco el padding lateral (era 14px 22px) */
+        font-size: 14px;
+    }
+
+    button[type="submit"] {
+        width: 95%;
+        padding: 14px;
+        font-size: 13px;
+    }
+
+    form h2 {
+        font-size: 16px;
+    }
 }
