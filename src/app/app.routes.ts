@@ -5,13 +5,13 @@ export const routes: Routes = [
      { path: 'home', component: Home },
 
      {
-          path: 'login',
-          loadComponent: () => import('./features/login/login')
+          path: 'register',
+          loadComponent: () => import('./features/auth/register/register')
      },
 
      {
-          path: 'register',
-          loadComponent: () => import('./features/register/register')
+          path: 'login',
+          loadComponent: () => import('./features/auth/login/login')
      },
 
      {
@@ -34,29 +34,33 @@ export const routes: Routes = [
           loadComponent: () => import('./features/page-not-foud/page-not-foud')
      },
 
+     {
+          path: 'dashboard',
+          loadComponent: () => import('./features/dashboard/dashboard')
+     },
 
      {
-          path: 'user/list',
+          path: 'dashboard/user/list',
           loadComponent: () => import('./features/users/user-list/user-list')
      },
 
      {
-          path: 'category-edit/:id',
+          path: 'dashboard/category-edit/:id',
           loadComponent: () => import('./features/categories/category-edit-form/category-edit-form')
      },
 
      {
-          path: 'product-new',
+          path: 'dashboard/product-new',
           loadComponent: () => import('./features/products/product-new-form/product-new-form')
      },
 
      {
-          path: 'product-list',
+          path: 'dashboard/product-list',
           loadComponent: () => import('./features/products/product-list/product-list')
      },
 
      {
-          path: 'product-edit/:id',
+          path: 'dashboard/product-edit/:id',
           loadComponent: () => import('./features/products/product-edit-form/product-edit-form')
      },
 

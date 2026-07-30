@@ -12,7 +12,17 @@
       <button [routerLink]="" (click)="toggleMenu('HOMBRE')">HOMBRE</button>
       <button [routerLink]="" (click)="toggleMenu('MUJER')">MUJER</button>
       <a routerLink="/category-list" routerLinkActive="active" class="menu-link">COLECCIONES  </a>
-      <a routerLink="/product-list" routerLinkActive="active" class="menu-link">BÁSICOS</a>
+      <a routerLink="/dashboard/product-list" routerLinkActive="active" class="menu-link">BÁSICOS</a>
+      
+      <!-- <button (click)= "logout()">logout</button> -->
+      
+      @if( httpAuth.isLogged() ){
+        <li><button (click)="logout()">logout</button></li>
+      }@else {
+        <li><a routerLink="/login" routerLinkActive="active">login</a></li>
+        <li><a routerLink="/register" routerLink="active">register</a></li>
+      }
+
     </div>
 
 

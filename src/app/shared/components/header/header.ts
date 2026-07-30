@@ -1,7 +1,8 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
+import { httpAuth } from '../../../core/services/http-auth';
 
 @Component({
   selector: 'app-header',
@@ -15,6 +16,8 @@ export class Header implements OnDestroy {
   currentMessageIndex = 0;
   animate = true;
   private intervalId: any;
+
+   httpAuth = inject( httpAuth )
 
   messages = [
     "Nueva Colección Disponible - Quiet Luxury",
@@ -39,5 +42,9 @@ export class Header implements OnDestroy {
 
   ngOnDestroy() {
     clearInterval(this.intervalId);
+  }
+
+  logout() {
+    this.httpAuth.logoutUser();
   }
 }
