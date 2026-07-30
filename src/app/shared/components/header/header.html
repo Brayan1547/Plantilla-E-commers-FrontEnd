@@ -16,14 +16,25 @@
       
       <!-- <button (click)= "logout()">logout</button> -->
       
-      @if( httpAuth.isLogged() ){
+      <!-- @if( httpAuth.isLogged() && httpAuth.user; as user){
         <li><button (click)="logout()">logout</button></li>
       }@else {
         <li><a routerLink="/login" routerLinkActive="active">login</a></li>
         <li><a routerLink="/register" routerLink="active">register</a></li>
-      }
+      } -->
+<ul>
+  @if ( httpAuth.user$ |async; as user) {
+  {{ user.name }}
+  {{ user.role }}
+  <li><button (click)="logout()">logout</button></li>
+  } 
+  @else {
+  <li><a routerLink="/login" routerLinkActive="active">login</a></li>
+  <li><a routerLink="/register" routerLink="active">register</a></li>
+  }
+</ul>
 
-    </div>
+</div>
 
 
     <div class="logo-container" [routerLink]="['/']">

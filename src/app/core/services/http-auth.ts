@@ -14,10 +14,13 @@ export class httpAuth {
     private BASE_URL: string = environment.apiUrl
     private router = inject(Router)
     private platFormId = inject(PLATFORM_ID);      //Obtener el ID de angulaar para identificar SPAs oSSR
+    private isBrowser: boolean = isPlatformBrowser(this.platFormId);
 
-    currentUser$ = new BehaviorSubject<any>(null);
-    currentToken$ = new BehaviorSubject<any>(null);
 
+    currentUser$ = new BehaviorSubject<any>(this.getUserFromStorage());
+    user$ = this.currentUser$.asObservable();
+    currentToken$ = new BehaviorSubject<any>(this.getTokenFromStorage());
+    token$ = this.currentToken$.asObservable();
 
     loginUser(credentials: any) {
         //credential = { "email": "tati.garcia@dominio.com", "password": "OtraClaveDiferente456" }
@@ -28,8 +31,8 @@ export class httpAuth {
                 tap((res) => {
                     //Verificamos que la respuesta contenga las propiedades esperadas
                     if (res?.token && res?.data) {
-                        this.saveDataLocalStorage(res.token, res.data)
-
+                  
+                        this.setAuthData(res.token, res.data);
                         //Redirecciona
                         this.router.navigateByUrl('/dashboard');
 
@@ -52,15 +55,9 @@ export class httpAuth {
             )
     }
 
-    saveDataLocalStorage(token: any, user: any) {
-        //Verificando el tipo de aplicacion que estamos ejecutando (SSR o SPA)
-        if (isPlatformBrowser(this.platFormId)) {
-            localStorage.setItem('token', token);
-            localStorage.setItem('user', JSON.stringify(user));
-        }
-
-        this.currentUser$.next(user);     //Guardando /persistir Datos en el behaviorSubject
-        this.currentToken$.next(token);
+    setAuthData( token: string | null, user: any ) {
+        this.token = token;
+        this.user = user;
     }
 
     getDataLocalStorage(): any {
@@ -68,7 +65,7 @@ export class httpAuth {
         let user;
 
         // Verificando el tipo de aplicacion que estamos ejecutando (SSR o SPA)
-        if (isPlatformBrowser(this.platFormId)) {
+        if (this.isBrowser) {
             const valueKeyToken = localStorage.getItem('token');
             token = valueKeyToken ? valueKeyToken : null;
 
@@ -85,25 +82,69 @@ export class httpAuth {
         }
     }
 
-    deleteDateLocalStorage() {
-        //Verificando el tipo de aplicacion que estamos ejecutando (SSR o SPA)
-        if( isPlatformBrowser( this.platFormId) ) {
-            localStorage.removeItem( 'token' );
-            localStorage.removeItem( 'user' );
-        }
-        this.currentToken$.next(null);
-        this.currentToken$.next(null);
+    clearAuthData() {
+        this.token = null;
+        this.user = null;
     }
 
-    logoutUser() {
-        this.deleteDateLocalStorage();
+    logoutUser(): void {
+        this.clearAuthData();
         this.router.navigateByUrl( '/login');        //Redireccionamos
     }
 
     isLogged(): boolean {
-        // return !!this.currentToken$.value && !!this.currentToken$.value;
-        const { token, user} = this.getDataLocalStorage();
+        return !!this.token && !!this.user;
+    }
 
-        return !!token && !!user;
+    getTokenFromStorage(): string | null {
+        if (this.isBrowser) {
+            return localStorage.getItem("token")
+        }
+        return null;
+    }
+
+    getUserFromStorage(): string | null {
+        if (this.isBrowser) {
+            const user = localStorage.getItem("user")
+            return user ? JSON.parse(user) : null;
+        }
+        return null;
+    }
+
+    //GETTERS Y SETTERS
+
+    set token(token: string | null) {
+        if (this.isBrowser) {
+            if(token){
+                localStorage.setItem("token", token)
+            } else {
+                localStorage.removeItem("token")
+            }
+        }
+
+        this.currentToken$.next(token);
+        console.log(token)
+    }
+
+    set user(user: any) {
+        if (this.isBrowser) {
+            if(user) {
+                localStorage.setItem("user", JSON.stringify(user))
+            } else {
+                localStorage.removeItem("user")
+            }
+        }
+
+        this.currentUser$.next(user);
+        console.log(user)
+    }
+
+    //Getters para ontener el valor actual sincronicamnete
+    get token(): string | null {
+        return this.currentToken$.getValue();
+    }
+
+    get user(): any {
+        return this.currentUser$.getValue();
     }
 }
