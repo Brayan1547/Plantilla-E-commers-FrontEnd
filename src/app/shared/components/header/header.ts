@@ -23,7 +23,7 @@ export class Header implements OnDestroy {
   httpAuth = inject( httpAuth )
 
   messages = [
-    "Nueva Colección Disponible - Quiet Luxury",
+    "Nueva Colección Disponible - DUSCK",
     "Envío estándar gratuito > $75"
   ];
 
