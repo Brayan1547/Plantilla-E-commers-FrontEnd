@@ -11,6 +11,8 @@ import { BadgeXIcon, Notification03Icon, CheckmarkBadge03Icon } from '@hugeicons
 
 import { ToggleOffIcon, ToggleOnIcon } from '@hugeicons/core-free-icons';
 
+// 1. IMPORTAR SWEETALERT2 AQUÍ
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-product-list',
@@ -60,18 +62,39 @@ export default class ProductList {
     this.router.navigateByUrl (`/dashboard/product-edit/${id}`)   //Redireccion Enviando el ID por la ruta
   }
 
+// 2. ACTUALIZAR EL MÉTODO ONDELETE CON SWEETALERT2
   onDelete(id: string) {
-    console.log( 'Eliminar' , id);
-    this.httpProduct.deleteProduct( id ).subscribe({
-      next: ( res ) => {
-        console.log( res);
-        this.onLoadData();
-      },
-      error: ( err ) => {
-        console.error( err );
-      },
-      complete: () => {
-        console.log( 'Execute Complete' );
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "¿Deseas eliminar este producto?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, ¡bórralo!",
+      cancelButtonText: "Cancelar"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.httpProduct.deleteProduct( id ).subscribe({
+          next: ( res ) => {
+            console.log( res );
+
+            // Alerta de éxito al eliminar
+            Swal.fire({
+              title: "¡Eliminado!",
+              text: "El producto ha sido eliminado con éxito.",
+              icon: "success"
+            });
+
+            this.onLoadData();
+          },
+          error: ( err ) => {
+            console.error( err );
+          },
+          complete: () => {
+            console.log( 'Execute Complete' );
+          }
+        });
       }
     });
   }

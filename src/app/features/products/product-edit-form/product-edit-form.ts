@@ -91,7 +91,7 @@ export default class ProductEditForm {
       this.httpProduct.updateProductById( this.selecteId, this.formData.value).subscribe({
         next: ( data ) => {
           console.log( data );
-          this.router.navigateByUrl( '/product-list')
+          this.router.navigateByUrl( '/dashboard/product-list')
 
         },
         error: ( err ) => {

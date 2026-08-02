@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy } from '@angular/core';
+import { Component, HostListener, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
@@ -49,11 +49,14 @@ export class Header implements OnDestroy {
 
   logout() {
     this.httpAuth.logoutUser();
+    this.accountMenuOpen = false;   //cierra el desplegable al salir
   }
 
 
-   authModalOpen = false;
+  authModalOpen = false;
   authModalTab: 'login' | 'register' = 'login';
+  accountMenuOpen = false;   // controla el desplegable de cuenta
+
 
   openAuthModal(tab: 'login' | 'register') {
     this.authModalTab = tab;
@@ -67,6 +70,17 @@ export class Header implements OnDestroy {
   onAccountIconClick() {
     if (!this.httpAuth.user) {
       this.openAuthModal('login');
+    }else {
+      this.accountMenuOpen = !this.accountMenuOpen;   //abre/cierra el desplegable
+    }
+  }
+
+   // ← método nuevo completo: cierra el desplegable si haces click fuera de él
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.account-wrapper')) {
+      this.accountMenuOpen = false;
     }
   }
 }

@@ -64,7 +64,16 @@
       </div>
       
       <!-- <span class="icon" title="Cuenta">👤</span> -->
-       <span class="icon" title="Cuenta" (click)="onAccountIconClick()">👤</span>
+       <div class="account-wrapper">
+  <span class="icon" title="Cuenta" (click)="onAccountIconClick()">👤</span>
+
+  @if (accountMenuOpen && (httpAuth.user$ | async); as user) {
+  <div class="account-dropdown">
+    <p class="account-dropdown__greeting">Hola, {{ user.name }}</p>
+    <button type="button" class="account-dropdown__logout" (click)="logout()">Cerrar sesión</button>
+  </div>
+  }
+</div>
 
       <span class="icon" title="Carrito">🛒</span>
     </div>

@@ -238,6 +238,46 @@ header {
   cursor: pointer;
   text-decoration: underline;
 }
+.account-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.account-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  min-width: 200px;
+  background: #FAF7F1;
+  border: 1px solid rgba(27, 27, 27, 0.1);
+  box-shadow: 0 12px 30px rgba(20, 18, 15, 0.18);
+  padding: 16px;
+  z-index: 500;
+}
+
+.account-dropdown__greeting {
+  font-size: 13px;
+  color: #1B1B1B;
+  margin: 0 0 12px;
+}
+
+.account-dropdown__logout {
+  width: 100%;
+  padding: 10px 0;
+  background: none;
+  border: 1px solid rgba(27, 27, 27, 0.2);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #1B1B1B;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.account-dropdown__logout:hover {
+  background: #1B1B1B;
+  color: #FAF7F1;
+}
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-4px); }
