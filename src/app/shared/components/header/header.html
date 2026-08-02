@@ -22,7 +22,8 @@
         <li><a routerLink="/login" routerLinkActive="active">login</a></li>
         <li><a routerLink="/register" routerLink="active">register</a></li>
       } -->
-      <ul>
+        
+      <!-- <ul>
         @if ( httpAuth.user$ |async; as user) {
         {{ user.name }}
         {{ user.role }}
@@ -32,7 +33,21 @@
         <li><a routerLink="/login" routerLinkActive="active">login</a></li>
         <li><a routerLink="/register" routerLinkActive="active">register</a></li>
         }
-      </ul>
+      </ul> -->
+
+
+       <!-- <ul>
+        @if ( httpAuth.user$ |async; as user) {
+        {{ user.name }}
+        {{ user.role }}
+        <li><button (click)="logout()">logout</button></li>
+        }
+        @else {
+        <li><button type="button" class="auth-link" (click)="openAuthModal('login')">login</button></li>
+        <li><button type="button" class="auth-link" (click)="openAuthModal('register')">register</button></li>
+        }
+      </ul> -->
+
 
     </div>
 
@@ -48,7 +63,8 @@
         <span class="search-icon">🔍</span>
       </div>
       
-      <span class="icon" title="Cuenta">👤</span>
+      <!-- <span class="icon" title="Cuenta">👤</span> -->
+       <span class="icon" title="Cuenta" (click)="onAccountIconClick()">👤</span>
 
       <span class="icon" title="Carrito">🛒</span>
     </div>
@@ -65,4 +81,9 @@
       <li>Denim</li>
     </ul>
   </div>
+
+    @if (authModalOpen) {
+  <app-auth-modal [initialTab]="authModalTab" (closed)="closeAuthModal()" />
+  }
+
 </header>

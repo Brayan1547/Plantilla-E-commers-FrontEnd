@@ -224,6 +224,21 @@ header {
   color: var(--color-accent);
 }
 
+/* =========================================
+  MENU DESPLEGABLE
+============================================
+*/
+
+.auth-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }

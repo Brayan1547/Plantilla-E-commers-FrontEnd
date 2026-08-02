@@ -4,12 +4,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { httpAuth } from '../../../core/services/http-auth';
 
+import { AuthModal } from '../auth-modal/auth-modal';
 
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, CommonModule, RouterLinkActive],
+  imports: [RouterLink, CommonModule, RouterLinkActive, AuthModal],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
@@ -18,8 +19,6 @@ export class Header implements OnDestroy {
   currentMessageIndex = 0;
   animate = true;
   private intervalId: any;
-
-
 
   httpAuth = inject( httpAuth )
 
@@ -50,5 +49,24 @@ export class Header implements OnDestroy {
 
   logout() {
     this.httpAuth.logoutUser();
+  }
+
+
+   authModalOpen = false;
+  authModalTab: 'login' | 'register' = 'login';
+
+  openAuthModal(tab: 'login' | 'register') {
+    this.authModalTab = tab;
+    this.authModalOpen = true;
+  }
+
+  closeAuthModal() {
+    this.authModalOpen = false;
+  }
+
+  onAccountIconClick() {
+    if (!this.httpAuth.user) {
+      this.openAuthModal('login');
+    }
   }
 }

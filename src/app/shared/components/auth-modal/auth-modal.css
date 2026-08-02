@@ -1,0 +1,107 @@
+.auth-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 18, 15, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+  animation: auth-fade-in 0.2s ease-out;
+}
+
+@keyframes auth-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.auth-modal {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;          /* ← nuevo: nunca más alto que el 90% de la pantalla */
+  overflow-y: auto;          /* ← nuevo: scroll interno si el contenido no cabe */
+  background: #FAF7F1;
+  border: 1px solid rgba(27, 27, 27, 0.1);
+  box-shadow: 0 24px 60px rgba(20, 18, 15, 0.25);
+  padding: 48px 40px 40px;
+  animation: auth-rise-in 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes auth-rise-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.auth-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  color: #1B1B1B;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.auth-modal__close:hover { opacity: 0.5; }
+
+.auth-modal__brand {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.auth-modal__brand-name {
+  display: block;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 26px;
+  letter-spacing: 6px;
+  color: #1B1B1B;
+}
+.auth-modal__brand-sub {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: #8A8579;
+  margin-top: 2px;
+}
+
+.auth-modal__tabs {
+  position: relative;
+  display: flex;
+  border-bottom: 1px solid rgba(27, 27, 27, 0.12);
+  margin-bottom: 32px;
+}
+.auth-modal__tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 0 0 14px;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #8A8579;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.auth-modal__tab.active { color: #1B1B1B; }
+
+.auth-modal__tab-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 50%;
+  height: 1px;
+  background: #1B1B1B;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.auth-modal__tab-indicator.right {
+  transform: translateX(100%);
+}
+
+@media (max-width: 480px) {
+  .auth-modal { padding: 40px 24px 32px; }
+}

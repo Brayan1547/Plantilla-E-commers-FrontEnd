@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
@@ -9,6 +9,8 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 })
 export default class Register {
   formData! : FormGroup;
+
+   @Output() switchToLogin = new EventEmitter<void>();
 
   constructor(){
     this.formData = new FormGroup({
@@ -34,6 +36,11 @@ export default class Register {
     onSubmit() {
     console.log('Registrarse', this.formData.value);
   }
+
+  get name() { return this.formData.get('name'); }
+  get nickname() { return this.formData.get('nickname'); }
+  get email() { return this.formData.get('email'); }
+  get password() { return this.formData.get('password'); }
 
   }
 

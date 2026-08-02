@@ -1,0 +1,28 @@
+<div class="auth-modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="auth-modal" role="dialog" aria-modal="true">
+    <button type="button" class="auth-modal__close" (click)="close()" aria-label="Cerrar">×</button>
+
+    <div class="auth-modal__brand">
+      <span class="auth-modal__brand-name">DUSCK</span>
+      <span class="auth-modal__brand-sub">MODEL</span>
+    </div>
+
+    <div class="auth-modal__tabs">
+      <button type="button" class="auth-modal__tab" [class.active]="activeTab === 'login'" (click)="setTab('login')">
+        Iniciar sesión
+      </button>
+      <button type="button" class="auth-modal__tab" [class.active]="activeTab === 'register'" (click)="setTab('register')">
+        Crear cuenta
+      </button>
+      <span class="auth-modal__tab-indicator" [class.right]="activeTab === 'register'"></span>
+    </div>
+
+    <div class="auth-modal__body">
+      @if (activeTab === 'login') {
+        <app-login (loginSuccess)="close()" (switchToRegister)="setTab('register')" />
+      } @else {
+        <app-register (switchToLogin)="setTab('login')" />
+      }
+    </div>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, EventEmitter, inject, Output,  } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { httpAuth } from '../../../core/services/http-auth';
 
@@ -12,6 +12,10 @@ import { httpAuth } from '../../../core/services/http-auth';
 export default class Login {
   httpAuth = inject(httpAuth)
   formData!: FormGroup;
+
+
+  @Output() loginSuccess = new EventEmitter<void>();   // Avisa  (auth-modal) que el login fue exitoso, para que se cierre el modal
+  @Output() switchToRegister = new EventEmitter<void>();    // Avisa que el usuario quiere cambiar a la pestaña de registro
 
   constructor() {
     this.formData = new FormGroup({
@@ -29,6 +33,7 @@ export default class Login {
           console.log( res )
 
           this.formData.reset();
+          this.loginSuccess.emit(); // Dispara el evento loginSuccess solo cuando el login respondió bien
         },
         error: ( err ) => {
           console.error( err );
@@ -41,4 +46,8 @@ export default class Login {
       console.log('Formulario invalido')
     }
   }
+
+  get email() { return this.formData.get('email'); }    // Getter para acceder al control 'email' desde el HTML y mostrar sus errores
+  get password() { return this.formData.get('password'); }  // Getter para acceder al control 'password' desde el HTML y mostrar sus errores
+
 }
