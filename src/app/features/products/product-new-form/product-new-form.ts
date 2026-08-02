@@ -58,7 +58,7 @@ export default class ProductNewForm {
         next: ( data ) => {
           console.log ( data );
           this.formData.reset();    //limpiar el formulario
-          this.router.navigateByUrl('/product-list')  //redirecciono 
+          this.router.navigateByUrl('/dashboard/product-list')  //redirecciono 
         },
         error: (err) => {
           console.error( err );

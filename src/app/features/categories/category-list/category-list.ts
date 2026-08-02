@@ -61,7 +61,7 @@ export default class CategoryList {
   onEdit(id: string) {
     console.log(' Edit', id);
     //redirecciona
-    this.router.navigate(['/category-edit', id]);
+    this.router.navigate(['//dashboard/category-edit', id]);
   }
   onDelete(id: string) {
     // 2. Implementar la ventana Modal de SweetAlert2

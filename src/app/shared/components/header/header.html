@@ -11,30 +11,30 @@
       <button [routerLink]="" (click)="toggleMenu('TIENDA')">TIENDA</button>
       <button [routerLink]="" (click)="toggleMenu('HOMBRE')">HOMBRE</button>
       <button [routerLink]="" (click)="toggleMenu('MUJER')">MUJER</button>
-      <a routerLink="/category-list" routerLinkActive="active" class="menu-link">COLECCIONES  </a>
+      <a routerLink="/category-list" routerLinkActive="active" class="menu-link">COLECCIONES </a>
       <a routerLink="/dashboard/product-list" routerLinkActive="active" class="menu-link">BÁSICOS</a>
-      
+
       <!-- <button (click)= "logout()">logout</button> -->
-      
+
       <!-- @if( httpAuth.isLogged() && httpAuth.user; as user){
         <li><button (click)="logout()">logout</button></li>
       }@else {
         <li><a routerLink="/login" routerLinkActive="active">login</a></li>
         <li><a routerLink="/register" routerLink="active">register</a></li>
       } -->
-<ul>
-  @if ( httpAuth.user$ |async; as user) {
-  {{ user.name }}
-  {{ user.role }}
-  <li><button (click)="logout()">logout</button></li>
-  } 
-  @else {
-  <li><a routerLink="/login" routerLinkActive="active">login</a></li>
-  <li><a routerLink="/register" routerLink="active">register</a></li>
-  }
-</ul>
+      <ul>
+        @if ( httpAuth.user$ |async; as user) {
+        {{ user.name }}
+        {{ user.role }}
+        <li><button (click)="logout()">logout</button></li>
+        }
+        @else {
+        <li><a routerLink="/login" routerLinkActive="active">login</a></li>
+        <li><a routerLink="/register" routerLinkActive="active">register</a></li>
+        }
+      </ul>
 
-</div>
+    </div>
 
 
     <div class="logo-container" [routerLink]="['/']">
@@ -47,7 +47,9 @@
         <input type="text" placeholder="Buscar...">
         <span class="search-icon">🔍</span>
       </div>
+      
       <span class="icon" title="Cuenta">👤</span>
+
       <span class="icon" title="Carrito">🛒</span>
     </div>
   </nav>

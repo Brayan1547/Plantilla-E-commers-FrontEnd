@@ -1,10 +1,13 @@
 <div class="container">
     <div class="header">
         <h2>Categorías</h2>
-        <button>+ Nueva Categoría</button>
+        <button>
+            <a routerLink="/category-new" class="btn-new-category"> Nueva Categoría</a>
+        </button>
+        
     </div>
 
-    <pre>{{categoryList$ | async | json}}</pre>
+    <!-- <pre>{{categoryList$ | async | json}}</pre> -->
 
     <table>
         <thead>
@@ -27,7 +30,7 @@
                 <td>{{category.description}}</td>
                 <td><span class="activo">Activo</span></td>
                 <td>
-                    <a [routerLink]="['/category-edit', category._id]">
+                    <a [routerLink]="['/dashboard/category-edit', category._id]">
                         <fa-icon [icon]="faPenToSquare" />
                         Editar
                     </a>

@@ -10,6 +10,10 @@ import { isPlatformBrowser } from "@angular/common";
 
 @Service()
 export class httpAuth {
+
+    private readonly TOKEN_KEY = 'token';
+    private readonly USER_KEY = 'user';
+
     private http = inject(HttpClient);
     private BASE_URL: string = environment.apiUrl
     private router = inject(Router)
@@ -89,7 +93,7 @@ export class httpAuth {
 
     logoutUser(): void {
         this.clearAuthData();
-        this.router.navigateByUrl( '/login');        //Redireccionamos
+        //this.router.navigateByUrl( '/login');        //Redireccionamos
     }
 
     isLogged(): boolean {
@@ -116,22 +120,22 @@ export class httpAuth {
     set token(token: string | null) {
         if (this.isBrowser) {
             if(token){
-                localStorage.setItem("token", token)
+                localStorage.setItem(this.TOKEN_KEY, token);
             } else {
-                localStorage.removeItem("token")
+                localStorage.removeItem(this.TOKEN_KEY)
             }
         }
 
         this.currentToken$.next(token);
-        console.log(token)
+        console.log('[seter token]:', token);
     }
 
     set user(user: any) {
         if (this.isBrowser) {
             if(user) {
-                localStorage.setItem("user", JSON.stringify(user))
+                localStorage.setItem(this.USER_KEY, JSON.stringify(user));
             } else {
-                localStorage.removeItem("user")
+                localStorage.removeItem(this.USER_KEY)
             }
         }
 

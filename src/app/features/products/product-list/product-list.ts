@@ -57,7 +57,7 @@ export default class ProductList {
 
   onEdit(id: string) {
     console.log( 'Editar', id);
-    this.router.navigateByUrl (`/product-edit/${id}`)   //Redireccion Enviando el ID por la ruta
+    this.router.navigateByUrl (`/dashboard/product-edit/${id}`)   //Redireccion Enviando el ID por la ruta
   }
 
   onDelete(id: string) {

@@ -4,6 +4,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { httpAuth } from '../../../core/services/http-auth';
 
+
+
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -17,7 +19,9 @@ export class Header implements OnDestroy {
   animate = true;
   private intervalId: any;
 
-   httpAuth = inject( httpAuth )
+
+
+  httpAuth = inject( httpAuth )
 
   messages = [
     "Nueva Colección Disponible - Quiet Luxury",

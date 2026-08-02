@@ -1,5 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
+import { httpAuth } from './http-auth';
 
 @Service()
 export class HttpProduct {
@@ -7,30 +8,42 @@ export class HttpProduct {
     //constructor( private http: httpClient){}
     //Inyectar una dependencia sin usar el constructor, implementarse en las funciones
     private http = inject(HttpClient);
+    private authHttp = inject( httpAuth);
+
+    //Crear una cabecera y va meter dentro de ella el token
+    private getHeader(): HttpHeaders {
+        //Obteniendo el token del GETTER del servicio http
+        const token = this.authHttp.token;
+
+        //Crea y retorna un Header de angular con el token y el nombre de la propiedad especificado en el Backend para recibir dicho valor 
+        return new  HttpHeaders({
+            'x-token': token || '',
+            'content-type': 'application/json'
+        });
+    }
 
     //metodo para obtener todas las categorias
-    
     createProduct( newProduct: any) {
         //http siempre devuelve los datos dentro de un Observable
-        return this.http.post<any>( 'http://localhost:3000/api/product', newProduct);
+        return this.http.post<any>( 'http://localhost:3000/api/product', newProduct, { headers: this.getHeader() } );
     }
 
     getProduct() {
         //http siemprem devuelve los datos dentro de un Observable
-        return this.http.get<any>( 'http://localhost:3000/api/product')
+        return this.http.get<any>( 'http://localhost:3000/api/product', { headers: this.getHeader() } );
     }
 
     deleteProduct( id: string | null) {
         //http siemprem devuelve los datos dentro de un Observable
-        return this.http.delete<any>( `http://localhost:3000/api/product/${id}` );
+        return this.http.delete<any>( `http://localhost:3000/api/product/${id}`, { headers: this.getHeader() } );
     }
 
     getProductById( id: string | null) {
         //http siemprem devuelve los datos dentro de un Observable
-        return this.http.get<any>(`http://localhost:3000/api/product/${id}`);
+        return this.http.get<any>(`http://localhost:3000/api/product/${id}`,  { headers: this.getHeader() } );
     }
 
     updateProductById( id: string | null,  updateProduct: any ) {
-        return this.http.patch<any>(`http://localhost:3000/api/product/${id}`, updateProduct) ;
+        return this.http.patch<any>(`http://localhost:3000/api/product/${id}`, updateProduct,  { headers: this.getHeader() } ) ;
     }
 }

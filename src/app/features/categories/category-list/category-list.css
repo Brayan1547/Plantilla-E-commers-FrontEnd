@@ -6,7 +6,7 @@
 }
 
 body{
-    background:#f4f6f9;
+    background:#000f06;
     padding:40px;
 }
 
@@ -28,7 +28,7 @@ body{
 }
 
 .header h2{
-    color:#222;
+    color:#241919;
 }
 
 .header button{
@@ -115,6 +115,25 @@ tbody tr:hover{
 
 .eliminar:hover{
     background:#b91c1c;
+}
+
+/* Estilo para el botón de nueva categoría basado en enlace */
+.btn-new-category {
+    background: #111827;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: .3s;
+    font-size: 15px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-new-category:hover {
+    background: #374151;
+    color: white;
 }
 
 /* ==========================================
