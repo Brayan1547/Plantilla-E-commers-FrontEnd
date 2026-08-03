@@ -24,7 +24,7 @@ export class HttpUsers {
 
   // Crear usuario
   createUser(newUser: any) {
-    return this.http.post<any>(`${this.BASE_URL}/user`, newUser);
+    return this.http.post<any>(`${this.BASE_URL}/users`, newUser);
   }
 
   // Actualizar usuario
