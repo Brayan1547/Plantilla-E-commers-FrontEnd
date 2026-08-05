@@ -2,6 +2,7 @@
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpCategory } from '../../../core/services/http-category';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -13,6 +14,8 @@ import { HttpCategory } from '../../../core/services/http-category';
 export default class CategoryNewForm {
   formData: FormGroup;
   private httpCategory = inject(HttpCategory);
+
+  private router = inject(Router)
 
   constructor() {
     //Define la estructura equivalente del formulario en HTML
@@ -37,6 +40,7 @@ export default class CategoryNewForm {
         next: (res) => {
           console.log(res);
           this.formData.reset()   //Para Limpiar el formulario
+          this.router.navigateByUrl( '/category-list')
         },
         error: (error) => {
           console.error(error);

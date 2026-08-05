@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpCategory } from '../../../core/services/http-category';
 
 import Swal from 'sweetalert2';
@@ -17,6 +17,8 @@ export default class CategoryEditForm {
 
   private activateRoute = inject(ActivatedRoute);
   private httpCategory = inject(HttpCategory);
+
+  private router = inject(Router)
 
   constructor() {
     //Define la estructura equivalente del formulario en HTML
@@ -80,6 +82,7 @@ export default class CategoryEditForm {
           this.httpCategory.updateCategotyById(this.selecteId, this.formData.value).subscribe({
             next: (data) => {
               console.log(data);
+              this.router.navigateByUrl( '/dashboard/product-list')
             },
             error: (err) => {
               console.error(err)

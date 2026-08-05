@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { Home } from './features/home/home';
 
 export const routes: Routes = [
+
      { path: 'home', component: Home },
 
      {
@@ -40,10 +41,22 @@ export const routes: Routes = [
      },
 
      {
+          path: 'product-ropa',
+          loadComponent: () => import('./features/product-disign/product-disign')
+     },
+     {
           path: 'dashboard/user/list',
           loadComponent: () => import('./features/users/user-list/user-list')
      },
-
+     {
+          path: 'dashboard/user-new',
+          loadComponent: () => import('./features/users/user-new-form/user-new-form'),
+     },
+     {
+          path: 'deshboard/user-edit:id',
+          loadComponent: () =>
+               import('./features/users/user-edit-form/user-edit-form')
+     },
      {
           path: 'dashboard/category-edit/:id',
           loadComponent: () => import('./features/categories/category-edit-form/category-edit-form')
@@ -66,6 +79,6 @@ export const routes: Routes = [
 
      //Redirecciones
      { path: '', redirectTo: 'home', pathMatch: 'full' },
-     { path: '**', redirectTo: '404', pathMatch: 'full' }
+     { path: '**', redirectTo: '404', pathMatch: 'full' },
 
 ];
