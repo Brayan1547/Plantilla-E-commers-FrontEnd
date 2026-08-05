@@ -59,6 +59,12 @@ export class httpAuth {
             )
     }
 
+    registerUser(data: any) {
+        // data = { name, nickname, email, password }
+
+        return this.http.post<any>(`${this.BASE_URL}/auth/register`, data)
+    }
+
     setAuthData( token: string | null, user: any ) {
         this.token = token;
         this.user = user;

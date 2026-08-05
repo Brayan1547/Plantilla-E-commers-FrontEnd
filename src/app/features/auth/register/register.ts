@@ -1,5 +1,7 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { httpAuth } from '../../../core/services/http-auth';
+
 
 @Component({
   selector: 'app-register',
@@ -8,9 +10,11 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
   styleUrl: './register.css',
 })
 export default class Register {
+  private httpAut = inject(httpAuth)
   formData! : FormGroup;
 
    @Output() switchToLogin = new EventEmitter<void>();
+
 
   constructor(){
     this.formData = new FormGroup({
@@ -33,8 +37,23 @@ export default class Register {
       password: new FormControl('', [Validators.required])
     });
     }
+
     onSubmit() {
-    console.log('Registrarse', this.formData.value);
+    // console.log('Registrarse', this.formData.value);
+    this.httpAut.registerUser(this.formData.value).subscribe({
+      next: ( res ) => {
+         console.log('Usuario registrado:', res);
+      },
+      error: ( err ) => {
+        console.error('Error al registrar:', err);
+      },
+      complete: () => {
+        console.log('Petición de registro finalizada');
+      }
+    })
+
+
+    
   }
 
   get name() { return this.formData.get('name'); }

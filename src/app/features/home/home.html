@@ -1,24 +1,150 @@
-<!-- <header>
-  <div class="announcement-bar">
-    ¡Los estudiantes tienen 10% de descuento! Aplican términos y condiciones.
-  </div>
+<div class="home">
 
-  <nav class="navbar">
-    <div class="nav-menu">
-      <div class="dropdown">
-        <a routerLink="">TIENDA</a>
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Colección 2026</p>
+      <h1 class="hero-title serif">Del amanecer<br>al <em>atardecer</em></h1>
+      <p class="hero-desc">
+        Piezas atemporales pensadas para acompañarte en cada momento del día —
+        estructura, comodidad y una actitud que no pasa de moda.
+      </p>
+      <div style="display:flex; gap:16px; flex-wrap:wrap;">
+        <a routerLink="/tienda" class="btn-primary">
+          Explorar colección
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F6F2EA" stroke-width="2">
+            <path d="M5 12h14M13 6l6 6-6 6"/>
+          </svg>
+        </a>
+        <a routerLink="/tienda/basicos" class="btn-ghost">Ver básicos</a>
       </div>
-      <a routerLink="">HOMBRE</a>
-      <a routerLink="">MUJER</a>
-      <a routerLink="">COLECCIONES</a>
     </div>
 
-    <div class="logo">DUSK</div>
-
-    <div class="nav-actions">
-      <input type="text" placeholder="Buscar prendas...">
-      <a routerLink=""><i class="icon-user"></i></a>
-      <a routerLink=""><i class="icon-cart"></i></a>
+    <div class="hero-visual">
+      <!-- <img src="/assets/img/hero.jpg" alt="Colección DUSCK" class="hero-img"> -->
+      <div class="hero-tag">
+        <p class="serif">Nueva colección</p>
+        <span>Disponible ahora</span>
+      </div>
     </div>
-  </nav>
-</header> -->
+  </section>
+
+  <div class="dusk-divider"></div>
+
+  <!-- ============ CATEGORÍAS ============ -->
+  <section class="section">
+    <div class="cat-header">
+      <h2 class="serif">Compra por categoría</h2>
+      <p>Tres formas de encontrar tu próxima pieza favorita, curadas para cada estilo.</p>
+    </div>
+
+    <div class="cat-grid">
+      <a routerLink="/tienda/hombre" class="cat-card cat-1">
+        <div class="bg"></div>
+        <div class="label">
+          <span class="serif">Hombre</span>
+          <span class="arrow">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+              <path d="M5 12h14M13 6l6 6-6 6"/>
+            </svg>
+          </span>
+        </div>
+      </a>
+
+      <a routerLink="/tienda/mujer" class="cat-card cat-2">
+        <div class="bg"></div>
+        <div class="label">
+          <span class="serif">Mujer</span>
+          <span class="arrow">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+              <path d="M5 12h14M13 6l6 6-6 6"/>
+            </svg>
+          </span>
+        </div>
+      </a>
+
+      <a routerLink="/tienda/colecciones" class="cat-card cat-3">
+        <div class="bg"></div>
+        <div class="label">
+          <span class="serif">Colecciones</span>
+          <span class="arrow">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+              <path d="M5 12h14M13 6l6 6-6 6"/>
+            </svg>
+          </span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ RECIÉN LLEGADOS ============ -->
+  <section class="section arrivals">
+    <div class="cat-header">
+      <h2 class="serif">Recién llegados</h2>
+      <p>Lo último de la temporada, en cantidades limitadas.</p>
+    </div>
+
+    <div class="product-grid">
+      <div class="product-card">
+        <div class="product-media">
+          <span class="tag-new">Nuevo</span>
+          <!-- <img [src]="product.images" [alt]="product.name"> -->
+          <div class="quick-add">Agregar al carrito</div>
+        </div>
+        <p class="product-name">Camisa Oversize Lino</p>
+        <p class="product-price">$189.000</p>
+      </div>
+
+      <div class="product-card">
+        <div class="product-media">
+          <div class="quick-add">Agregar al carrito</div>
+        </div>
+        <p class="product-name">Vestido Midi Satinado</p>
+        <p class="product-price">$249.000</p>
+      </div>
+
+      <div class="product-card">
+        <div class="product-media">
+          <span class="tag-new">Nuevo</span>
+          <div class="quick-add">Agregar al carrito</div>
+        </div>
+        <p class="product-name">Pantalón Recto Sastre</p>
+        <p class="product-price">$219.000</p>
+      </div>
+
+      <div class="product-card">
+        <div class="product-media">
+          <div class="quick-add">Agregar al carrito</div>
+        </div>
+        <p class="product-name">Blazer Estructurado</p>
+        <p class="product-price">$329.000</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EDITORIAL / STORY ============ -->
+  <section class="section story">
+    <div class="story-visual">
+      <!-- <img src="/assets/img/story.jpg" alt="DUSCK detrás de escena"> -->
+    </div>
+    <div>
+      <p class="story-quote serif">"No diseñamos tendencias, diseñamos actitud."</p>
+      <p class="story-body">
+        Cada prenda DUSCK nace de la idea de que el estilo no debería cambiar según
+        la hora del día. Trabajamos con telas nobles y cortes limpios para piezas
+        que se llevan del escritorio a la calle, sin esfuerzo.
+      </p>
+      <p class="story-sign">— Equipo de diseño DUSCK</p>
+    </div>
+  </section>
+
+<div class="dusk-divider"></div>
+
+  <!-- ============ CIERRE / WHATSAPP ============ -->
+  <section class="closing">
+    <h3 class="serif">¿Tienes dudas sobre una talla o un pedido?</h3>
+    <p>Escríbenos directo, te respondemos rápido.</p>
+    <a href="https://wa.me/TUNUMERO" class="btn-primary" target="_blank">Escríbenos por WhatsApp</a>
+  </section>
+
+</div>
