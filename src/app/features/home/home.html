@@ -1,31 +1,118 @@
 <div class="home">
 
-  <!-- ============ HERO ============ -->
-  <section class="hero">
-    <div class="hero-copy">
-      <p class="eyebrow">Colección 2026</p>
-      <h1 class="hero-title serif">Del amanecer<br>al <em>atardecer</em></h1>
-      <p class="hero-desc">
-        Piezas atemporales pensadas para acompañarte en cada momento del día —
-        estructura, comodidad y una actitud que no pasa de moda.
-      </p>
-      <div style="display:flex; gap:16px; flex-wrap:wrap;">
-        <a routerLink="/tienda" class="btn-primary">
-          Explorar colección
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F6F2EA" stroke-width="2">
-            <path d="M5 12h14M13 6l6 6-6 6"/>
-          </svg>
-        </a>
-        <a routerLink="/tienda/basicos" class="btn-ghost">Ver básicos</a>
-      </div>
+  <!-- ============ HERO VIDEO ============ -->
+  <section class="hero-video">
+    <video
+      class="hero-video-bg"
+      autoplay
+      muted
+      loop
+      playsinline
+      poster="/assets/img/hero-poster.jpg">
+      <source src="assets/video/video_dusk.mp4" type="video/mp4">
+    </video>
+
+    <!-- Si tu archivo es un .gif real (no video), usa esto en vez del <video> de arriba:
+    <img class="hero-video-bg" src="/assets/img/hero.gif" alt="DUSCK colección"> -->
+
+    <div class="hero-video-overlay"></div>
+
+    <div class="hero-video-content">
+      <p class="eyebrow eyebrow--light">Colección 2026</p>
+      <h1 class="hero-video-title serif">Línea de <em>básicos</em><br>esenciales</h1>
+      <a routerLink="/tienda" class="btn-outline-light">Ver colección</a>
+    </div>
+  </section>
+
+  <div class="dusk-divider"></div>
+
+  <!-- ============ RECIÉN LLEGADOS (grid estilo Undergold) ============ -->
+  <section class="section arrivals">
+    <div class="cat-header">
+      <h2 class="serif">Recién llegados</h2>
+      <p>Lo último de la temporada, en cantidades limitadas.</p>
     </div>
 
-    <div class="hero-visual">
-      <!-- <img src="/assets/img/hero.jpg" alt="Colección DUSCK" class="hero-img"> -->
-      <div class="hero-tag">
-        <p class="serif">Nueva colección</p>
-        <span>Disponible ahora</span>
-      </div>
+    <div class="product-grid">
+
+      <a routerLink="/tienda/producto/1" class="product-card">
+        <div class="product-media">
+          <span class="tag-new">Nuevo</span>
+          <button class="wishlist-btn" (click)="onWishlist($event, 1)" aria-label="Agregar a favoritos">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 21s-6.7-4.35-9.3-8.1C.8 10 1.4 6.3 4.6 4.9c2-.9 4.3-.3 5.6 1.5.4.5.7 1 .9 1.6.2-.6.5-1.1.9-1.6 1.3-1.8 3.6-2.4 5.6-1.5 3.2 1.4 3.8 5.1 1.9 8-2.6 3.75-9.3 8.1-9.3 8.1z"/>
+            </svg>
+          </button>
+          <img class="product-img product-img--main" src="/assets/img/producto-1.jpg" alt="Camisa Oversize Lino">
+          <img class="product-img product-img--hover" src="/assets/img/producto-1-modelo.jpg" alt="Camisa Oversize Lino modelo">
+          <div class="quick-buy">Comprar</div>
+        </div>
+        <p class="product-name">Camisa Oversize Lino</p>
+        <p class="product-price">$189.000 COP</p>
+      </a>
+
+      <a routerLink="/tienda/producto/2" class="product-card">
+        <div class="product-media">
+          <button class="wishlist-btn" (click)="onWishlist($event, 2)" aria-label="Agregar a favoritos">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 21s-6.7-4.35-9.3-8.1C.8 10 1.4 6.3 4.6 4.9c2-.9 4.3-.3 5.6 1.5.4.5.7 1 .9 1.6.2-.6.5-1.1.9-1.6 1.3-1.8 3.6-2.4 5.6-1.5 3.2 1.4 3.8 5.1 1.9 8-2.6 3.75-9.3 8.1-9.3 8.1z"/>
+            </svg>
+          </button>
+          <img class="product-img product-img--main" src="/assets/img/producto-2.jpg" alt="Vestido Midi Satinado">
+          <img class="product-img product-img--hover" src="/assets/img/producto-2-modelo.jpg" alt="Vestido Midi Satinado modelo">
+          <div class="quick-buy">Comprar</div>
+        </div>
+        <p class="product-name">Vestido Midi Satinado</p>
+        <p class="product-price">$249.000 COP</p>
+      </a>
+
+      <a routerLink="/tienda/producto/3" class="product-card">
+        <div class="product-media">
+          <span class="tag-new">Nuevo</span>
+          <button class="wishlist-btn" (click)="onWishlist($event, 3)" aria-label="Agregar a favoritos">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 21s-6.7-4.35-9.3-8.1C.8 10 1.4 6.3 4.6 4.9c2-.9 4.3-.3 5.6 1.5.4.5.7 1 .9 1.6.2-.6.5-1.1.9-1.6 1.3-1.8 3.6-2.4 5.6-1.5 3.2 1.4 3.8 5.1 1.9 8-2.6 3.75-9.3 8.1-9.3 8.1z"/>
+            </svg>
+          </button>
+          <img class="product-img product-img--main" src="/assets/img/producto-3.jpg" alt="Pantalón Recto Sastre">
+          <img class="product-img product-img--hover" src="/assets/img/producto-3-modelo.jpg" alt="Pantalón Recto Sastre modelo">
+          <div class="quick-buy">Comprar</div>
+        </div>
+        <p class="product-name">Pantalón Recto Sastre</p>
+        <p class="product-price">$219.000 COP</p>
+      </a>
+
+      <a routerLink="/tienda/producto/4" class="product-card">
+        <div class="product-media">
+          <button class="wishlist-btn" (click)="onWishlist($event, 4)" aria-label="Agregar a favoritos">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 21s-6.7-4.35-9.3-8.1C.8 10 1.4 6.3 4.6 4.9c2-.9 4.3-.3 5.6 1.5.4.5.7 1 .9 1.6.2-.6.5-1.1.9-1.6 1.3-1.8 3.6-2.4 5.6-1.5 3.2 1.4 3.8 5.1 1.9 8-2.6 3.75-9.3 8.1-9.3 8.1z"/>
+            </svg>
+          </button>
+          <img class="product-img product-img--main" src="/assets/img/producto-4.jpg" alt="Blazer Estructurado">
+          <img class="product-img product-img--hover" src="/assets/img/producto-4-modelo.jpg" alt="Blazer Estructurado modelo">
+          <div class="quick-buy">Comprar</div>
+        </div>
+        <p class="product-name">Blazer Estructurado</p>
+        <p class="product-price">$329.000 COP</p>
+      </a>
+
+      <!-- Ejemplo dinámico con tu API (descomenta y borra las 4 cards de arriba cuando conectes):
+
+      @for (product of (newArrivals$ | async); track $index) {
+        <a [routerLink]="['/tienda/producto', product._id]" class="product-card">
+          <div class="product-media">
+            @if (product.isNew) { <span class="tag-new">Nuevo</span> }
+            <button class="wishlist-btn" (click)="onWishlist($event, product._id)">...</button>
+            <img class="product-img product-img--main" [src]="product.images[0]" [alt]="product.name">
+            <img class="product-img product-img--hover" [src]="product.images[1]" [alt]="product.name">
+            <div class="quick-buy">Comprar</div>
+          </div>
+          <p class="product-name">{{ product.name }}</p>
+          <p class="product-price">{{ product.price | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
+        </a>
+      }
+      -->
     </div>
   </section>
 
@@ -39,86 +126,33 @@
     </div>
 
     <div class="cat-grid">
-      <a routerLink="/tienda/hombre" class="cat-card cat-1">
+      <a routerLink="/tienda/hombre" class="cat-card cat-hombre">
         <div class="bg"></div>
+        <!-- Cuando tengas la foto, reemplaza el div de arriba por:
+        <img src="/assets/img/categoria-hombre.jpg" alt="Ropa de hombre"> -->
         <div class="label">
           <span class="serif">Hombre</span>
-          <span class="arrow">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
-              <path d="M5 12h14M13 6l6 6-6 6"/>
-            </svg>
-          </span>
+          <span class="cat-btn">Comprar</span>
         </div>
       </a>
 
-      <a routerLink="/tienda/mujer" class="cat-card cat-2">
+      <a routerLink="/tienda/mujer" class="cat-card cat-mujer">
         <div class="bg"></div>
+        <!-- <img src="/assets/img/categoria-mujer.jpg" alt="Ropa de mujer"> -->
         <div class="label">
           <span class="serif">Mujer</span>
-          <span class="arrow">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
-              <path d="M5 12h14M13 6l6 6-6 6"/>
-            </svg>
-          </span>
+          <span class="cat-btn">Comprar</span>
         </div>
       </a>
 
-      <a routerLink="/tienda/colecciones" class="cat-card cat-3">
+      <a routerLink="/tienda/colecciones" class="cat-card cat-colecciones">
         <div class="bg"></div>
+        <!-- <img src="/assets/img/categoria-colecciones.jpg" alt="Colecciones"> -->
         <div class="label">
           <span class="serif">Colecciones</span>
-          <span class="arrow">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
-              <path d="M5 12h14M13 6l6 6-6 6"/>
-            </svg>
-          </span>
+          <span class="cat-btn">Comprar</span>
         </div>
       </a>
-    </div>
-  </section>
-
-  <!-- ============ RECIÉN LLEGADOS ============ -->
-  <section class="section arrivals">
-    <div class="cat-header">
-      <h2 class="serif">Recién llegados</h2>
-      <p>Lo último de la temporada, en cantidades limitadas.</p>
-    </div>
-
-    <div class="product-grid">
-      <div class="product-card">
-        <div class="product-media">
-          <span class="tag-new">Nuevo</span>
-          <!-- <img [src]="product.images" [alt]="product.name"> -->
-          <div class="quick-add">Agregar al carrito</div>
-        </div>
-        <p class="product-name">Camisa Oversize Lino</p>
-        <p class="product-price">$189.000</p>
-      </div>
-
-      <div class="product-card">
-        <div class="product-media">
-          <div class="quick-add">Agregar al carrito</div>
-        </div>
-        <p class="product-name">Vestido Midi Satinado</p>
-        <p class="product-price">$249.000</p>
-      </div>
-
-      <div class="product-card">
-        <div class="product-media">
-          <span class="tag-new">Nuevo</span>
-          <div class="quick-add">Agregar al carrito</div>
-        </div>
-        <p class="product-name">Pantalón Recto Sastre</p>
-        <p class="product-price">$219.000</p>
-      </div>
-
-      <div class="product-card">
-        <div class="product-media">
-          <div class="quick-add">Agregar al carrito</div>
-        </div>
-        <p class="product-name">Blazer Estructurado</p>
-        <p class="product-price">$329.000</p>
-      </div>
     </div>
   </section>
 
@@ -138,7 +172,7 @@
     </div>
   </section>
 
-<div class="dusk-divider"></div>
+  <div class="dusk-divider"></div>
 
   <!-- ============ CIERRE / WHATSAPP ============ -->
   <section class="closing">

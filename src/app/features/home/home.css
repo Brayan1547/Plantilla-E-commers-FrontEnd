@@ -1,6 +1,7 @@
 :root{
   --cream: #F6F2EA;
   --cream-soft: #EFE9DE;
+  --gray-flat: #EDEAE3;
   --ink: #14120F;
   --ink-soft: #4A4640;
   --line: rgba(20,18,15,0.12);
@@ -28,32 +29,58 @@
   color:var(--ink-soft);
   font-weight:500;
 }
+.eyebrow--light{ color:rgba(255,255,255,.85); }
 
-.section{
-  padding:96px 8vw;
+.section{ padding:96px 8vw; }
+
+.dusk-divider{
+  height:3px;
+  width:100%;
+  background:var(--dusk-gradient);
 }
 
-/* ================= HERO ================= */
-.hero{
+/* ================= HERO VIDEO ================= */
+.hero-video{
   position:relative;
-  padding:120px 8vw 100px;
-  display:grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap:64px;
-  align-items:center;
+  width:100%;
+  height:88vh;
+  min-height:520px;
+  overflow:hidden;
+  display:flex;
+  align-items:flex-end;
 }
 
-.hero-copy .eyebrow{ margin-bottom:18px; }
+.hero-video-bg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:0;
+}
 
-.hero-title{
-  font-size:clamp(38px, 5vw, 68px);
+.hero-video-overlay{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  background:linear-gradient(0deg, rgba(20,18,15,0.75) 0%, rgba(20,18,15,0.25) 45%, rgba(20,18,15,0.15) 100%);
+}
+
+.hero-video-content{
+  position:relative;
+  z-index:2;
+  padding:0 8vw 72px;
+  color:#fff;
+  max-width:640px;
+}
+
+.hero-video-title{
+  font-size:clamp(36px, 5.5vw, 64px);
   line-height:1.05;
   font-weight:500;
-  letter-spacing:-0.5px;
-  margin-bottom:26px;
+  margin:16px 0 32px;
 }
-
-.hero-title em{
+.hero-video-title em{
   font-style:italic;
   font-weight:400;
   background:var(--dusk-gradient);
@@ -62,87 +89,23 @@
   color:transparent;
 }
 
-.hero-desc{
-  font-size:16px;
-  line-height:1.7;
-  color:var(--ink-soft);
-  max-width:440px;
-  margin-bottom:40px;
-}
-
-.btn-primary{
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  background:var(--ink);
-  color:var(--cream);
-  padding:16px 30px;
-  font-size:13px;
-  letter-spacing:2px;
-  text-transform:uppercase;
-  text-decoration:none;
-  border:none;
-  cursor:pointer;
-  transition:transform .35s cubic-bezier(.2,.8,.2,1), background .35s ease;
-}
-.btn-primary:hover{ background:#2c2822; transform:translateX(4px); }
-.btn-primary svg{ transition:transform .35s ease; }
-.btn-primary:hover svg{ transform:translateX(3px); }
-
-.btn-ghost{
+.btn-outline-light{
   display:inline-flex;
   align-items:center;
   gap:10px;
   background:transparent;
-  color:var(--ink);
-  padding:15px 28px;
+  color:#fff;
+  border:1.5px solid #fff;
+  padding:15px 30px;
   font-size:13px;
   letter-spacing:2px;
   text-transform:uppercase;
   text-decoration:none;
-  border:1px solid var(--ink);
-  cursor:pointer;
   transition:background .3s ease, color .3s ease;
 }
-.btn-ghost:hover{ background:var(--ink); color:var(--cream); }
+.btn-outline-light:hover{ background:#fff; color:var(--ink); }
 
-.hero-visual{
-  position:relative;
-  aspect-ratio: 4 / 5;
-  border-radius:2px;
-  overflow:hidden;
-  background:
-    radial-gradient(circle at 30% 20%, rgba(255,255,255,0.25), transparent 45%),
-    linear-gradient(155deg, #DCC9AE 0%, #C9A98B 35%, #A9836F 65%, #6B4F52 100%);
-}
-/* Si agregas <img> real dentro de .hero-visual, dale este estilo: */
-.hero-visual .hero-img{
-  width:100%; height:100%; object-fit:cover;
-}
-.hero-visual::after{
-  content:"";
-  position:absolute;
-  left:0; right:0; bottom:0;
-  height:38%;
-  background:linear-gradient(0deg, rgba(20,18,15,0.55), transparent);
-}
-.hero-tag{
-  position:absolute;
-  left:24px; bottom:24px;
-  color:#fff;
-  z-index:2;
-}
-.hero-tag .serif{ font-size:22px; font-style:italic; }
-.hero-tag span{ font-size:11px; letter-spacing:2px; text-transform:uppercase; opacity:.85; }
-
-/* signature dusk divider */
-.dusk-divider{
-  height:3px;
-  width:100%;
-  background:var(--dusk-gradient);
-}
-
-/* ================= CATEGORIES ================= */
+/* ================= SECTION HEADERS ================= */
 .cat-header{
   display:flex;
   justify-content:space-between;
@@ -151,10 +114,7 @@
   gap:24px;
   flex-wrap:wrap;
 }
-.cat-header h2{
-  font-size:clamp(28px,3vw,40px);
-  font-weight:500;
-}
+.cat-header h2{ font-size:clamp(28px,3vw,40px); font-weight:500; }
 .cat-header p{
   color:var(--ink-soft);
   max-width:360px;
@@ -162,6 +122,86 @@
   line-height:1.6;
 }
 
+/* ================= PRODUCT GRID (estilo Undergold) ================= */
+.arrivals{ background:var(--cream); }
+
+.product-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:24px;
+  margin-top:44px;
+}
+
+.product-card{
+  display:block;
+  text-decoration:none;
+  color:inherit;
+}
+
+.product-media{
+  position:relative;
+  aspect-ratio:3/4;
+  overflow:hidden;
+  background:var(--gray-flat);
+  margin-bottom:16px;
+}
+
+.product-img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:opacity .45s ease;
+}
+.product-img--main{ opacity:1; z-index:1; }
+.product-img--hover{ opacity:0; z-index:2; }
+.product-card:hover .product-img--hover{ opacity:1; }
+
+.tag-new{
+  position:absolute; top:14px; left:14px; z-index:3;
+  background:var(--ink);
+  color:var(--cream);
+  font-size:10px;
+  letter-spacing:1.5px;
+  padding:5px 10px;
+  text-transform:uppercase;
+}
+
+.wishlist-btn{
+  position:absolute; top:12px; right:12px; z-index:3;
+  width:34px; height:34px;
+  border-radius:50%;
+  border:none;
+  background:rgba(255,255,255,.85);
+  color:var(--ink);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  transition:background .25s ease, transform .25s ease;
+}
+.wishlist-btn:hover{ background:#fff; transform:scale(1.08); }
+
+.quick-buy{
+  position:absolute;
+  left:0; right:0; bottom:0;
+  z-index:3;
+  background:var(--ink);
+  color:var(--cream);
+  text-align:center;
+  padding:13px;
+  font-size:12px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  opacity:0;
+  transform:translateY(100%);
+  transition:opacity .3s ease, transform .3s ease;
+}
+.product-card:hover .quick-buy{ opacity:1; transform:translateY(0); }
+
+.product-name{ font-size:15px; font-weight:500; margin-bottom:4px; }
+.product-price{ font-size:14px; color:var(--ink-soft); }
+
+/* ================= CATEGORIES ================= */
 .cat-grid{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -183,7 +223,6 @@
   position:absolute; inset:0;
   transition:transform .7s cubic-bezier(.2,.8,.2,1);
 }
-/* Si usas <img> en vez de .bg, aplícale este mismo selector */
 .cat-card img{
   position:absolute; inset:0;
   width:100%; height:100%; object-fit:cover;
@@ -194,7 +233,7 @@
 .cat-card::before{
   content:"";
   position:absolute; inset:0;
-  background:linear-gradient(0deg, rgba(20,18,15,.65) 0%, rgba(20,18,15,0) 55%);
+  background:linear-gradient(0deg, rgba(20,18,15,.6) 0%, rgba(20,18,15,0) 55%);
   z-index:1;
 }
 .cat-card .label{
@@ -207,88 +246,30 @@
   justify-content:space-between;
   align-items:center;
 }
-.cat-card .label .serif{
-  font-size:24px;
-  font-style:italic;
-}
-.cat-card .arrow{
-  width:34px; height:34px;
-  border:1px solid rgba(255,255,255,.6);
-  border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  transition:background .3s ease, transform .35s ease;
-}
-.cat-card:hover .arrow{ background:#fff; transform:rotate(45deg); }
-.cat-card:hover .arrow svg{ stroke:var(--ink); }
+.cat-card .label .serif{ font-size:26px; font-style:italic; }
 
-/* Placeholders de color -- borra estos 3 bloques cuando pongas fotos reales */
-.cat-1 .bg{ background:linear-gradient(160deg,#3a352f,#14120F 70%); }
-.cat-2 .bg{ background:linear-gradient(160deg,#D9C3AE,#B98E8E 60%,#6E4F63 100%); }
-.cat-3 .bg{ background:linear-gradient(160deg,var(--dusk-amber),var(--dusk-rose) 55%,var(--dusk-indigo) 100%); }
-
-/* ================= NEW ARRIVALS ================= */
-.arrivals{ background:var(--cream-soft); }
-
-.product-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:28px;
-  margin-top:44px;
-}
-
-.product-card{
-  cursor:pointer;
-  text-decoration:none;
-  color:inherit;
-  display:block;
-}
-
-.product-media{
-  position:relative;
-  aspect-ratio:3/4;
-  overflow:hidden;
-  background:linear-gradient(150deg,#E7DACB,#C7AE95);
-  margin-bottom:16px;
-}
-/* Placeholders de color -- borra cuando pongas fotos reales */
-.product-card:nth-child(2) .product-media{ background:linear-gradient(150deg,#DCC9CE,#B98E9A); }
-.product-card:nth-child(3) .product-media{ background:linear-gradient(150deg,#CFCBD8,#8F87A6); }
-.product-card:nth-child(4) .product-media{ background:linear-gradient(150deg,#D8D2C4,#7B6F5E); }
-
-.product-media img{
-  width:100%; height:100%; object-fit:cover;
-  transition:transform .6s ease;
-}
-.product-card:hover .product-media img{ transform:scale(1.05); }
-
-.quick-add{
-  position:absolute;
-  left:14px; right:14px; bottom:14px;
-  background:rgba(246,242,234,0.94);
-  color:var(--ink);
-  text-align:center;
-  padding:12px;
-  font-size:12px;
+.cat-btn{
+  border:1px solid rgba(255,255,255,.7);
+  padding:9px 18px;
+  font-size:11px;
   letter-spacing:1.5px;
   text-transform:uppercase;
-  opacity:0;
-  transform:translateY(10px);
-  transition:opacity .3s ease, transform .3s ease;
+  transition:background .3s ease, color .3s ease;
 }
-.product-card:hover .quick-add{ opacity:1; transform:translateY(0); }
+.cat-card:hover .cat-btn{ background:#fff; color:var(--ink); }
 
-.tag-new{
-  position:absolute; top:14px; left:14px;
-  background:var(--ink);
-  color:var(--cream);
-  font-size:10px;
-  letter-spacing:1.5px;
-  padding:5px 10px;
-  text-transform:uppercase;
+/* Colores placeholder -- reemplaza el div .bg por <img> cuando tengas la foto */
+.cat-hombre .bg{
+  background:
+    linear-gradient(0deg, rgba(20,18,15,.65) 0%, rgba(20,18,15,0) 55%),
+    var(--cream);
 }
-
-.product-name{ font-size:15px; font-weight:500; margin-bottom:4px; }
-.product-price{ font-size:14px; color:var(--ink-soft); }
+.cat-mujer .bg{
+  background:linear-gradient(160deg, #E8D5D0 0%, #D4A5A5 55%, #B47B84 100%);
+}
+.cat-colecciones .bg{
+  background:linear-gradient(150deg, #E7DACB, #C7AE95);
+}
 
 /* ================= EDITORIAL / STORY ================= */
 .story{
@@ -305,9 +286,7 @@
     radial-gradient(circle at 70% 30%, rgba(255,255,255,.18), transparent 50%),
     linear-gradient(200deg,#14120F 0%, #4B3F72 60%, #C97B84 100%);
 }
-.story-visual img{
-  width:100%; height:100%; object-fit:cover;
-}
+.story-visual img{ width:100%; height:100%; object-fit:cover; }
 .story-quote{
   font-size:clamp(24px,2.6vw,34px);
   line-height:1.4;
@@ -329,7 +308,7 @@
   color:var(--ink-soft);
 }
 
-/* ========== whatsApp =============== */
+/* ================= CLOSING / WHATSAPP ================= */
 .closing{
   text-align:center;
   padding:80px 8vw 100px;
@@ -345,23 +324,38 @@
   margin-bottom:32px;
 }
 
+.btn-primary{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  background:var(--ink);
+  color:var(--cream);
+  padding:16px 30px;
+  font-size:13px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  text-decoration:none;
+  border:none;
+  cursor:pointer;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1), background .35s ease;
+}
+.btn-primary:hover{ background:#2c2822; transform:translateX(4px); }
+
 /* ================= RESPONSIVE ================= */
 @media (max-width:1000px){
-  .hero{ grid-template-columns:1fr; gap:44px; padding:80px 7vw 60px; }
-  .hero-visual{ aspect-ratio:16/10; order:-1; }
-  .cat-grid{ grid-template-columns:1fr 1fr; }
+  .hero-video{ height:70vh; }
   .product-grid{ grid-template-columns:1fr 1fr; }
+  .cat-grid{ grid-template-columns:1fr 1fr; }
   .story{ grid-template-columns:1fr; gap:36px; }
   .story-visual{ aspect-ratio:16/9; }
   .section{ padding:72px 7vw; }
 }
 
 @media (max-width:620px){
-  .hero{ padding:64px 6vw 48px; }
-  .hero-desc{ max-width:100%; }
+  .hero-video{ height:60vh; min-height:420px; }
+  .hero-video-content{ padding:0 6vw 48px; }
+  .product-grid{ grid-template-columns:1fr 1fr; gap:14px; }
   .cat-grid{ grid-template-columns:1fr; }
-  .product-grid{ grid-template-columns:1fr 1fr; gap:16px; }
   .section{ padding:56px 6vw; }
   .cat-header{ flex-direction:column; align-items:flex-start; }
-
 }
