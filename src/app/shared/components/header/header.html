@@ -1,18 +1,23 @@
-<header>
+<header [class.scrolled]="scrolled">
   <!-- Barra de anuncios superior -->
   <div class="announcement-bar">
     <span *ngIf="animate">{{ messages[currentMessageIndex] }}</span>
   </div>
 
-
   <!-- Barra de navegación principal -->
   <nav class="navbar">
     <div class="nav-left">
-      <button [routerLink]="" (click)="toggleMenu('TIENDA')">TIENDA</button>
-      <button routerLink="/product-ropa" (click)="toggleMenu('HOMBRE')">HOMBRE</button>
-      <button [routerLink]="" (click)="toggleMenu('MUJER')">MUJER</button>
-      <a routerLink="/category-list" routerLinkActive="active" class="menu-link">COLECCIONES </a>
-      <a routerLink="/dashboard/product-list" routerLinkActive="active" class="menu-link">BÁSICOS</a>
+      <button class="icon-btn" (click)="toggleDrawer()" aria-label="Abrir menú">
+        <span class="hamburger-icon">☰</span>
+      </button>
+
+     <!-- ============================================
+           ICONO: Lupa / Buscador
+      ============================================ -->
+      <div class="search-box">
+        <input type="text" placeholder="Buscar...">
+        <span class="search-icon icon-mask icon-mask--lupa"></span>
+      </div>
 
       <!-- <button (click)= "logout()">logout</button> -->
 
@@ -22,7 +27,7 @@
         <li><a routerLink="/login" routerLinkActive="active">login</a></li>
         <li><a routerLink="/register" routerLink="active">register</a></li>
       } -->
-        
+
       <!-- <ul>
         @if ( httpAuth.user$ |async; as user) {
         {{ user.name }}
@@ -34,7 +39,6 @@
         <li><a routerLink="/register" routerLinkActive="active">register</a></li>
         }
       </ul> -->
-
 
        <!-- <ul>
         @if ( httpAuth.user$ |async; as user) {
@@ -48,51 +52,75 @@
         }
       </ul> -->
 
-
     </div>
 
+    <!-- <div class="logo-container" [routerLink]="['/']">
+      <img src="assets/imagenes/Dusck_model_logo.png" alt="Dusck Model Logo" class="brand-logo">
+    </div> -->
 
     <div class="logo-container" [routerLink]="['/']">
-      <img src="assets/imagenes/Dusck_model_logo.png" alt="Dusck Model Logo" class="brand-logo">
+      <span class="brand-logo" role="img" aria-label="Dusck Model Logo"></span>
     </div>
-
 
     <div class="nav-right">
-      <div class="search-box">
-        <input type="text" placeholder="Buscar...">
-        <span class="search-icon">🔍</span>
-      </div>
-      
+      <!-- ============================================
+           ICONO: Favoritos (corazón)
+      ============================================ -->
+      <span class="icon icon-mask icon-mask--heart" title="Favoritos"></span>
+
       <!-- <span class="icon" title="Cuenta">👤</span> -->
-       <div class="account-wrapper">
-  <span class="icon" title="Cuenta" (click)="onAccountIconClick()">👤</span>
+      <!-- ============================================
+           ICONO: Usuario / Cuenta
+           - onAccountIconClick(): si NO hay usuario logueado, abre el modal de login
+           - si SÍ hay usuario, abre/cierra el desplegable con "Cerrar sesión"
+      ============================================ -->
+      <div class="account-wrapper">
+        <span class="icon icon-mask icon-mask--user" title="Cuenta" (click)="onAccountIconClick()"></span>
 
-  @if (accountMenuOpen && (httpAuth.user$ | async); as user) {
-  <div class="account-dropdown">
-    <p class="account-dropdown__greeting">Hola, {{ user.name }}</p>
-    <button type="button" class="account-dropdown__logout" (click)="logout()">Cerrar sesión</button>
-  </div>
-  }
-</div>
+        @if (accountMenuOpen && (httpAuth.user$ | async); as user) {
+        <div class="account-dropdown">
+          <p class="account-dropdown__greeting">Hola, {{ user.name }}</p>
+          <button type="button" class="account-dropdown__logout" (click)="logout()">Cerrar sesión</button>
+        </div>
+        }
+      </div>
 
-      <span class="icon" title="Carrito">🛒</span>
+       <!-- ============================================
+           ICONO: Carrito de compras
+           - cartCount viene del componente (por ahora en 0, falta conectar al servicio real)
+      ============================================ -->
+      <div class="cart-wrapper">
+        <span class="icon icon-mask icon-mask--bag" title="Carrito"></span>
+        @if (httpCart.cartCount() > 0) {
+          <span class="cart-badge">{{  httpCart.cartCount()  }}</span>
+        }
+      </div>
     </div>
   </nav>
+</header>
 
 
-  <!-- Mega Menú desplegable -->
-  <div class="mega-menu" *ngIf="activeMenu">
-    <h3>{{ activeMenu }}</h3>
-    <ul>
-      <li>Novedades</li>
-      <li>Más vendidos</li>
-      <li>Accesorios</li>
-      <li>Denim</li>
-    </ul>
+<!-- Overlay oscuro detrás del drawer -->
+<div class="drawer-overlay" *ngIf="drawerOpen" (click)="closeDrawer()"></div>
+
+<!-- Panel lateral de navegación (reemplaza al mega-menú) -->
+<aside class="side-drawer" [class.open]="drawerOpen">
+  <div class="side-drawer__header">
+    <span class="side-drawer__logo">DUSCK</span>
+    <button class="side-drawer__close" (click)="closeDrawer()">
+      CERRAR <span class="close-x">✕</span>
+    </button>
   </div>
 
-    @if (authModalOpen) {
-  <app-auth-modal [initialTab]="authModalTab" (closed)="closeAuthModal()" />
-  }
+  <ul class="side-drawer__list">
+    <li><button routerLink="/home" (click)="closeDrawer()">TIENDA</button></li>
+    <li><button routerLink="/product-ropa" (click)="closeDrawer()">HOMBRE</button></li>
+    <li><button [routerLink]="" (click)="closeDrawer()">MUJER</button></li>
+    <li><a routerLink="/category-list" routerLinkActive="active" (click)="closeDrawer()">COLECCIONES</a></li>
+    <li><a routerLink="/dashboard/product-list" routerLinkActive="active" (click)="closeDrawer()">BÁSICOS</a></li>
+  </ul>
+</aside>
 
-</header>
+@if (authModalOpen) {
+<app-auth-modal [initialTab]="authModalTab" (closed)="closeAuthModal()" />
+}

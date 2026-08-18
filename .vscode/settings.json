@@ -25,5 +25,6 @@
         "statusBar.debuggingBackground": "#dd0531",
         "statusBar.debuggingForeground": "#e7e7e7"
     },
-    "peacock.color": "#dd0531"
+    "peacock.color": "#dd0531",
+    "liveServer.settings.port": 5501
 }

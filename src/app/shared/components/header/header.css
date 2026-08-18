@@ -33,6 +33,7 @@
   overflow: hidden;
   font-weight: 300;
   letter-spacing: 1px;
+  transition: max-height 300ms ease, opacity 300ms ease, padding 300ms ease;
 }
 
 .announcement-bar span {
@@ -52,14 +53,29 @@
 }
 
 /* ========================================
-   HEADER STICKY Y NAVBAR EN 3 COLUMNAS
+   HEADER FLOTANTE (transparente → blanco al hacer scroll)
 ======================================== */
 header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  width: 100%;
   z-index: 1000;
+  background-color: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background-color 300ms ease, border-color 300ms ease;
+}
+
+header.scrolled {
   background-color: var(--color-white);
   border-bottom: 1px solid var(--color-cream);
+}
+
+/* la barra de anuncios se oculta al hacer scroll */
+header.scrolled .announcement-bar {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
 }
 
 .navbar {
@@ -70,6 +86,10 @@ header {
   height: 110px;
   max-width: 1400px;
   margin: 0 auto;
+   transition: height 300ms ease;
+}
+header.scrolled .navbar {
+  height: 72px;
 }
 
 .nav-left { 
@@ -112,6 +132,28 @@ header {
 }
 
 /* ========================================
+   ICONO HAMBURGUESA
+======================================== */
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+}
+
+.hamburger-icon {
+  font-size: 22px;
+  color: var(--color-primary);
+  transition: color var(--transition-smooth);
+}
+
+.icon-btn:hover .hamburger-icon {
+  color: var(--color-accent);
+}
+
+/* ========================================
    LOGOTIPO GRANDE SIN FONDO Y CENTRADO
 ======================================== */
 .logo-container {
@@ -123,18 +165,31 @@ header {
 }
 
 .brand-logo {
+  display: block;
   height: 55px;
-  max-width: 250px;
-  width: auto;
-  object-fit: contain;
-  /* MAGIA CSS PARA QUITAR EL FONDO BLANCO/CREMA DE LA IMAGEN */
-  mix-blend-mode: multiply; 
-  filter: contrast(1.2); /* Acentúa el negro de las letras para que se vea nítido */
-  transition: opacity var(--transition-smooth);
+  width: 180px;
+  background-color: var(--color-primary);
+  -webkit-mask-image: url('/assets/imagenes/Dusck_model_logo-removebg-preview.png');
+  mask-image: url('/assets/imagenes/Dusck_model_logo-removebg-preview.png');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  cursor: pointer;
+  transition: background-color var(--transition-smooth), opacity var(--transition-smooth), height 300ms ease;
+}
+header.scrolled .brand-logo {
+  font-size: 20px; /* logo más chico al bajar, antes era 26px */
 }
 
 .brand-logo:hover {
   opacity: 0.8;
+}
+
+header:not(.scrolled) .brand-logo {
+  background-color: var(--color-white);
 }
 
 /* ========================================
@@ -169,17 +224,39 @@ header {
   border-color: var(--color-accent);
 }
 
-.search-icon, .icon { 
-  font-size: 18px; 
-  cursor: pointer; 
-  transition: transform var(--transition-smooth);
-  color: var(--color-primary);
+/* ========================================
+   ICONOS PNG COMO MÁSCARA (color controlado por CSS)
+======================================== */
+.icon-mask {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: var(--color-primary);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  cursor: pointer;
+  transition: background-color var(--transition-smooth), transform var(--transition-smooth);
+  vertical-align: middle;
 }
 
-.search-icon:hover, .icon:hover { 
+.icon-mask:hover {
+  background-color: var(--color-accent);
   transform: scale(1.1);
-  color: var(--color-accent);
 }
+
+/* header transparente sobre el hero: íconos en blanco */
+header:not(.scrolled) .icon-mask {
+  background-color: var(--color-white);
+}
+
+.icon-mask--lupa   { -webkit-mask-image: url('/assets/imagenes/lupa.png');      mask-image: url('/assets/imagenes/lupa.png'); }
+.icon-mask--heart  { -webkit-mask-image: url('/assets/imagenes/me-gusta.png'); mask-image: url('/assets/imagenes/me-gusta.png'); }
+.icon-mask--bag    { -webkit-mask-image: url('/assets/imagenes/bolso.png');    mask-image: url('/assets/imagenes/bolso.png'); }
+.icon-mask--user   { -webkit-mask-image: url('/assets/imagenes/usuario.png'); mask-image: url('/assets/imagenes/usuario.png'); }
 
 /* ========================================
    MEGA MENÚ DESPLEGABLE
@@ -279,9 +356,165 @@ header {
   color: #FAF7F1;
 }
 
+/* ========================================
+   CARRITO CON BADGE
+======================================== */
+.cart-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: var(--color-primary);
+  color: var(--color-white);
+  font-size: 10px;
+  font-family: var(--font-body);
+  min-width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========================================
+   OVERLAY DEL DRAWER
+======================================== */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 15, 16, 0.5);
+  z-index: 1500;
+  animation: fadeIn var(--transition-smooth);
+}
+
+/* ========================================
+   PANEL LATERAL (DRAWER)
+======================================== */
+.side-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 320px;
+  max-width: 85vw;
+  background: var(--color-white);
+  z-index: 2000;
+  transform: translateX(-100%);
+  transition: transform 300ms ease;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 10px 0 30px rgba(15, 15, 16, 0.15);
+}
+
+.side-drawer.open {
+  transform: translateX(0);
+}
+
+.side-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid var(--color-cream);
+}
+
+.side-drawer__logo {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: var(--color-primary);
+}
+
+.side-drawer__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.close-x {
+  font-size: 14px;
+}
+
+.side-drawer__list {
+  list-style: none;
+  padding: 24px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.side-drawer__list li button,
+.side-drawer__list li a {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: var(--color-primary);
+  text-align: left;
+  padding: 0;
+  transition: color var(--transition-smooth);
+}
+
+.side-drawer__list li button:hover,
+.side-drawer__list li a:hover {
+  color: var(--color-accent);
+}
+
+/* ========================================
+   BARRA FLOTANTE INFERIOR
+======================================== */
+.floating-nav {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 900;
+  background: var(--color-primary);
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  box-shadow: 0 8px 24px rgba(15, 15, 16, 0.25);
+}
+
+.floating-nav button,
+.floating-nav a {
+  background: none;
+  border: none;
+  color: var(--color-white);
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 10px 16px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--transition-smooth);
+}
+
+.floating-nav button:hover,
+.floating-nav a:hover {
+  background: var(--color-accent);
 }
 
 /* ========================================

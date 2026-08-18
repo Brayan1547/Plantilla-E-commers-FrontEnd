@@ -35,10 +35,28 @@ export class httpAuth {
                 tap((res) => {
                     //Verificamos que la respuesta contenga las propiedades esperadas
                     if (res?.token && res?.data) {
-                  
+
                         this.setAuthData(res.token, res.data);
-                        //Redirecciona
-                        this.router.navigateByUrl('/dashboard');
+
+                        //Redirecciona según el rol
+                        const role = res.data?.role;
+
+                        switch (role) {
+                            case 'administrador':
+                                this.router.navigateByUrl('/dashboard');
+                                break;
+                            case 'shop_manager':
+                                this.router.navigateByUrl('/dashboard'); // cambiar cuando tengas su vista propia
+                                break;
+                            case 'editor':
+                                this.router.navigateByUrl('/dashboard'); // cambiar cuando tengas su vista propia
+                                break;
+                            case 'subscriber':
+                            default:
+                                this.router.navigateByUrl('/home');
+                                break;
+                        }
+
 
                     }
                 }),
@@ -65,7 +83,7 @@ export class httpAuth {
         return this.http.post<any>(`${this.BASE_URL}/auth/register`, data)
     }
 
-    setAuthData( token: string | null, user: any ) {
+    setAuthData(token: string | null, user: any) {
         this.token = token;
         this.user = user;
     }
@@ -125,7 +143,7 @@ export class httpAuth {
 
     set token(token: string | null) {
         if (this.isBrowser) {
-            if(token){
+            if (token) {
                 localStorage.setItem(this.TOKEN_KEY, token);
             } else {
                 localStorage.removeItem(this.TOKEN_KEY)
@@ -138,7 +156,7 @@ export class httpAuth {
 
     set user(user: any) {
         if (this.isBrowser) {
-            if(user) {
+            if (user) {
                 localStorage.setItem(this.USER_KEY, JSON.stringify(user));
             } else {
                 localStorage.removeItem(this.USER_KEY)

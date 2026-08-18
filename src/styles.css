@@ -14,6 +14,10 @@ body{
 
 }
 
+body.has-fixed-header {
+  padding-top: 72px; /* mismo alto que tu .navbar cuando está compacto */
+}
+
 .container{
     width:95%;
     max-width:1200px;
@@ -153,10 +157,6 @@ tbody tr:hover{
 } */
 
 @media (max-width:768px){
-
-    body{
-        padding:15px;
-    }
 
     .container{
         overflow-x:auto;

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { Home } from './features/home/home';
+// import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
 
@@ -43,6 +44,18 @@ export const routes: Routes = [
      {
           path: 'product-ropa',
           loadComponent: () => import('./features/product-disign/product-disign')
+     },
+
+     {
+          // ficha de un producto, ":id" recibe el _id de Mongo desde la URL
+          path: 'tienda/producto/:id',
+          loadComponent: () => import('./features/product-disign/product-disign')
+     },
+     {
+          // "/tienda" sola aún no tiene vista propia, por ahora manda a home
+          path: 'tienda',
+          redirectTo: 'home',
+          pathMatch: 'full'
      },
      {
           path: 'dashboard/user/list',

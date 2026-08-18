@@ -11,6 +11,7 @@
   --dusk-gradient: linear-gradient(90deg, var(--dusk-amber) 0%, var(--dusk-rose) 50%, var(--dusk-indigo) 100%);
 }
 
+
 .home{
   width:100%;
   overflow-x:hidden;

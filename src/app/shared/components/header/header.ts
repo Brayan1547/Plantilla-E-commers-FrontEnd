@@ -1,11 +1,14 @@
 import { Component, HostListener, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { httpAuth } from '../../../core/services/http-auth';
 
 import { AuthModal } from '../auth-modal/auth-modal';
 
+import { filter } from 'rxjs/operators';
+
+import { HttpCart } from '../../../core/services/http-cart'; // nuevo: servicio del carrito
 
 @Component({
   selector: 'app-header',
@@ -15,19 +18,35 @@ import { AuthModal } from '../auth-modal/auth-modal';
   styleUrl: './header.css',
 })
 export class Header implements OnDestroy {
-  activeMenu: string | null = null;
   currentMessageIndex = 0;
   animate = true;
   private intervalId: any;
 
-  httpAuth = inject( httpAuth )
+  httpAuth = inject( httpAuth );
+  httpCart = inject( HttpCart ); // nuevo: acceso al carrito (cart, cartCount)
 
   messages = [
     "Nueva Colección Disponible - DUSCK",
     "Envío estándar gratuito > $75"
   ];
 
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor(private cdr: ChangeDetectorRef, private router: Router) {
+    // 2
+    this.isHomePage = this.checkIsHome(this.router.url);
+this.updateScrolled();
+
+this.router.events.pipe(
+  filter(e => e instanceof NavigationEnd)
+).subscribe((e: any) => {
+  this.isHomePage = this.checkIsHome(e.urlAfterRedirects);
+  this.updateScrolled();
+});
+
+  // si ya hay sesión activa, trae el carrito para que el badge no empiece en 0 sin razón
+    if (this.httpAuth.user) {
+      this.httpCart.getMyCart().subscribe();
+    }
+
     this.intervalId = setInterval(() => {
       this.animate = false;
       this.cdr.detectChanges(); 
@@ -38,10 +57,24 @@ export class Header implements OnDestroy {
       }, 500);
     }, 3000);
   }
-
-  toggleMenu(menu: string) {
-    this.activeMenu = this.activeMenu === menu ? null : menu;
+// 3
+  private checkIsHome(url: string): boolean {
+  return url === '/' || url === '/home';
+}
+// 4
+private updateScrolled() {
+  if (typeof window === 'undefined') {
+    // esto corre en el servidor (SSR), ahí no existe "window"
+    this.scrolled = !this.isHomePage;
+  } else {
+    this.scrolled = !this.isHomePage || window.scrollY > 80;
   }
+  // le avisa al body si debe reservar espacio para el header fijo (fuera del home)
+  if (typeof document !== 'undefined') {
+    document.body.classList.toggle('has-fixed-header', !this.isHomePage);
+  }
+  
+}
 
   ngOnDestroy() {
     clearInterval(this.intervalId);
@@ -51,12 +84,38 @@ export class Header implements OnDestroy {
     this.httpAuth.logoutUser();
     this.accountMenuOpen = false;   //cierra el desplegable al salir
   }
-
+  // 1
+  isHomePage = true;
 
   authModalOpen = false;
   authModalTab: 'login' | 'register' = 'login';
   accountMenuOpen = false;   // controla el desplegable de cuenta
 
+
+  // controla el panel lateral (drawer) que reemplaza al mega-menú
+  drawerOpen = false;
+
+  // true cuando el usuario ya bajó lo suficiente: header pasa de transparente a blanco
+  scrolled = false;
+
+  @HostListener('window:scroll')
+  onWindowScroll() {
+    // ajusta este número según la altura de tu hero (ej: si el hero mide 600px, pon un valor cercano)
+    // this.scrolled = window.scrollY > 80;
+    this.updateScrolled();
+  }
+
+  toggleDrawer() {
+    this.drawerOpen = !this.drawerOpen;
+    // si el drawer se abre, cerramos el dropdown de cuenta para que no queden dos abiertos
+    if (this.drawerOpen) {
+      this.accountMenuOpen = false;
+    }
+  }
+
+  closeDrawer() {
+    this.drawerOpen = false;
+  }
 
   openAuthModal(tab: 'login' | 'register') {
     this.authModalTab = tab;
