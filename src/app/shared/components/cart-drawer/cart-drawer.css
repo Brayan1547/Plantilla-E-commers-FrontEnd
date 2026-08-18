@@ -1,0 +1,224 @@
+/* ======================================== 
+   OVERLAY
+======================================== */
+.cart-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 15, 16, 0.5);
+  z-index: 2100; /* por encima del side-drawer del menú (2000) */
+  animation: fadeIn 250ms ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ========================================
+   PANEL: entra desde la DERECHA
+======================================== */
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 380px;
+  max-width: 90vw;
+  background: var(--color-white);
+  z-index: 2200;
+  transform: translateX(100%); /* oculto fuera de pantalla a la derecha */
+  transition: transform 300ms ease;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -10px 0 30px rgba(15, 15, 16, 0.15);
+}
+
+.cart-drawer.open {
+  transform: translateX(0);
+}
+
+/* ========================================
+   HEADER DEL PANEL
+======================================== */
+.cart-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-cream);
+  flex-shrink: 0;
+}
+
+.cart-drawer__title {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: var(--color-primary);
+}
+
+.cart-drawer__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--color-primary);
+}
+
+/* ========================================
+   ESTADO VACÍO
+======================================== */
+.cart-drawer__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+  color: var(--color-primary);
+}
+
+.cart-drawer__empty-btn {
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  padding: 12px 24px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+/* ========================================
+   LISTA DE PRODUCTOS (con scroll propio)
+======================================== */
+.cart-drawer__list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cart-item {
+  display: flex;
+  gap: 12px;
+}
+
+.cart-item__img-wrapper {
+  width: 80px;
+  height: 96px;
+  flex-shrink: 0;
+  background: var(--color-cream);
+  overflow: hidden;
+}
+
+.cart-item__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cart-item__img--empty {
+  background: #f0f0f0;
+}
+
+.cart-item__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cart-item__name {
+  font-size: 13px;
+  color: var(--color-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.cart-item__price {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.cart-item__actions {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cart-item__stepper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-cream);
+}
+
+.cart-item__stepper button {
+  background: none;
+  border: none;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--color-primary);
+}
+
+.cart-item__stepper span {
+  min-width: 24px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.cart-item__remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: #999;
+  text-decoration: underline;
+}
+
+/* ========================================
+   FOOTER FIJO: subtotal + botón de pago
+======================================== */
+.cart-drawer__footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--color-cream);
+  padding: 20px 24px 24px;
+}
+
+.cart-drawer__subtotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--color-primary);
+}
+
+.cart-drawer__subtotal-amount {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.cart-drawer__checkout-btn {
+  width: 100%;
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  padding: 14px;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: opacity 200ms ease;
+}
+
+.cart-drawer__checkout-btn:hover {
+  opacity: 0.85;
+}

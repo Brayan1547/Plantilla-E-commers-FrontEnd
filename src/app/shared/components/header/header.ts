@@ -9,11 +9,14 @@ import { AuthModal } from '../auth-modal/auth-modal';
 import { filter } from 'rxjs/operators';
 
 import { HttpCart } from '../../../core/services/http-cart'; // nuevo: servicio del carrito
+import { CartDrawer } from '../cart-drawer/cart-drawer'; // nuevo: panel del carrito
+
+import { UiModal } from '../../../core/services/ui-modal'; // nuevo: estado compartido del modal
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, CommonModule, RouterLinkActive, AuthModal],
+  imports: [RouterLink, CommonModule, RouterLinkActive, AuthModal, CartDrawer],
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
@@ -23,7 +26,8 @@ export class Header implements OnDestroy {
   private intervalId: any;
 
   httpAuth = inject( httpAuth );
-  httpCart = inject( HttpCart ); // nuevo: acceso al carrito (cart, cartCount)
+  httpCart = inject( HttpCart ); // acceso al carrito (cart, cartCount)
+    uiModal = inject(UiModal); // para abrir/cerrar el modal desde cualquier lado
 
   messages = [
     "Nueva Colección Disponible - DUSCK",
@@ -87,13 +91,14 @@ private updateScrolled() {
   // 1
   isHomePage = true;
 
-  authModalOpen = false;
-  authModalTab: 'login' | 'register' = 'login';
   accountMenuOpen = false;   // controla el desplegable de cuenta
 
 
-  // controla el panel lateral (drawer) que reemplaza al mega-menú
+  // controla el panel lateral de navegación (drawer) que reemplaza al mega-menú
   drawerOpen = false;
+
+  // controla el panel lateral del carrito (distinto al drawer del menú)
+  cartDrawerOpen = false;
 
   // true cuando el usuario ya bajó lo suficiente: header pasa de transparente a blanco
   scrolled = false;
@@ -117,14 +122,37 @@ private updateScrolled() {
     this.drawerOpen = false;
   }
 
+   // abre el panel del carrito si hay sesión, si no pide iniciar sesión primero
+  onCartIconClick() {
+    if (!this.httpAuth.user) {
+      this.openAuthModal('login');
+    } else {
+      this.cartDrawerOpen = true;
+    }
+  }
+
+  closeCartDrawer() {
+    this.cartDrawerOpen = false;
+  }
+
   openAuthModal(tab: 'login' | 'register') {
-    this.authModalTab = tab;
-    this.authModalOpen = true;
+    this.uiModal.open(tab);
   }
 
   closeAuthModal() {
-    this.authModalOpen = false;
+    this.uiModal.close();
   }
+
+
+    // getters: permiten que el html siga usando "authModalOpen" y "authModalTab" sin cambios
+  get authModalOpen(): boolean {
+    return this.uiModal.authModalOpen();
+  }
+
+  get authModalTab(): 'login' | 'register' {
+    return this.uiModal.authModalTab();
+  }
+  
 
   onAccountIconClick() {
     if (!this.httpAuth.user) {

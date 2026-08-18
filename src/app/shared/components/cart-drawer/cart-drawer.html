@@ -1,0 +1,64 @@
+<!-- Overlay oscuro detrás del panel, cierra el drawer al hacer click fuera -->
+<div class="cart-drawer-overlay" *ngIf="open" (click)="close()"></div>
+
+<!-- Panel lateral: entra desde la derecha (a diferencia del menú, que entra por la izquierda) -->
+<aside class="cart-drawer" [class.open]="open">
+
+  <div class="cart-drawer__header">
+    <span class="cart-drawer__title">Tu carrito</span>
+    <button class="cart-drawer__close" (click)="close()" aria-label="Cerrar carrito">✕</button>
+  </div>
+
+  <!-- Carrito vacío -->
+  @if (items.length === 0) {
+    <div class="cart-drawer__empty">
+      <p>Tu carrito está vacío.</p>
+      <button class="cart-drawer__empty-btn" (click)="close()">Seguir comprando</button>
+    </div>
+  } @else {
+
+    <!-- Lista de productos, con scroll propio para que el footer quede siempre visible -->
+    <div class="cart-drawer__list">
+      @for (item of items; track item.productId._id) {
+        <div class="cart-item">
+
+          <div class="cart-item__img-wrapper">
+            @if (getMainImage(item.productId.images)) {
+              <img class="cart-item__img" [src]="getMainImage(item.productId.images)" [alt]="item.productId.name">
+            } @else {
+              <div class="cart-item__img cart-item__img--empty"></div>
+            }
+          </div>
+
+          <div class="cart-item__info">
+            <p class="cart-item__name">{{ item.productId.name }}</p>
+            <p class="cart-item__price">{{ item.productId.price | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
+
+            <div class="cart-item__actions">
+              <!-- Stepper de cantidad, igual estilo al de Temu -->
+              <div class="cart-item__stepper">
+                <button (click)="decrease(item)" aria-label="Restar cantidad">−</button>
+                <span>{{ item.quantity }}</span>
+                <button (click)="increase(item)" aria-label="Sumar cantidad">+</button>
+              </div>
+
+              <button class="cart-item__remove" (click)="remove(item)">Eliminar</button>
+            </div>
+          </div>
+
+        </div>
+      }
+    </div>
+
+    <!-- Footer fijo: subtotal + botón de pago -->
+    <div class="cart-drawer__footer">
+      <div class="cart-drawer__subtotal">
+        <span>Subtotal</span>
+        <span class="cart-drawer__subtotal-amount">{{ subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+      </div>
+      <button class="cart-drawer__checkout-btn" (click)="goToCheckout()">Ir a pagar</button>
+    </div>
+
+  }
+
+</aside>

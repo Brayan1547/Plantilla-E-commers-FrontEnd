@@ -90,9 +90,9 @@
            - cartCount viene del componente (por ahora en 0, falta conectar al servicio real)
       ============================================ -->
       <div class="cart-wrapper">
-        <span class="icon icon-mask icon-mask--bag" title="Carrito"></span>
+        <span class="icon icon-mask icon-mask--bag" title="Carrito" (click)="onCartIconClick()"></span>
         @if (httpCart.cartCount() > 0) {
-          <span class="cart-badge">{{  httpCart.cartCount()  }}</span>
+          <span class="cart-badge">{{ httpCart.cartCount() }}</span>
         }
       </div>
     </div>
@@ -124,3 +124,5 @@
 @if (authModalOpen) {
 <app-auth-modal [initialTab]="authModalTab" (closed)="closeAuthModal()" />
 }
+<!-- Panel lateral del carrito, estilo Temu -->
+<app-cart-drawer [open]="cartDrawerOpen" (closed)="closeCartDrawer()" />

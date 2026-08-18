@@ -4,6 +4,9 @@ import { RouterLink } from '@angular/router';
 import { HttpProduct } from '../../core/services/http-product';
 import { HttpCart } from '../../core/services/http-cart';
 
+import { UiModal } from '../../core/services/ui-modal'; // nuevo: para pedir login si no hay sesión
+import { httpAuth } from '../../core/services/http-auth'; // nuevo: saber si hay usuario logueado
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -17,6 +20,9 @@ export class Home {
   private httpProduct = inject(HttpProduct);
   private httpCart = inject(HttpCart); //  para agregar productos al carrito
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID)); // true solo en navegador, false en SSR
+
+  private uiModal = inject(UiModal); 
+  private httpAuth = inject(httpAuth); 
 
 
   // ahora guardamos el arreglo COMPLETO de productos
@@ -80,6 +86,11 @@ export class Home {
   onAddToCart(event: Event, productId: string) {
     event.preventDefault();   // evita que el clic dispare el routerLink de la card
     event.stopPropagation();
+
+      if (!this.httpAuth.user) {
+      this.uiModal.open('login'); // nuevo: pide iniciar sesión antes de comprar
+      return;
+    }
 
     this.httpCart.updateCart(productId, 1).subscribe({
       next: () => console.log('Producto agregado al carrito'),

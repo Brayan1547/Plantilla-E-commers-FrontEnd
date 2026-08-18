@@ -21,7 +21,7 @@
       @if (activeTab === 'login') {
         <app-login (loginSuccess)="close()" (switchToRegister)="setTab('register')" />
       } @else {
-        <app-register (switchToLogin)="setTab('login')" />
+        <app-register (switchToLogin)="setTab('login')" (registerSuccess)="close()" />
       }
     </div>
   </div>

@@ -14,6 +14,7 @@ export default class Register {
   formData! : FormGroup;
 
    @Output() switchToLogin = new EventEmitter<void>();
+  @Output() registerSuccess = new EventEmitter<void>(); //avisa al modal que ya puede cerrarse
 
 
   constructor(){
@@ -43,6 +44,13 @@ export default class Register {
     this.httpAut.registerUser(this.formData.value).subscribe({
       next: ( res ) => {
          console.log('Usuario registrado:', res);
+
+         //inicia sesión automática con las mismas credenciales, y loginUser() ya redirige según el rol
+        const { email, password } = this.formData.value;
+        this.httpAut.loginUser({ email, password }).subscribe({
+          next: () => this.registerSuccess.emit() // avisa al modal que cierre, si estaba abierto como modal
+        });
+
       },
       error: ( err ) => {
         console.error('Error al registrar:', err);
