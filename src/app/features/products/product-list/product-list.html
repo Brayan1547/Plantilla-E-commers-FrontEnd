@@ -26,12 +26,10 @@
                 <td>{{product.name}}</td>
                 <td>
                     @if( product.isActive) {
-                    <hugeicons-icon class="toggle-icon toggle-on-icon" [icon]="ToggleOnIcon" [size]="24" color="currentColor" [strokeWidth]="1.5">
-                    </hugeicons-icon>
+                        activo
                     }
                     @else {
-                    <hugeicons-icon class="toggle-icon toggle-off-icon" [icon]="ToggleOffIcon" [size]="24" color="#fe0a0a"
-                        [strokeWidth]="1.5"></hugeicons-icon>
+                        inactivo
                     }
 
                 </td>
