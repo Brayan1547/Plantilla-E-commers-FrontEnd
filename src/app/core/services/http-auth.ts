@@ -9,7 +9,7 @@ import { isPlatformBrowser } from "@angular/common";
 
 
 @Service()
-export class httpAuth {
+export class HttpAuth {
 
     private readonly TOKEN_KEY = 'token';
     private readonly USER_KEY = 'user';

@@ -1,14 +1,14 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, signal, Service } from '@angular/core';
 import { tap } from 'rxjs';
-import { httpAuth } from './http-auth';
+import { HttpAuth } from './http-auth';
 import { environment } from '../../../environments/environment';
 
 @Service()
 export class HttpCart {
 
     private http = inject(HttpClient);
-    private authHttp = inject(httpAuth);
+    private authHttp = inject(HttpAuth);
     private BASE_URL = `${environment.apiUrl}/cart`; // ej: http://localhost:3000/api/cart
 
     // Estado reactivo del carrito, visible desde cualquier componente (header, drawer, etc.)
