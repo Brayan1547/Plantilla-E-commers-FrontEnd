@@ -1,5 +1,5 @@
 /* ==========================================
-   VARIABLES DE DISEÑO MINIMALISTA
+   VARIABLES DE DISEÑO MINIMALISTA & HOST
    ========================================== */
 :host {
   --color-bg: #ffffff;
@@ -8,22 +8,27 @@
   --color-border: #e5e5e5;
   --color-btn-bg: #f5f5f5;
   --font-primary: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  
+
   display: block;
   background-color: var(--color-bg);
   font-family: var(--font-primary);
   color: var(--color-text-main);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* CONTENEDOR PRINCIPAL: Dos columnas en Desktop */
+/* ==========================================
+   CONTENEDOR PRINCIPAL
+   ========================================== */
 .product-container {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
+  gap: 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
   padding: 0; /* Full-bleed en móvil para el carrusel */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @media (min-width: 992px) {
@@ -35,35 +40,39 @@
 }
 
 /* ==========================================
-   GALERÍA: MÓVIL (Carrusel de Deslizamiento Moderno)
+   GALERÍA: MÓVIL (Carrusel Tactil Optimizado)
    ========================================== */
 .product-gallery {
   width: 100%;
   overflow: hidden;
+  position: relative;
 }
 
 .gallery-grid {
   display: flex;
   overflow-x: auto;
-  scroll-snap-type: x mandatory; /* Bloqueo magnético al deslizar */
+  scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+  -webkit-overflow-scrolling: touch; /* Scroll fluido iOS */
+  touch-action: pan-x pan-y; /* Previene bloqueos de gesto vertical */
   gap: 0;
   padding: 0;
+  margin: 0;
+  list-style: none;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
-/* Ocultar barra de scroll en móviles */
+/* Ocultar barra de scroll */
 .gallery-grid::-webkit-scrollbar {
   display: none;
 }
-.gallery-grid {
-  -ms-overflow-style: none;  
-  scrollbar-width: none;  
-}
 
 .image-wrapper {
-  flex: 0 0 100%; /* Cada imagen ocupa el ancho completo en celular */
+  flex: 0 0 100%; /* Una imagen completa por viewport en móvil */
+  width: 100%;
   scroll-snap-align: start;
+  scroll-snap-stop: always; /* Detención magnética precisa por foto */
   background-color: #fcfcfc;
   position: relative;
   aspect-ratio: 3 / 4;
@@ -74,19 +83,19 @@
   height: 100%;
   display: block;
   object-fit: cover;
-  pointer-events: none;
+  cursor: pointer;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
-
 /* ==========================================
-   GALERÍA: DESKTOP / PC (1 Principal Arriba + 5 Abajo Simétricas)
+   GALERÍA: DESKTOP (Grid de 5 columnas + Principal)
    ========================================== */
 @media (min-width: 992px) {
   .gallery-grid {
     display: grid;
-    /* Creamos 5 columnas iguales para encajar de forma limpia las imágenes de abajo */
     grid-template-columns: repeat(5, 1fr);
-    gap: 12px; /* Espacio minimalista uniforme */
+    gap: 12px;
     overflow-x: visible;
     scroll-snap-type: none;
   }
@@ -95,42 +104,37 @@
     flex: none;
     scroll-snap-align: none;
     height: auto;
-    aspect-ratio: 3 / 4; /* Proporción limpia y estilizada de moda */
+    aspect-ratio: 3 / 4;
   }
 
   .image-wrapper img {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
     transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Efecto zoom premium al pasar el cursor */
   .image-wrapper:hover img {
     transform: scale(1.02);
   }
 
-  /* IMAGEN PRINCIPAL: Ocupa las 5 columnas completas arriba */
+  /* Imagen Principal Panorámica */
   .main-front {
     grid-column: 1 / -1;
-    aspect-ratio: 16 / 10; /* Formato panorámico ideal para la foto de portada del producto */
+    aspect-ratio: 16 / 10;
   }
   
-  /* IMÁGENES SECUNDARIAS: Se acomodan automáticamente una al lado de la otra en la siguiente fila */
+  /* Imágenes Secundarias */
   .main-back, .detail-1, .detail-2, .detail-3, .detail-flat {
     grid-column: span 1;
-    display: block; /* Asegura que la sexta imagen (detail-flat) también se renderice perfectamente */
+    display: block;
   }
 }
 
-
 /* ==========================================
-   COLUMNA DE INFORMACIÓN (Limpia y Estática)
+   COLUMNA DE INFORMACIÓN DEL PRODUCTO
    ========================================== */
 .product-info {
   position: relative;
-  padding: 1.5rem; 
+  padding: 1.25rem; 
+  box-sizing: border-box;
 }
 
 @media (min-width: 992px) {
@@ -140,7 +144,7 @@
 
   .sticky-wrapper {
     position: sticky;
-    top: 3rem; /* Se ancla estéticamente mientras el usuario explora las fotos hacia abajo */
+    top: 3rem;
     max-height: calc(100vh - 6rem);
     overflow-y: auto;
     padding-right: 1rem;
@@ -154,9 +158,9 @@
   }
 }
 
-/* Cabecera del Producto */
+/* Cabecera */
 .product-header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .brand-tag {
@@ -164,36 +168,45 @@
   letter-spacing: 0.15em;
   color: var(--color-text-muted);
   font-weight: 600;
+  text-transform: uppercase;
 }
 
 .product-title {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 500;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
   margin: 0.4rem 0;
+  line-height: 1.25;
+}
+
+@media (min-width: 768px) {
+  .product-title {
+    font-size: 1.6rem;
+  }
 }
 
 .product-color {
   font-size: 0.85rem;
   color: var(--color-text-muted);
   letter-spacing: 0.05em;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .product-price {
   font-size: 1.3rem;
   font-weight: 500;
   letter-spacing: 0.05em;
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
-/* Notas de Ajuste/Modelo */
+/* Notas de Ajuste / Modelo */
 .model-info {
   font-size: 0.85rem;
-  color: #333;
+  color: #333333;
   border-bottom: 1px solid var(--color-border);
-  padding-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
   margin-bottom: 1.5rem;
+  line-height: 1.4;
 }
 
 /* Selector de Tallas */
@@ -221,7 +234,7 @@
   color: var(--color-text-muted);
   text-decoration: underline;
   cursor: pointer;
-  padding: 0;
+  padding: 0.25rem 0; /* Mayor área táctil */
 }
 
 .size-options {
@@ -234,7 +247,7 @@
   background: transparent;
   border: 1px solid var(--color-border);
   min-width: 46px;
-  height: 46px;
+  height: 46px; /* Cumple estándar táctil mínimo */
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
@@ -242,6 +255,7 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  touch-action: manipulation;
 }
 
 .size-btn:hover {
@@ -250,7 +264,7 @@
 
 .size-btn.active {
   background-color: var(--color-text-main);
-  color: #fff;
+  color: #ffffff;
   border-color: var(--color-text-main);
 }
 
@@ -259,34 +273,46 @@
   display: flex;
   gap: 12px;
   margin-bottom: 2.5rem;
+  align-items: center;
+}
+
+@media (max-width: 360px) {
+  .purchase-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .quantity-selector {
   display: flex;
   align-items: center;
   border: 1px solid var(--color-border);
-  height: 52px;
+  height: 50px;
+  flex-shrink: 0;
 }
 
 .qty-btn {
   background: none;
   border: none;
-  width: 40px;
+  width: 44px; /* Optimización táctil */
   height: 100%;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: manipulation;
 }
 
 .qty-input {
-  width: 35px;
+  width: 36px;
   border: none;
   text-align: center;
   font-size: 0.95rem;
   font-weight: 500;
   outline: none;
+  background: transparent;
+  color: var(--color-text-main);
   -moz-appearance: textfield;
 }
 
@@ -302,11 +328,13 @@
   color: var(--color-text-main);
   border: none;
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.1em;
-  height: 52px;
+  height: 50px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  touch-action: manipulation;
+  text-transform: uppercase;
 }
 
 .btn-add-to-cart:hover {
@@ -314,7 +342,7 @@
   color: #ffffff;
 }
 
-/* Detalles y Textos */
+/* Descripción */
 .product-description {
   font-size: 0.88rem;
   line-height: 1.6;
@@ -347,6 +375,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .accordion-item summary::-webkit-details-marker {
@@ -374,4 +403,72 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================
+   VISOR DE IMÁGENES / LIGHTBOX
+   ========================================== */
+.image-viewer {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.94);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  padding: 1rem;
+  box-sizing: border-box;
+  animation: fadeViewer 0.3s ease;
+  touch-action: none; /* Bloquea el scroll de fondo en móviles */
+}
+
+.image-viewer img {
+  max-width: 92vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: zoomViewer 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.close-viewer {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 28px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+  z-index: 100000;
+  touch-action: manipulation;
+}
+
+.close-viewer:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+@keyframes fadeViewer {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomViewer {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }

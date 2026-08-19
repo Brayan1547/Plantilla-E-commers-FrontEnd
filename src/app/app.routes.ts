@@ -1,8 +1,11 @@
 import { Routes } from '@angular/router';
 import { Home } from './features/home/home';
+import { authGuard } from './core/guards/auth-guard';
 // import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
+
+     // ================= Rutas publicas ========== 
 
      { path: 'home', component: Home },
 
@@ -21,32 +24,17 @@ export const routes: Routes = [
           loadComponent: () => import('./features/checkout/checkout')
      },
 
-     {
-          path: 'category-new',
-          loadComponent: () => import('./features/categories/category-new-form/category-new-form')
-     },
-
-     {
+      {
           path: 'category-list',
           loadComponent: () => import('./features/categories/category-list/category-list')
      },
 
-     {
-          path: '404',
-          loadComponent: () => import('./features/page-not-foud/page-not-foud')
-     },
-
-     {
-          path: 'dashboard',
-          loadComponent: () => import('./features/dashboard/dashboard')
-     },
-
-     {
+      {
           path: 'product-ropa',
           loadComponent: () => import('./features/product-disign/product-disign')
      },
 
-     {
+          {
           // ficha de un producto, ":id" recibe el _id de Mongo desde la URL
           path: 'tienda/producto/:id',
           loadComponent: () => import('./features/product-disign/product-disign')
@@ -57,37 +45,64 @@ export const routes: Routes = [
           redirectTo: 'home',
           pathMatch: 'full'
      },
+
      {
-          path: 'dashboard/user/list',
-          loadComponent: () => import('./features/users/user-list/user-list')
+          path: '404',
+          loadComponent: () => import('./features/page-not-foud/page-not-foud')
      },
+
+
+     // =============== Rutas privadas ==============
+
      {
-          path: 'dashboard/user-new',
-          loadComponent: () => import('./features/users/user-new-form/user-new-form'),
+          path: 'dashboard',
+          // canActivate:[ authGuard ],
+          loadComponent: () => import('./features/dashboard/dashboard'),
+          children: [
+     {
+          path: 'category-new',
+          loadComponent: () => import('./features/categories/category-new-form/category-new-form')
      },
+
      {
-          path: 'deshboard/user-edit:id',
-          loadComponent: () =>
-               import('./features/users/user-edit-form/user-edit-form')
-     },
-     {
-          path: 'dashboard/category-edit/:id',
+          path: 'category-edit/:id',
+          canActivate: [ authGuard ],
           loadComponent: () => import('./features/categories/category-edit-form/category-edit-form')
      },
 
      {
-          path: 'dashboard/product-new',
+          path: 'product-new',
           loadComponent: () => import('./features/products/product-new-form/product-new-form')
      },
 
      {
-          path: 'dashboard/product-list',
+          path: 'product-edit/:id',
+          loadComponent: () => import('./features/products/product-edit-form/product-edit-form')
+     },
+
+     {
+          path: 'user/list',
+          loadComponent: () => import('./features/users/user-list/user-list')
+     },
+
+
+     {
+          path: 'product-list',
           loadComponent: () => import('./features/products/product-list/product-list')
      },
 
      {
-          path: 'dashboard/product-edit/:id',
-          loadComponent: () => import('./features/products/product-edit-form/product-edit-form')
+          path: 'user-new',
+          loadComponent: () => import('./features/users/user-new-form/user-new-form'),
+     },
+
+
+     {
+          path: 'user-edit/:id',
+          loadComponent: () =>
+               import('./features/users/user-edit-form/user-edit-form')
+     },
+          ]
      },
 
      //Redirecciones

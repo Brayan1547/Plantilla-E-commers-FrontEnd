@@ -1,6 +1,6 @@
 import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { httpAuth } from '../../../core/services/http-auth';
+import { HttpAuth } from '../../../core/services/http-auth';
 
 
 @Component({
@@ -10,7 +10,7 @@ import { httpAuth } from '../../../core/services/http-auth';
   styleUrl: './register.css',
 })
 export default class Register {
-  private httpAut = inject(httpAuth)
+  private httpAut = inject(HttpAuth)
   formData! : FormGroup;
 
    @Output() switchToLogin = new EventEmitter<void>();

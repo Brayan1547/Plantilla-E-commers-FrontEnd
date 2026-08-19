@@ -2,7 +2,7 @@ import { Component, HostListener, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
-import { httpAuth } from '../../../core/services/http-auth';
+import { HttpAuth } from '../../../core/services/http-auth';
 
 import { AuthModal } from '../auth-modal/auth-modal';
 
@@ -25,7 +25,7 @@ export class Header implements OnDestroy {
   animate = true;
   private intervalId: any;
 
-  httpAuth = inject( httpAuth );
+  httpAuth = inject( HttpAuth );
   httpCart = inject( HttpCart ); // acceso al carrito (cart, cartCount)
     uiModal = inject(UiModal); // para abrir/cerrar el modal desde cualquier lado
 

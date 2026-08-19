@@ -5,7 +5,7 @@ import { HttpProduct } from '../../core/services/http-product';
 import { HttpCart } from '../../core/services/http-cart';
 
 import { UiModal } from '../../core/services/ui-modal'; // nuevo: para pedir login si no hay sesión
-import { httpAuth } from '../../core/services/http-auth'; // nuevo: saber si hay usuario logueado
+import { HttpAuth } from '../../core/services/http-auth'; // nuevo: saber si hay usuario logueado
 
 @Component({
   selector: 'app-home',
@@ -22,7 +22,7 @@ export class Home {
   private isBrowser = isPlatformBrowser(inject(PLATFORM_ID)); // true solo en navegador, false en SSR
 
   private uiModal = inject(UiModal); 
-  private httpAuth = inject(httpAuth); 
+  private httpAuth = inject(HttpAuth); 
 
 
   // ahora guardamos el arreglo COMPLETO de productos

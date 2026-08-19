@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
-import { httpAuth } from './http-auth';
+import { HttpAuth } from './http-auth';
 
 @Service()
 export class HttpProduct {
@@ -8,7 +8,7 @@ export class HttpProduct {
     //constructor( private http: httpClient){}
     //Inyectar una dependencia sin usar el constructor, implementarse en las funciones
     private http = inject(HttpClient);
-    private authHttp = inject( httpAuth);
+    private authHttp = inject( HttpAuth);
 
     //Crear una cabecera y va meter dentro de ella el token
     private getHeader(): HttpHeaders {

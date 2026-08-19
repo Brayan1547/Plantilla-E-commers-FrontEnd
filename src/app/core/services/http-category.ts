@@ -1,13 +1,13 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { httpAuth } from './http-auth';
+import { HttpAuth } from './http-auth';
 
 @Service()
 export class HttpCategory {
     //Inyectar una dependencia 
     private http = inject(HttpClient);
-    private authHttp = inject(httpAuth); 
+    private authHttp = inject(HttpAuth); 
 
     BASE_URL: string = environment.apiUrl;
 

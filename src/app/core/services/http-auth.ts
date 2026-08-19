@@ -77,6 +77,10 @@ export class HttpAuth {
             )
     }
 
+    checkAuth(){
+        
+    }
+
     registerUser(data: any) {
         // data = { name, nickname, email, password }
 
