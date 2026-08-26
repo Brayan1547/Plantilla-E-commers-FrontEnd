@@ -77,14 +77,36 @@ export class HttpAuth {
             )
     }
 
-    checkAuth(){
-        
-    }
 
     registerUser(data: any) {
         // data = { name, nickname, email, password }
 
         return this.http.post<any>(`${this.BASE_URL}/auth/register`, data)
+    }
+
+
+    checkAuthStatus(){
+        const token = this.token;
+
+        //validar si el token existe
+        if( !token ) {
+            this.clearAuthData();       //Eliminar las propiedades del localstorage
+            return of( false );
+        }
+        //realiza la peticion para renovar token
+        return this.http.get<any>(`${this.BASE_URL}/auth/renew-token`).pipe(
+            tap( ( res ) => {
+                if ( res?.token && res?.data ) {
+                    this.setAuthData(res.token, res.data );
+                }
+            }),
+            map( ( res ) => !!res.token ),
+            catchError( ( err: HttpErrorResponse ) => {
+                console.log( 'Error al renovar el token ');
+                this.clearAuthData();       //Eliminar las propiedades del localStorage
+                return of(false);
+            } )
+        );
     }
 
     setAuthData(token: string | null, user: any) {
@@ -98,10 +120,10 @@ export class HttpAuth {
 
         // Verificando el tipo de aplicacion que estamos ejecutando (SSR o SPA)
         if (this.isBrowser) {
-            const valueKeyToken = localStorage.getItem('token');
+            const valueKeyToken = sessionStorage.getItem('token');
             token = valueKeyToken ? valueKeyToken : null;
 
-            const valueKeyUser = localStorage.getItem('user');
+            const valueKeyUser = sessionStorage.getItem('user');
             user = valueKeyUser ? JSON.parse(valueKeyUser) : null;
 
             this.currentToken$.next(token);     // Actualizamos el token en el BehaviorSubject
@@ -130,14 +152,14 @@ export class HttpAuth {
 
     getTokenFromStorage(): string | null {
         if (this.isBrowser) {
-            return localStorage.getItem("token")
+            return sessionStorage.getItem("token")
         }
         return null;
     }
 
     getUserFromStorage(): string | null {
         if (this.isBrowser) {
-            const user = localStorage.getItem("user")
+            const user = sessionStorage.getItem("user")
             return user ? JSON.parse(user) : null;
         }
         return null;
@@ -148,9 +170,9 @@ export class HttpAuth {
     set token(token: string | null) {
         if (this.isBrowser) {
             if (token) {
-                localStorage.setItem(this.TOKEN_KEY, token);
+                sessionStorage.setItem(this.TOKEN_KEY, token);
             } else {
-                localStorage.removeItem(this.TOKEN_KEY)
+                sessionStorage.removeItem(this.TOKEN_KEY)
             }
         }
 
@@ -161,9 +183,9 @@ export class HttpAuth {
     set user(user: any) {
         if (this.isBrowser) {
             if (user) {
-                localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+                sessionStorage.setItem(this.USER_KEY, JSON.stringify(user));
             } else {
-                localStorage.removeItem(this.USER_KEY)
+                sessionStorage.removeItem(this.USER_KEY)
             }
         }
 

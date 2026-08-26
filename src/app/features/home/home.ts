@@ -1,5 +1,5 @@
-import { Component, inject, PLATFORM_ID } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { CommonModule,  } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpProduct } from '../../core/services/http-product';
 import { HttpCart } from '../../core/services/http-cart';
@@ -19,10 +19,9 @@ export class Home {
   // (0) Siempre inyectar la dependencia
   private httpProduct = inject(HttpProduct);
   private httpCart = inject(HttpCart); //  para agregar productos al carrito
-  private isBrowser = isPlatformBrowser(inject(PLATFORM_ID)); // true solo en navegador, false en SSR
 
   private uiModal = inject(UiModal); 
-  private httpAuth = inject(HttpAuth); 
+  httpAuth = inject(HttpAuth); // público: el html necesita leer el rol directo
 
 
   // ahora guardamos el arreglo COMPLETO de productos
@@ -31,8 +30,6 @@ export class Home {
   // solo se muestran los primeros "shownCount" de "products"
   displayedProducts: any[] = [];
 
-  //clave para guardar el progreso en el navegador (localStorage)
-  private readonly STORAGE_KEY = 'dusck_shown_count';
 
 
   ngOnInit() {
@@ -51,27 +48,12 @@ export class Home {
       });
   }
 
-    // Lee el progreso guardado en localStorage y arma displayedProducts.
-  // Si es primera vez, muestra solo 1.
+    // Muestra todos los productos activos de una vez, sin límite inicial
   private updateDisplayedProducts() {
-    const saved = this.isBrowser ? localStorage.getItem(this.STORAGE_KEY) : null; // guard SSR
-    const shownCount = saved ? Number(saved) : 1;
-    this.displayedProducts = this.products.slice(0, shownCount);
+    this.displayedProducts = this.products;
   }
 
-  // Avanza al siguiente producto y guarda el progreso en localStorage
-  onNextProduct() {
-    const currentCount = this.displayedProducts.length;
 
-    if (currentCount >= this.products.length) {
-      console.log('No hay más productos por ahora');
-      return;
-    }
-
-  const newCount = currentCount + 1; // aumenta cuántos productos se muestran
-    if (this.isBrowser) localStorage.setItem(this.STORAGE_KEY, String(newCount)); // guarda progreso, solo en navegador
-    this.displayedProducts = this.products.slice(0, newCount); // refresca la lista visible
-  }
 
   onWishlist(event: Event, productId: string) {
     event.preventDefault();  // evita que el clic en el corazón dispare el routerLink de la card
@@ -112,4 +94,10 @@ export class Home {
     return !!images && images.length > 0;
   }
 
+    // true solo si el usuario logueado puede administrar productos (mismos roles que el backend)
+  get canManageProducts(): boolean {
+    const role = this.httpAuth.user?.role;
+    return role === 'administrador' || role === 'shop_manager';
+  }
+  
 }

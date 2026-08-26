@@ -76,7 +76,7 @@
 }
 
 .hero-video-title{
-  font-size:clamp(36px, 5.5vw, 64px);
+  /* font-size:clamp(36px, 5.5vw, 64px); */
   line-height:1.05;
   font-weight:500;
   margin:16px 0 32px;
@@ -87,7 +87,7 @@
   background:var(--dusk-gradient);
   -webkit-background-clip:text;
   background-clip:text;
-  color:transparent;
+  /* color:transparent; */
 }
 
 .btn-outline-light{
@@ -102,9 +102,15 @@
   letter-spacing:2px;
   text-transform:uppercase;
   text-decoration:none;
-  transition:background .3s ease, color .3s ease;
+  transition:background .3s ease;
 }
-.btn-outline-light:hover{ background:#fff; color:var(--ink); }
+
+/* .btn-outline-light:hover{ background:#fff !important; color:var(--ink) !important; } */
+
+.btn-outline-light:hover {
+  background: #ffffff;
+  color: #000000;
+}
 
 /* ================= SECTION HEADERS ================= */
 .cat-header{
@@ -241,13 +247,17 @@
   position:relative;
   z-index:2;
   padding:26px;
-  color:#fff;
+  /* color:#fff; */
   width:100%;
   display:flex;
   justify-content:space-between;
   align-items:center;
 }
-.cat-card .label .serif{ font-size:26px; font-style:italic; }
+.cat-card .label .serif{ 
+  font-size:26px;
+  font-style:italic;
+  color: white;
+ }
 
 .cat-btn{
   border:1px solid rgba(255,255,255,.7);
@@ -255,9 +265,10 @@
   font-size:11px;
   letter-spacing:1.5px;
   text-transform:uppercase;
-  transition:background .3s ease, color .3s ease;
+  color: #fff;
+  transition:background .3s ease;
 }
-.cat-card:hover .cat-btn{ background:#fff; color:var(--ink); }
+.cat-card:hover .cat-btn{ background:#fff; color:var(--ink); }  
 
 /* Colores placeholder -- reemplaza el div .bg por <img> cuando tengas la foto */
 .cat-hombre .bg{
@@ -359,4 +370,19 @@
   .cat-grid{ grid-template-columns:1fr; }
   .section{ padding:56px 6vw; }
   .cat-header{ flex-direction:column; align-items:flex-start; }
+}
+
+/* Card especial de "agregar producto", mismo tamaño que las cards normales */
+.product-card--add .product-media--add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream);
+  border: 1px dashed var(--ink);
+}
+
+.product-card--add .add-icon {
+  font-size: 40px;
+  color: var(--ink);
+  line-height: 1;
 }

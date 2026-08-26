@@ -1,0 +1,6 @@
+<!-- Se muestra solo cuando hay un mensaje activo en el servicio -->
+@if (toast.message(); as msg) {
+  <div class="toast" [class.toast--error]="msg.type === 'error'">
+    {{ msg.text }}
+  </div>
+}

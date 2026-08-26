@@ -13,6 +13,8 @@ import { CartDrawer } from '../cart-drawer/cart-drawer'; // nuevo: panel del car
 
 import { UiModal } from '../../../core/services/ui-modal'; // nuevo: estado compartido del modal
 
+import { Toast } from '../../../core/services/toast';
+
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -27,7 +29,8 @@ export class Header implements OnDestroy {
 
   httpAuth = inject( HttpAuth );
   httpCart = inject( HttpCart ); // acceso al carrito (cart, cartCount)
-    uiModal = inject(UiModal); // para abrir/cerrar el modal desde cualquier lado
+  uiModal = inject(UiModal); // para abrir/cerrar el modal desde cualquier lado
+  private toast = inject(Toast)
 
   messages = [
     "Nueva Colección Disponible - DUSCK",
@@ -84,10 +87,20 @@ private updateScrolled() {
     clearInterval(this.intervalId);
   }
 
-  logout() {
+logout() {
     this.httpAuth.logoutUser();
     this.accountMenuOpen = false;   //cierra el desplegable al salir
+    this.toast.show('Cerraste sesión'); // nuevo: aviso antes de recargar
+
+    // nuevo: recarga completa hacia /home, para que toda la app olvide el estado del usuario anterior
+    // (carrito, botones de admin, etc.) sin dejar nada viejo en pantalla
+    if (typeof window !== 'undefined') {
+      setTimeout(() => {
+        window.location.href = '/home';
+      }, 1000);
+    }
   }
+
   // 1
   isHomePage = true;
 

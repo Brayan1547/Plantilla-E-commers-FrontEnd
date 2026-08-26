@@ -1,6 +1,7 @@
 /* Contenedor del formulario */
 form {
     width: 400px;
+    max-width: 90vw;
     margin: 40px auto;
     padding: 20px;
     border: 1px solid #ddd;

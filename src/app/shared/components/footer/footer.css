@@ -16,6 +16,11 @@
   margin-top: 50px;
 }
 
+/* nuevo: como .footer-top ya no existe, el padding superior del footer se ajusta directo aquí */
+.footer-dusck {
+  padding-top: 32px; /* antes el espacio lo daba .footer-top, ahora el footer-mid entra directo */
+}
+
 .footer-top {
   max-width: 480px;
   margin: 0 auto;
@@ -28,12 +33,7 @@
   margin: 0;
 }
 
-.footer-rule {
-  max-width: 1200px;
-  margin: 40px auto;
-  height: 1px;
-  background: rgba(15, 15, 16, 0.12);
-}
+
 
 .footer-mid {
   max-width: 1200px;
@@ -48,6 +48,7 @@
 .footer-contact {
   font-size: 12px;
   letter-spacing: 0.5px;
+  align-self: flex-end;
 }
 
 .footer-contact a {
@@ -64,7 +65,10 @@
 
 .footer-social {
   display: flex;
-  gap: 16px;
+  gap: 24px;
+  align-self: flex-end;
+  margin-right: 40px;
+  margin-top: 10px;
 }
 
 .footer-social__icon {
@@ -114,17 +118,21 @@
 .footer-links a:hover { color: var(--color-accent); }
 .footer-links a:hover::after { width: 100%; }
 
+
 .footer-signature {
+  flex: 1 1 auto;
   text-align: center;
-  padding: 20px 0 8px;
+  align-self: flex-start;
+  margin-top: -12px;
 }
 
 .footer-signature__name {
   display: block;
   font-family: var(--font-heading);
-  font-size: 42px;
+  font-size: 32px;
   letter-spacing: 14px;
   color: var(--color-primary);
+  margin-top: -15px;
 }
 
 .footer-signature__sub {
@@ -137,9 +145,9 @@
 
 .footer-derechos {
   background: var(--color-primary);
-  margin: 32px -24px 0;
+  margin: 20px -24px 0;
   width: calc(100% + 48px);
-  padding: 20px 0;
+  padding: 14px 0;
   text-align: center;
 }
 
@@ -150,13 +158,31 @@
   color: var(--color-white);
 }
 
+@media (max-width: 900px) {
+  .footer-social {
+    margin-right: 0;
+  }
+}
+
 @media (max-width: 768px) {
   .footer-mid {
     flex-direction: column;
     text-align: center;
   }
+  .footer-contact,
+  .footer-social {
+    align-self: center;
+  }
+  .footer-social {
+    justify-content: center;
+    gap: 16px;
+  }
+  .footer-signature {
+    margin-top: 0;
+  }
   .footer-signature__name {
     font-size: 32px;
     letter-spacing: 10px;
+    margin-top: 0;
   }
 }

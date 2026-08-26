@@ -1,6 +1,7 @@
 import { Component, EventEmitter, inject, Output,  } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpAuth } from '../../../core/services/http-auth';
+import { HttpAuth } from '../../../core/services/http-auth';      
+import { Toast } from '../../../core/services/toast';
 
 
 @Component({
@@ -12,7 +13,7 @@ import { HttpAuth } from '../../../core/services/http-auth';
 export default class Login {
   httpAuth = inject(HttpAuth)
   formData!: FormGroup;
-
+  private toast = inject(Toast)
 
   @Output() loginSuccess = new EventEmitter<void>();   // Avisa  (auth-modal) que el login fue exitoso, para que se cierre el modal
   @Output() switchToRegister = new EventEmitter<void>();    // Avisa que el usuario quiere cambiar a la pestaña de registro
@@ -33,6 +34,7 @@ export default class Login {
           console.log( res )
 
           this.formData.reset();
+          this.toast.show(`¡Bienvenido de nuevo!`); // nuevo: mensaje al iniciar sesión
           this.loginSuccess.emit(); // Dispara el evento loginSuccess solo cuando el login respondió bien
         },
         error: ( err ) => {
