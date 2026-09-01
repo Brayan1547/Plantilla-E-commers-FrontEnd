@@ -1,0 +1,180 @@
+<adm-page-header
+  [title]="user()?.name || 'Usuario'"
+  subtitle="Detalle de la cuenta">
+  <div actions class="adm-inline">
+    <a class="adm-btn adm-btn--ghost adm-btn--sm" routerLink="/admin/users">
+      <adm-icon name="chevron-left" [size]="14" /> Volver
+    </a>
+    @if (user() && perms.can('users.update')) {
+      <a
+        class="adm-btn adm-btn--sm"
+        [routerLink]="['/admin/users', user()!._id, 'edit']">
+        <adm-icon name="edit" [size]="14" /> Editar perfil
+      </a>
+    }
+  </div>
+</adm-page-header>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="adm-grid-2">
+      <div class="adm-card"><div class="adm-card__body"><adm-skeleton [count]="6" /></div></div>
+      <div class="adm-card"><div class="adm-card__body"><adm-skeleton [count]="4" /></div></div>
+    </div>
+  }
+  @case ('error') {
+    <div class="adm-card"><adm-error-state [message]="errorMsg()" (retry)="retry()" /></div>
+  }
+  @case ('ready') {
+    <div class="adm-grid-2">
+      <!-- Perfil -->
+      <section class="adm-card">
+        <div class="adm-card__header"><h2>Perfil</h2></div>
+        <div class="adm-card__body adm-stack">
+          <div class="adm-inline">
+            <span class="adm-avatar" style="width:44px;height:44px;font-size:15px">
+              @if (user()!.avatar) {
+                <img [src]="user()!.avatar" alt="" />
+              } @else {
+                {{ (user()!.name[0] || 'U') }}
+              }
+            </span>
+            <div>
+              <div style="font-weight:600">{{ user()!.name }}</div>
+              <div class="adm-muted">{{ '@' + user()!.nickname }}</div>
+            </div>
+          </div>
+
+          <dl class="adm-stack" style="gap:10px;margin:0">
+            <div class="adm-inline" style="justify-content:space-between">
+              <dt class="adm-muted">Correo</dt>
+              <dd style="margin:0">{{ user()!.email }}</dd>
+            </div>
+            <div class="adm-inline" style="justify-content:space-between">
+              <dt class="adm-muted">Rol actual</dt>
+              <dd style="margin:0">
+                <adm-status-badge
+                  [label]="roleName(user()!.role)"
+                  tone="info" [dot]="false" />
+              </dd>
+            </div>
+            <div class="adm-inline" style="justify-content:space-between">
+              <dt class="adm-muted">Estado</dt>
+              <dd style="margin:0">
+                @if (user()!.status) {
+                  <adm-status-badge label="Activo" tone="ok" />
+                } @else {
+                  <adm-status-badge label="Suspendido" tone="danger" />
+                }
+              </dd>
+            </div>
+            <div class="adm-inline" style="justify-content:space-between">
+              <dt class="adm-muted">Registro</dt>
+              <dd class="adm-mono" style="margin:0">{{ formatDateTime(user()!.createdAt) }}</dd>
+            </div>
+            <div class="adm-inline" style="justify-content:space-between">
+              <dt class="adm-muted">Última modificación</dt>
+              <dd class="adm-mono" style="margin:0">{{ formatDateTime(user()!.updatedAt) }}</dd>
+            </div>
+            <div class="adm-inline" style="justify-content:space-between">
+              <dt class="adm-muted">ID</dt>
+              <dd class="adm-mono adm-truncate" style="margin:0">{{ user()!._id }}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <!-- Acciones administrativas -->
+      <div class="adm-stack">
+        @if (isSelf()) {
+          <div class="adm-card">
+            <div class="adm-card__body">
+              <p class="adm-muted">
+                Esta es tu propia cuenta. Los cambios de rol, estado y la
+                eliminación están deshabilitados aquí (el backend también los
+                rechaza para evitar quedarte sin acceso).
+              </p>
+            </div>
+          </div>
+        }
+
+        @if (perms.can('users.manageRole')) {
+          <section class="adm-card">
+            <div class="adm-card__header"><h3>Rol</h3></div>
+            <div class="adm-card__body adm-stack">
+              <label class="adm-field" style="margin:0">
+                <span class="adm-field__label">Asignar rol</span>
+                <select
+                  class="adm-select"
+                  [ngModel]="pendingRole()"
+                  (ngModelChange)="pendingRole.set($event)"
+                  [disabled]="isSelf() || busy()">
+                  @for (r of roleOptions(); track r.id) {
+                    <option [value]="r.id">{{ r.name }}</option>
+                  }
+                </select>
+              </label>
+              <button
+                type="button"
+                class="adm-btn adm-btn--sm"
+                [disabled]="isSelf() || busy() || pendingRole() === user()!.role"
+                (click)="saveRole()">
+                Guardar rol
+              </button>
+            </div>
+          </section>
+        }
+
+        @if (perms.can('users.manageStatus')) {
+          <section class="adm-card">
+            <div class="adm-card__header"><h3>Estado de la cuenta</h3></div>
+            <div class="adm-card__body adm-stack">
+              <p class="adm-muted">
+                {{ user()!.status
+                  ? 'La cuenta está activa. Suspenderla impide el inicio de sesión.'
+                  : 'La cuenta está suspendida.' }}
+              </p>
+              <button
+                type="button"
+                class="adm-btn adm-btn--sm"
+                [class.adm-btn--danger]="user()!.status"
+                [class.adm-btn--ghost]="!user()!.status"
+                [disabled]="isSelf() || busy()"
+                (click)="toggleStatus()">
+                {{ user()!.status ? 'Suspender cuenta' : 'Reactivar cuenta' }}
+              </button>
+            </div>
+          </section>
+        }
+
+        @if (perms.can('users.delete')) {
+          <section class="adm-card">
+            <div class="adm-card__header"><h3>Eliminar</h3></div>
+            <div class="adm-card__body adm-stack">
+              <p class="adm-muted">Elimina permanentemente la cuenta. No se puede deshacer.</p>
+              <button
+                type="button"
+                class="adm-btn adm-btn--danger adm-btn--sm"
+                [disabled]="isSelf() || busy()"
+                (click)="remove()">
+                <adm-icon name="trash" [size]="14" /> Eliminar usuario
+              </button>
+            </div>
+          </section>
+        }
+      </div>
+    </div>
+
+    <!-- Datos que el backend NO expone hoy -->
+    <section class="adm-card" style="margin-top:16px">
+      <div class="adm-card__header"><h3>Actividad y pedidos</h3></div>
+      <div class="adm-card__body">
+        <p class="adm-muted">
+          Información no disponible actualmente. El historial de compras, órdenes,
+          direcciones y última actividad requieren modelos que el backend aún no
+          tiene. Ver PENDING BACKEND.
+        </p>
+      </div>
+    </section>
+  }
+}

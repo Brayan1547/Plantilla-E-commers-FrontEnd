@@ -55,7 +55,18 @@ export const routes: Routes = [
      },
 
 
-     // =============== Rutas privadas ==============
+     // =============== Admin Panel (nuevo) ==============
+     // Panel privado con su propio layout, guards y design system.
+     // Render CSR (ver app.routes.server.ts): datos autenticados, sin SEO.
+     {
+          path: 'admin',
+          loadChildren: () => import('./admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+     },
+
+     // =============== Rutas privadas (legacy /dashboard) ==============
+     // TODO(migracion): se conserva mientras se migran todas las referencias a
+     // /admin y se reescriben estos formularios sobre el nuevo layout. No borrar
+     // hasta completar la migracion y verificar navegacion + build.
 
      {
           path: 'dashboard',

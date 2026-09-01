@@ -1,0 +1,111 @@
+<adm-page-header [title]="title()" [subtitle]="isEdit ? 'Solo datos de perfil. El rol y el estado se gestionan desde el detalle.' : 'Crear una cuenta y asignar rol y estado iniciales.'">
+  <a actions class="adm-btn adm-btn--ghost adm-btn--sm" [routerLink]="isEdit ? ['/admin/users', userId] : ['/admin/users']">
+    <adm-icon name="chevron-left" [size]="14" /> Cancelar
+  </a>
+</adm-page-header>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="adm-card"><div class="adm-card__body"><adm-skeleton [count]="6" /></div></div>
+  }
+  @case ('error') {
+    <div class="adm-card"><adm-error-state [message]="errorMsg()" (retry)="retry()" /></div>
+  }
+  @default {
+    <form class="adm-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="adm-card__body" style="max-width:560px">
+        <div class="adm-field">
+          <label class="adm-field__label" for="uf-name">Nombre</label>
+          <input id="uf-name" class="adm-input" type="text" formControlName="name"
+            [attr.aria-invalid]="ctrl('name').touched && ctrl('name').invalid" />
+          <span class="adm-field__error">
+            @if (ctrl('name').touched && ctrl('name').invalid) {
+              @if (ctrl('name').errors?.['required']) { El nombre es obligatorio. }
+              @else { El nombre debe tener entre 2 y 50 caracteres. }
+            }
+          </span>
+        </div>
+
+        <div class="adm-field">
+          <label class="adm-field__label" for="uf-nick">Nickname</label>
+          <input id="uf-nick" class="adm-input" type="text" formControlName="nickname"
+            [attr.aria-invalid]="ctrl('nickname').touched && ctrl('nickname').invalid" />
+          <span class="adm-field__hint">Se guarda en minúsculas. Único en el sistema.</span>
+          <span class="adm-field__error">
+            @if (ctrl('nickname').touched && ctrl('nickname').invalid) {
+              @if (ctrl('nickname').errors?.['required']) { El nickname es obligatorio. }
+              @else { Entre 3 y 20 caracteres. }
+            }
+          </span>
+        </div>
+
+        <div class="adm-field">
+          <label class="adm-field__label" for="uf-email">Correo</label>
+          <input id="uf-email" class="adm-input" type="email" formControlName="email"
+            [attr.aria-invalid]="ctrl('email').touched && ctrl('email').invalid" />
+          <span class="adm-field__error">
+            @if (ctrl('email').touched && ctrl('email').invalid) {
+              @if (ctrl('email').errors?.['required']) { El correo es obligatorio. }
+              @else { Formato de correo no válido. }
+            }
+          </span>
+        </div>
+
+        <div class="adm-field">
+          <label class="adm-field__label" for="uf-pass">
+            Contraseña {{ isEdit ? '(dejar en blanco para no cambiarla)' : '' }}
+          </label>
+          <input id="uf-pass" class="adm-input" type="password" formControlName="password"
+            autocomplete="new-password"
+            [attr.aria-invalid]="ctrl('password').touched && ctrl('password').invalid" />
+          <span class="adm-field__error">
+            @if (ctrl('password').touched && ctrl('password').invalid) {
+              @if (ctrl('password').errors?.['required']) { La contraseña es obligatoria. }
+              @else { Mínimo 6 caracteres. }
+            }
+          </span>
+        </div>
+
+        <div class="adm-field">
+          <label class="adm-field__label" for="uf-avatar">Avatar (URL)</label>
+          <input id="uf-avatar" class="adm-input" type="url" formControlName="avatar"
+            placeholder="https://…" />
+        </div>
+
+        @if (!isEdit) {
+          <div class="adm-field">
+            <label class="adm-field__label" for="uf-role">Rol</label>
+            <select id="uf-role" class="adm-select" formControlName="role">
+              @for (r of roleOptions(); track r.id) {
+                <option [value]="r.id">{{ r.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="adm-field">
+            <span class="adm-field__label">Estado</span>
+            <label class="adm-switch">
+              <input type="checkbox" formControlName="status" />
+              <span class="adm-switch__track"></span>
+              <span>{{ form.controls.status.value ? 'Activa' : 'Suspendida' }}</span>
+            </label>
+          </div>
+        }
+      </div>
+
+      <div class="adm-card__header" style="border-top:1px solid var(--adm-line);border-bottom:0">
+        <span class="adm-muted" style="font-size:12px">
+          @if (form.dirty && !submitting()) { Cambios sin guardar }
+        </span>
+        <div class="adm-inline">
+          <a class="adm-btn adm-btn--ghost adm-btn--sm"
+            [routerLink]="isEdit ? ['/admin/users', userId] : ['/admin/users']">Cancelar</a>
+          <button type="submit" class="adm-btn adm-btn--sm"
+            [disabled]="submitting() || form.invalid">
+            @if (submitting()) { Guardando… } @else { {{ isEdit ? 'Guardar cambios' : 'Crear usuario' }} }
+          </button>
+        </div>
+      </div>
+    </form>
+  }
+}

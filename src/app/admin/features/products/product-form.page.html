@@ -1,0 +1,160 @@
+<adm-page-header [title]="title()" subtitle="Campos soportados por la API. Sin variantes, tallas, colores ni SKU (requieren backend adicional).">
+  <a actions class="adm-btn adm-btn--ghost adm-btn--sm" routerLink="/admin/products">
+    <adm-icon name="chevron-left" [size]="14" /> Cancelar
+  </a>
+</adm-page-header>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="adm-card"><div class="adm-card__body"><adm-skeleton [count]="7" /></div></div>
+  }
+  @case ('error') {
+    <div class="adm-card"><adm-error-state [message]="errorMsg()" (retry)="retry()" /></div>
+  }
+  @default {
+    <form class="adm-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="adm-card__body adm-grid-2">
+        <!-- Columna izquierda -->
+        <div>
+          <div class="adm-field">
+            <label class="adm-field__label" for="pf-name">Nombre</label>
+            <input id="pf-name" class="adm-input" type="text" formControlName="name"
+              (input)="onNameInput()"
+              [attr.aria-invalid]="ctrl('name').touched && ctrl('name').invalid" />
+            <span class="adm-field__error">
+              @if (ctrl('name').touched && ctrl('name').invalid) {
+                @if (ctrl('name').errors?.['required']) { El nombre es obligatorio. }
+                @else { Entre 2 y 100 caracteres. }
+              }
+            </span>
+          </div>
+
+          <div class="adm-field">
+            <label class="adm-field__label" for="pf-slug">Slug</label>
+            <input id="pf-slug" class="adm-input adm-mono" type="text" formControlName="slug"
+              (input)="markSlugTouched()"
+              [attr.aria-invalid]="ctrl('slug').touched && ctrl('slug').invalid" />
+            <span class="adm-field__hint">Solo minúsculas, números y guiones. Único.</span>
+            <span class="adm-field__error">
+              @if (ctrl('slug').touched && ctrl('slug').invalid) {
+                @if (ctrl('slug').errors?.['required']) { El slug es obligatorio. }
+                @else { Formato inválido: usa a-z, 0-9 y guiones. }
+              }
+            </span>
+          </div>
+
+          <div class="adm-field">
+            <label class="adm-field__label" for="pf-desc">Descripción</label>
+            <textarea id="pf-desc" class="adm-textarea" formControlName="description"></textarea>
+            <span class="adm-field__hint">{{ form.controls.description.value.length }}/500</span>
+            <span class="adm-field__error">
+              @if (ctrl('description').touched && ctrl('description').errors?.['maxlength']) {
+                Máximo 500 caracteres.
+              }
+            </span>
+          </div>
+
+          <div class="adm-inline" style="gap:12px;align-items:flex-start">
+            <div class="adm-field" style="flex:1">
+              <label class="adm-field__label" for="pf-price">Precio (COP)</label>
+              <input id="pf-price" class="adm-input" type="number" min="0" step="1"
+                formControlName="price"
+                [attr.aria-invalid]="ctrl('price').touched && ctrl('price').invalid" />
+              <span class="adm-field__error">
+                @if (ctrl('price').touched && ctrl('price').invalid) { Debe ser un número ≥ 0. }
+              </span>
+            </div>
+            <div class="adm-field" style="flex:1">
+              <label class="adm-field__label" for="pf-stock">Stock</label>
+              <input id="pf-stock" class="adm-input" type="number" min="0" step="1"
+                formControlName="stock"
+                [attr.aria-invalid]="ctrl('stock').touched && ctrl('stock').invalid" />
+              <span class="adm-field__error">
+                @if (ctrl('stock').touched && ctrl('stock').invalid) { Debe ser un número ≥ 0. }
+              </span>
+            </div>
+          </div>
+
+          <div class="adm-field">
+            <label class="adm-field__label" for="pf-cat">Categoría</label>
+            <select id="pf-cat" class="adm-select" formControlName="category"
+              [attr.aria-invalid]="ctrl('category').touched && ctrl('category').invalid">
+              <option value="" disabled>Selecciona una categoría</option>
+              @for (c of categories(); track c._id) {
+                <option [value]="c._id">{{ c.name }}{{ c.isActive ? '' : ' (inactiva)' }}</option>
+              }
+            </select>
+            <span class="adm-field__error">
+              @if (ctrl('category').touched && ctrl('category').invalid) { La categoría es obligatoria. }
+              @else if (categories().length === 0) { No hay categorías. Crea una primero. }
+            </span>
+          </div>
+
+          <div class="adm-field">
+            <span class="adm-field__label">Estado</span>
+            <label class="adm-switch">
+              <input type="checkbox" formControlName="isActive" />
+              <span class="adm-switch__track"></span>
+              <span>{{ form.controls.isActive.value ? 'Activo (visible en tienda)' : 'Inactivo' }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Columna derecha: imágenes -->
+        <div>
+          <div class="adm-inline" style="justify-content:space-between;margin-bottom:10px">
+            <span class="adm-field__label">Imágenes</span>
+            <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" (click)="addImage()">
+              <adm-icon name="plus" [size]="13" /> Añadir
+            </button>
+          </div>
+
+          @if (images.length === 0) {
+            <p class="adm-muted" style="font-size:12.5px">
+              Sin imágenes. El producto se puede guardar igual.
+            </p>
+          }
+
+          <div class="adm-stack" formArrayName="images" style="gap:10px">
+            @for (img of images.controls; track $index) {
+              <div class="adm-card" [formGroupName]="$index">
+                <div class="adm-card__body adm-stack" style="gap:8px">
+                  <input class="adm-input" type="url" formControlName="url"
+                    placeholder="https://…/imagen.jpg"
+                    [attr.aria-invalid]="img.controls.url.touched && img.controls.url.invalid" />
+                  @if (img.controls.url.touched && img.controls.url.invalid) {
+                    <span class="adm-field__error">La URL de la imagen es obligatoria.</span>
+                  }
+                  <div class="adm-inline" style="justify-content:space-between">
+                    <label class="adm-inline" style="gap:6px;cursor:pointer">
+                      <input type="radio" name="mainImage"
+                        [checked]="img.controls.isMain.value"
+                        (change)="setMain($index)" />
+                      <span style="font-size:12px">Principal</span>
+                    </label>
+                    <button type="button" class="adm-icon-btn" aria-label="Quitar imagen"
+                      (click)="removeImage($index)">
+                      <adm-icon name="trash" [size]="14" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="adm-card__header" style="border-top:1px solid var(--adm-line);border-bottom:0">
+        <span class="adm-muted" style="font-size:12px">
+          @if (form.dirty && !submitting()) { Cambios sin guardar }
+        </span>
+        <div class="adm-inline">
+          <a class="adm-btn adm-btn--ghost adm-btn--sm" routerLink="/admin/products">Cancelar</a>
+          <button type="submit" class="adm-btn adm-btn--sm" [disabled]="submitting() || form.invalid">
+            @if (submitting()) { Guardando… } @else { {{ isEdit ? 'Guardar cambios' : 'Crear producto' }} }
+          </button>
+        </div>
+      </div>
+    </form>
+  }
+}

@@ -1,0 +1,80 @@
+<adm-page-header [title]="title()" subtitle="Campos soportados por la API: nombre, slug, descripción y estado.">
+  <a actions class="adm-btn adm-btn--ghost adm-btn--sm" routerLink="/admin/categories">
+    <adm-icon name="chevron-left" [size]="14" /> Cancelar
+  </a>
+</adm-page-header>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="adm-card"><div class="adm-card__body"><adm-skeleton [count]="4" /></div></div>
+  }
+  @case ('error') {
+    <div class="adm-card"><adm-error-state [message]="errorMsg()" (retry)="retry()" /></div>
+  }
+  @default {
+    <form class="adm-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="adm-card__body" style="max-width:560px">
+        <div class="adm-field">
+          <label class="adm-field__label" for="cf-name">Nombre</label>
+          <input id="cf-name" class="adm-input" type="text" formControlName="name"
+            (input)="onNameInput()"
+            [attr.aria-invalid]="ctrl('name').touched && ctrl('name').invalid" />
+          <span class="adm-field__error">
+            @if (ctrl('name').touched && ctrl('name').invalid) {
+              @if (ctrl('name').errors?.['required']) { El nombre es obligatorio. }
+              @else { Entre 2 y 50 caracteres. }
+            }
+          </span>
+        </div>
+
+        <div class="adm-field">
+          <label class="adm-field__label" for="cf-slug">Slug</label>
+          <input id="cf-slug" class="adm-input adm-mono" type="text" formControlName="slug"
+            (input)="markSlugTouched()"
+            [attr.aria-invalid]="ctrl('slug').touched && ctrl('slug').invalid" />
+          <span class="adm-field__hint">Solo minúsculas, números y guiones. Único en el sistema.</span>
+          <span class="adm-field__error">
+            @if (ctrl('slug').touched && ctrl('slug').invalid) {
+              @if (ctrl('slug').errors?.['required']) { El slug es obligatorio. }
+              @else if (ctrl('slug').errors?.['pattern']) { Formato inválido: usa a-z, 0-9 y guiones. }
+              @else { Máximo 60 caracteres. }
+            }
+          </span>
+        </div>
+
+        <div class="adm-field">
+          <label class="adm-field__label" for="cf-desc">Descripción</label>
+          <textarea id="cf-desc" class="adm-textarea" formControlName="description"
+            [attr.aria-invalid]="ctrl('description').touched && ctrl('description').invalid"></textarea>
+          <span class="adm-field__hint">{{ ctrl('description').value.length }}/250</span>
+          <span class="adm-field__error">
+            @if (ctrl('description').touched && ctrl('description').errors?.['maxlength']) {
+              Máximo 250 caracteres.
+            }
+          </span>
+        </div>
+
+        <div class="adm-field">
+          <span class="adm-field__label">Estado</span>
+          <label class="adm-switch">
+            <input type="checkbox" formControlName="isActive" />
+            <span class="adm-switch__track"></span>
+            <span>{{ form.controls.isActive.value ? 'Activa' : 'Inactiva' }}</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="adm-card__header" style="border-top:1px solid var(--adm-line);border-bottom:0">
+        <span class="adm-muted" style="font-size:12px">
+          @if (form.dirty && !submitting()) { Cambios sin guardar }
+        </span>
+        <div class="adm-inline">
+          <a class="adm-btn adm-btn--ghost adm-btn--sm" routerLink="/admin/categories">Cancelar</a>
+          <button type="submit" class="adm-btn adm-btn--sm" [disabled]="submitting() || form.invalid">
+            @if (submitting()) { Guardando… } @else { {{ isEdit ? 'Guardar cambios' : 'Crear categoría' }} }
+          </button>
+        </div>
+      </div>
+    </form>
+  }
+}

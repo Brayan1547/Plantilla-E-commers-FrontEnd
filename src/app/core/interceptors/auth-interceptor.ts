@@ -30,12 +30,17 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       if ( error.status == 401 ) {
         //(1) Eliminar los datos que tengo almacenados en mi LocalStorage (token, userData)
         httpAuth.clearAuthData();
-        //(2) Redirecciona
-        router.navigateByUrl('/login');
+        //(2) Redirecciona -- salvo que ya estemos en una pantalla de auth
+        const onAuthPage = /\/login|\/register/.test(router.url);
+        if (!onAuthPage) {
+          router.navigate(['/login'], { queryParams: { returnUrl: router.url } });
+        }
       }
 
-      //Define un error en RxJS
-      return throwError( () => {});
+      // Propagamos el error REAL (status + body) para que los componentes
+      // puedan mostrar estados de error/reintento. Antes se emitia `{}`, lo que
+      // dejaba a los callbacks `error:` sin informacion.
+      return throwError( () => error );
     })
   )
 };

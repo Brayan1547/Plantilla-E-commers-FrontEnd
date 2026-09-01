@@ -38,19 +38,17 @@ export class HttpAuth {
 
                         this.setAuthData(res.token, res.data);
 
-                        //Redirecciona según el rol
+                        //Redirecciona según el rol.
+                        // administrador y shop_manager tienen acceso al Admin Panel;
+                        // editor y subscriber van a la tienda.
                         const role = res.data?.role;
 
                         switch (role) {
                             case 'administrador':
-                                this.router.navigateByUrl('/dashboard');
-                                break;
                             case 'shop_manager':
-                                this.router.navigateByUrl('/dashboard'); // cambiar cuando tengas su vista propia
+                                this.router.navigateByUrl('/admin');
                                 break;
                             case 'editor':
-                                this.router.navigateByUrl('/dashboard'); // cambiar cuando tengas su vista propia
-                                break;
                             case 'subscriber':
                             default:
                                 this.router.navigateByUrl('/home');

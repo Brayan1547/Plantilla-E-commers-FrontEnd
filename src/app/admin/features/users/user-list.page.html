@@ -1,0 +1,126 @@
+<adm-page-header title="Usuarios" subtitle="Cuentas registradas, roles y estado.">
+  @if (perms.can('users.create')) {
+    <button actions type="button" class="adm-btn" (click)="goNew()">
+      <adm-icon name="plus" [size]="15" />
+      Nuevo usuario
+    </button>
+  }
+</adm-page-header>
+
+<div class="adm-filter-bar">
+  <label class="adm-topbar__search adm-filter-bar__search">
+    <adm-icon name="search" [size]="16" />
+    <input
+      type="search"
+      placeholder="Buscar por nombre, nickname o correo"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event); page.set(1)"
+      aria-label="Buscar usuarios" />
+  </label>
+
+  <label class="adm-field">
+    <span class="adm-sr-only">Filtrar por rol</span>
+    <select
+      class="adm-select"
+      [ngModel]="roleFilter()"
+      (ngModelChange)="roleFilter.set($event); page.set(1)">
+      <option value="">Todos los roles</option>
+      @for (r of roleOptions(); track r.id) {
+        <option [value]="r.id">{{ r.name }}</option>
+      }
+    </select>
+  </label>
+
+  <label class="adm-field">
+    <span class="adm-sr-only">Filtrar por estado</span>
+    <select
+      class="adm-select"
+      [ngModel]="statusFilter()"
+      (ngModelChange)="statusFilter.set($event); page.set(1)">
+      <option value="">Todos los estados</option>
+      <option value="active">Activos</option>
+      <option value="inactive">Inactivos</option>
+    </select>
+  </label>
+
+  <label class="adm-field">
+    <span class="adm-sr-only">Registrados desde</span>
+    <input
+      type="date"
+      class="adm-input"
+      [ngModel]="dateFrom()"
+      (ngModelChange)="dateFrom.set($event); page.set(1)"
+      aria-label="Registrados desde" />
+  </label>
+
+  <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" (click)="resetFilters()">
+    Limpiar
+  </button>
+</div>
+
+<adm-data-table
+  [columns]="columns"
+  [rows]="view().rows"
+  [state]="tableState()"
+  [sort]="sort()"
+  [errorMessage]="errorMsg()"
+  emptyTitle="Sin usuarios"
+  emptyMessage="No hay usuarios que coincidan con los filtros."
+  (sortChange)="onSort($event)"
+  (retry)="load()">
+  <ng-template #admRow let-user let-i="index">
+    <td class="adm-table__num">{{ (page() - 1) * pageSize + i + 1 }}</td>
+    <td>
+      <a class="adm-inline" [routerLink]="['/admin/users', user._id]" style="gap:6px">
+        <strong>{{ user.name }}</strong>
+      </a>
+    </td>
+    <td class="adm-muted">{{ '@' + user.nickname }}</td>
+    <td class="adm-truncate">{{ user.email }}</td>
+    <td>
+      <adm-status-badge [label]="roleName(user.role)" tone="info" [dot]="false" />
+    </td>
+    <td>
+      @if (user.status) {
+        <adm-status-badge label="Activo" tone="ok" />
+      } @else {
+        <adm-status-badge label="Inactivo" tone="neutral" />
+      }
+    </td>
+    <td class="adm-muted adm-mono">{{ formatDate(user.createdAt) }}</td>
+    <td>
+      <div class="adm-table__actions">
+        <a class="adm-btn adm-btn--ghost adm-btn--sm" [routerLink]="['/admin/users', user._id]">
+          Ver
+        </a>
+        @if (perms.can('users.update')) {
+          <a
+            class="adm-icon-btn"
+            [routerLink]="['/admin/users', user._id, 'edit']"
+            aria-label="Editar perfil">
+            <adm-icon name="edit" [size]="15" />
+          </a>
+        }
+        @if (perms.can('users.delete')) {
+          <button
+            type="button"
+            class="adm-icon-btn"
+            [disabled]="user._id === currentUserId()"
+            [title]="user._id === currentUserId() ? 'No puedes eliminar tu propia cuenta' : 'Eliminar'"
+            aria-label="Eliminar usuario"
+            (click)="remove(user)">
+            <adm-icon name="trash" [size]="15" />
+          </button>
+        }
+      </div>
+    </td>
+  </ng-template>
+</adm-data-table>
+
+@if (tableState() === 'ready') {
+  <adm-pagination
+    [page]="view().page"
+    [pageSize]="pageSize"
+    [totalItems]="view().total"
+    (pageChange)="page.set($event)" />
+}

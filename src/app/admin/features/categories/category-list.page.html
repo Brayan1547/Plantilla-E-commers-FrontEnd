@@ -1,0 +1,84 @@
+<adm-page-header title="Categorías" subtitle="Organización del catálogo.">
+  @if (perms.can('categories.create')) {
+    <button actions type="button" class="adm-btn" (click)="goNew()">
+      <adm-icon name="plus" [size]="15" /> Nueva categoría
+    </button>
+  }
+</adm-page-header>
+
+<div class="adm-filter-bar">
+  <label class="adm-topbar__search adm-filter-bar__search">
+    <adm-icon name="search" [size]="16" />
+    <input type="search" placeholder="Buscar por nombre, slug o descripción"
+      [ngModel]="search()" (ngModelChange)="search.set($event); page.set(1)"
+      aria-label="Buscar categorías" />
+  </label>
+
+  <label class="adm-field">
+    <span class="adm-sr-only">Filtrar por estado</span>
+    <select class="adm-select" [ngModel]="statusFilter()"
+      (ngModelChange)="statusFilter.set($event); page.set(1)">
+      <option value="">Todos los estados</option>
+      <option value="active">Activas</option>
+      <option value="inactive">Inactivas</option>
+    </select>
+  </label>
+
+  <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" (click)="resetFilters()">
+    Limpiar
+  </button>
+</div>
+
+<adm-data-table
+  [columns]="columns"
+  [rows]="view().rows"
+  [state]="tableState()"
+  [sort]="sort()"
+  [errorMessage]="errorMsg()"
+  emptyTitle="Sin categorías"
+  emptyMessage="No hay categorías que coincidan con los filtros."
+  (sortChange)="onSort($event)"
+  (retry)="load()">
+  <ng-template #admRow let-cat>
+    <td><strong>{{ cat.name }}</strong></td>
+    <td class="adm-mono adm-muted">{{ cat.slug }}</td>
+    <td class="adm-truncate adm-muted">{{ cat.description || '—' }}</td>
+    <td>
+      @if (cat.isActive) {
+        <adm-status-badge label="Activa" tone="ok" />
+      } @else {
+        <adm-status-badge label="Inactiva" tone="neutral" />
+      }
+    </td>
+    <td class="adm-muted adm-mono">{{ formatDate(cat.updatedAt) }}</td>
+    <td>
+      <div class="adm-table__actions">
+        @if (perms.can('categories.update')) {
+          <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm"
+            [disabled]="busyId() === cat._id"
+            (click)="toggleActive(cat)">
+            {{ cat.isActive ? 'Desactivar' : 'Activar' }}
+          </button>
+          <a class="adm-icon-btn" [routerLink]="['/admin/categories', cat._id, 'edit']"
+            aria-label="Editar categoría">
+            <adm-icon name="edit" [size]="15" />
+          </a>
+        }
+        @if (perms.can('categories.delete')) {
+          <button type="button" class="adm-icon-btn" aria-label="Eliminar categoría"
+            (click)="remove(cat)">
+            <adm-icon name="trash" [size]="15" />
+          </button>
+        }
+      </div>
+    </td>
+  </ng-template>
+</adm-data-table>
+
+@if (tableState() === 'ready') {
+  <adm-pagination
+    [page]="view().page"
+    [pageSize]="pageSize"
+    [totalItems]="view().total"
+    (pageChange)="page.set($event)" />
+}

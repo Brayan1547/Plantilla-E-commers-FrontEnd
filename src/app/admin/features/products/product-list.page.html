@@ -1,0 +1,123 @@
+<adm-page-header title="Productos" subtitle="Catálogo: precio, stock, imágenes, categoría y estado.">
+  @if (perms.can('products.create')) {
+    <button actions type="button" class="adm-btn" (click)="goNew()">
+      <adm-icon name="plus" [size]="15" /> Nuevo producto
+    </button>
+  }
+</adm-page-header>
+
+<div class="adm-filter-bar">
+  <label class="adm-topbar__search adm-filter-bar__search">
+    <adm-icon name="search" [size]="16" />
+    <input type="search" placeholder="Buscar por nombre, slug o descripción"
+      [ngModel]="search()" (ngModelChange)="search.set($event); page.set(1)"
+      aria-label="Buscar productos" />
+  </label>
+
+  <label class="adm-field">
+    <span class="adm-sr-only">Filtrar por categoría</span>
+    <select class="adm-select" [ngModel]="categoryFilter()"
+      (ngModelChange)="categoryFilter.set($event); page.set(1)">
+      <option value="">Todas las categorías</option>
+      @for (c of categoryOptions(); track c._id) {
+        <option [value]="c._id">{{ c.name }}</option>
+      }
+    </select>
+  </label>
+
+  <label class="adm-field">
+    <span class="adm-sr-only">Filtrar por stock</span>
+    <select class="adm-select" [ngModel]="stockFilter()"
+      (ngModelChange)="stockFilter.set($event); page.set(1)">
+      <option value="">Todo el stock</option>
+      <option value="ok">Disponible</option>
+      <option value="low">Stock bajo (≤ {{ lowThreshold }})</option>
+      <option value="out">Agotado</option>
+    </select>
+  </label>
+
+  <label class="adm-field">
+    <span class="adm-sr-only">Filtrar por estado</span>
+    <select class="adm-select" [ngModel]="statusFilter()"
+      (ngModelChange)="statusFilter.set($event); page.set(1)">
+      <option value="">Todos los estados</option>
+      <option value="active">Activos</option>
+      <option value="inactive">Inactivos</option>
+    </select>
+  </label>
+
+  <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" (click)="resetFilters()">
+    Limpiar
+  </button>
+</div>
+
+<adm-data-table
+  [columns]="columns"
+  [rows]="view().rows"
+  [state]="tableState()"
+  [sort]="sort()"
+  [errorMessage]="errorMsg()"
+  emptyTitle="Sin productos"
+  emptyMessage="No hay productos que coincidan con los filtros."
+  (sortChange)="onSort($event)"
+  (retry)="load()">
+  <ng-template #admRow let-p>
+    <td>
+      <span class="adm-avatar" style="border-radius:6px;background:var(--adm-surface-2)">
+        @if (mainImage(p.images)) {
+          <img [src]="mainImage(p.images)" alt="" />
+        } @else {
+          <adm-icon name="box" [size]="16" />
+        }
+      </span>
+    </td>
+    <td>
+      <strong>{{ p.name }}</strong>
+      <div class="adm-mono adm-muted" style="font-size:11px">{{ p.slug }}</div>
+    </td>
+    <td class="adm-muted">{{ categoryName(p) }}</td>
+    <td class="adm-table__num adm-mono">{{ formatCurrency(p.price) }}</td>
+    <td>
+      @switch (stockLevel(p.stock)) {
+        @case ('out') { <adm-status-badge [label]="'Agotado'" tone="danger" /> }
+        @case ('low') { <adm-status-badge [label]="p.stock + ' uds'" tone="warn" /> }
+        @default { <adm-status-badge [label]="p.stock + ' uds'" tone="ok" /> }
+      }
+    </td>
+    <td>
+      @if (p.isActive) {
+        <adm-status-badge label="Activo" tone="ok" />
+      } @else {
+        <adm-status-badge label="Inactivo" tone="neutral" />
+      }
+    </td>
+    <td>
+      <div class="adm-table__actions">
+        @if (perms.can('products.update')) {
+          <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm"
+            [disabled]="busyId() === p._id" (click)="toggleActive(p)">
+            {{ p.isActive ? 'Desactivar' : 'Activar' }}
+          </button>
+          <a class="adm-icon-btn" [routerLink]="['/admin/products', p._id, 'edit']"
+            aria-label="Editar producto">
+            <adm-icon name="edit" [size]="15" />
+          </a>
+        }
+        @if (perms.can('products.delete')) {
+          <button type="button" class="adm-icon-btn" aria-label="Eliminar producto"
+            (click)="remove(p)">
+            <adm-icon name="trash" [size]="15" />
+          </button>
+        }
+      </div>
+    </td>
+  </ng-template>
+</adm-data-table>
+
+@if (tableState() === 'ready') {
+  <adm-pagination
+    [page]="view().page"
+    [pageSize]="pageSize"
+    [totalItems]="view().total"
+    (pageChange)="page.set($event)" />
+}

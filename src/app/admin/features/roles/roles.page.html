@@ -1,0 +1,75 @@
+<adm-page-header title="Roles" subtitle="Catálogo de roles del sistema. Solo lectura." />
+
+<div class="adm-card" style="margin-bottom:16px">
+  <div class="adm-card__body">
+    <p class="adm-muted">
+      El backend expone los roles como una lista fija (<code>GET /roles</code>,
+      derivada de <code>global.config.js</code>). <strong>No existe</strong>
+      creación, edición ni asignación de permisos por rol: por eso este módulo no
+      ofrece esa interfaz. La asignación de rol a un usuario se hace desde
+      <strong>Usuarios → detalle</strong>.
+    </p>
+  </div>
+</div>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="adm-card"><div class="adm-card__body"><adm-skeleton [count]="4" /></div></div>
+  }
+  @case ('error') {
+    <div class="adm-card"><adm-error-state [message]="errorMsg()" (retry)="load()" /></div>
+  }
+  @case ('ready') {
+    <div class="adm-kpi-grid" style="margin-bottom:20px">
+      @for (r of roles(); track r.id) {
+        <div class="adm-kpi">
+          <span class="adm-kpi__label">{{ r.id }}</span>
+          <span class="adm-kpi__value" style="font-size:18px">{{ r.name }}</span>
+        </div>
+      }
+    </div>
+
+    <section class="adm-card">
+      <div class="adm-card__header">
+        <h2>Permisos por rol</h2>
+        <span class="adm-badge adm-badge--neutral">Modelo del cliente · no es RBAC del backend</span>
+      </div>
+      <div class="adm-card__body">
+        <p class="adm-muted" style="margin-bottom:14px">
+          Esta matriz es la que usa el panel para decidir qué se muestra y qué
+          rutas se activan. La autorización real la aplica el backend en cada
+          endpoint. Se sincronizará con permisos servidos por el backend cuando
+          existan.
+        </p>
+        <div class="adm-table-wrap">
+          <table class="adm-table">
+            <thead>
+              <tr>
+                <th>Permiso</th>
+                @for (row of matrix(); track row.role.id) {
+                  <th style="text-align:center">{{ row.role.name }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (perm of permissions; track perm) {
+                <tr>
+                  <td class="adm-mono">{{ perm }}</td>
+                  @for (row of matrix(); track row.role.id) {
+                    <td style="text-align:center">
+                      @if (row.granted.has(perm)) {
+                        <adm-icon name="check" [size]="15" />
+                      } @else {
+                        <span class="adm-muted">—</span>
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  }
+}
