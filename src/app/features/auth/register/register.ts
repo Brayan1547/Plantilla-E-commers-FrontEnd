@@ -42,9 +42,7 @@ export default class Register {
     onSubmit() {
     // console.log('Registrarse', this.formData.value);
     this.httpAut.registerUser(this.formData.value).subscribe({
-      next: ( res ) => {
-         console.log('Usuario registrado:', res);
-
+      next: () => {
          //inicia sesión automática con las mismas credenciales, y loginUser() ya redirige según el rol
         const { email, password } = this.formData.value;
         this.httpAut.loginUser({ email, password }).subscribe({

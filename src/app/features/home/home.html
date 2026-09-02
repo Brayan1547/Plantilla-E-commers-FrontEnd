@@ -146,7 +146,7 @@
     </div>
 
     <div class="cat-grid">
-      <a routerLink="/tienda/hombre" class="cat-card cat-hombre">
+      <a routerLink="/basicos" [queryParams]="{ categoria: 'hombre' }" class="cat-card cat-hombre">
         <div class="bg"></div>
         <!-- Cuando tengas la foto, reemplaza el div de arriba por:
         <img src="/assets/img/categoria-hombre.jpg" alt="Ropa de hombre"> -->
@@ -156,7 +156,7 @@
         </div>
       </a>
 
-      <a routerLink="/tienda/mujer" class="cat-card cat-mujer">
+      <a routerLink="/basicos" [queryParams]="{ categoria: 'mujer' }" class="cat-card cat-mujer">
         <div class="bg"></div>
         <!-- <img src="/assets/img/categoria-mujer.jpg" alt="Ropa de mujer"> -->
         <div class="label">
@@ -165,7 +165,7 @@
         </div>
       </a>
 
-      <a routerLink="/tienda/colecciones" class="cat-card cat-colecciones">
+      <a routerLink="/colecciones" class="cat-card cat-colecciones">
         <div class="bg"></div>
         <!-- <img src="/assets/img/categoria-colecciones.jpg" alt="Colecciones"> -->
         <div class="label">

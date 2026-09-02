@@ -54,7 +54,11 @@ export class BreadcrumbsComponent {
     let node: ActivatedRoute | null = this.route.root;
     let url = '';
 
-    while (node) {
+    // `node.snapshot` puede ser `undefined` para una ruta hija que todavia no
+    // termino de activarse (p. ej. al construir el layout en el primer render o
+    // un refresh directo). Se recorre solo lo ya resuelto; el `NavigationEnd`
+    // posterior recalcula el rastro completo.
+    while (node?.snapshot) {
       const segment = node.snapshot.url.map((s) => s.path).join('/');
       if (segment) url += `/${segment}`;
       const label = node.snapshot.data?.['breadcrumb'] as string | undefined;

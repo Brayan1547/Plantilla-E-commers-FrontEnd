@@ -14,10 +14,13 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  // Smoke test real (reemplaza al test scaffold de Angular que esperaba
+  // "<h1>Hello, frontEND</h1>", eliminado del template hace tiempo).
+  // Verifica la lógica que decide si se muestra el shell público (header/footer)
+  // o el layout del Admin Panel.
+  it('fuera de /admin muestra el shell público (isAdminRoute = false)', () => {
     const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, frontEND');
+    const cmp = fixture.componentInstance as unknown as { isAdminRoute: () => boolean };
+    expect(cmp.isAdminRoute()).toBe(false);
   });
 });

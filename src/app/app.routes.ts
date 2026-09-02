@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { Home } from './features/home/home';
-import { authGuard } from './core/guards/auth-guard';
 import { guestGuard } from './core/guards/guest-guard';
 // import { adminGuard } from './core/guards/admin.guard';
 
@@ -33,8 +32,15 @@ export const routes: Routes = [
      },
 
       {
-          path: 'product-ropa',
-          loadComponent: () => import('./features/product-disign/product-disign')
+          // BÁSICOS: catálogo público permanente, clasificado por categoría.
+          path: 'basicos',
+          loadComponent: () => import('./features/basicos/basicos')
+     },
+
+      {
+          // COLECCIONES: seccion publica de lanzamientos especiales (concepto).
+          path: 'colecciones',
+          loadComponent: () => import('./features/colecciones/colecciones')
      },
 
           {
@@ -63,61 +69,9 @@ export const routes: Routes = [
           loadChildren: () => import('./admin/admin.routes').then((m) => m.ADMIN_ROUTES),
      },
 
-     // =============== Rutas privadas (legacy /dashboard) ==============
-     // TODO(migracion): se conserva mientras se migran todas las referencias a
-     // /admin y se reescriben estos formularios sobre el nuevo layout. No borrar
-     // hasta completar la migracion y verificar navegacion + build.
-
-     {
-          path: 'dashboard',
-          // canActivate:[ authGuard ],
-          loadComponent: () => import('./features/dashboard/dashboard'),
-          children: [
-     {
-          path: 'category-new',
-          loadComponent: () => import('./features/categories/category-new-form/category-new-form')
-     },
-
-     {
-          path: 'category-edit/:id',
-          canActivate: [ authGuard ],
-          loadComponent: () => import('./features/categories/category-edit-form/category-edit-form')
-     },
-
-     {
-          path: 'product-new',
-          loadComponent: () => import('./features/products/product-new-form/product-new-form')
-     },
-
-     {
-          path: 'product-edit/:id',
-          loadComponent: () => import('./features/products/product-edit-form/product-edit-form')
-     },
-
-     {
-          path: 'user/list',
-          loadComponent: () => import('./features/users/user-list/user-list')
-     },
-
-
-     {
-          path: 'product-list',
-          loadComponent: () => import('./features/products/product-list/product-list')
-     },
-
-     {
-          path: 'user-new',
-          loadComponent: () => import('./features/users/user-new-form/user-new-form'),
-     },
-
-
-     {
-          path: 'user-edit/:id',
-          loadComponent: () =>
-               import('./features/users/user-edit-form/user-edit-form')
-     },
-          ]
-     },
+     // El legacy /dashboard y sus formularios administrativos fueron retirados en
+     // R2.2. La gestion de productos/categorias/usuarios vive solo en /admin.
+     // Cualquier URL antigua /dashboard/* cae en el comodin -> /404 (controlado).
 
      //Redirecciones
      { path: '', redirectTo: 'home', pathMatch: 'full' },

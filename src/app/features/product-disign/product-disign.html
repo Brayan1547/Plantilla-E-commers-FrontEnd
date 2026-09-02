@@ -1,164 +1,98 @@
-<div class="product-container">
-  <section class="product-gallery">
-    <div class="gallery-grid">
-      <div
-        class="image-wrapper main-front"
-        (click)="openImage('/assets/buzo N/buzo_N_frente.png')"
-        (touchstart)="onTouchStart($event)"
-        (touchend)="onTouchEnd($event, 'assets/buzo N/buzo N frente.png')"
-      >
-        <img src="/assets/buzo N/buzo_N_frente.png" alt="Holy State Divinity - Front View" />
-      </div>
+@switch (state()) {
 
-      <div
-        class="image-wrapper main-back"
-        (click)="openImage('/assets/buzo N/buzo_N_producto.png')"
-        (touchstart)="onTouchStart($event)"
-        (touchend)="onTouchEnd($event, 'assets/buzo N/buzo N producto.png')"
-      >
-        <img src="/assets/buzo N/buzo_N_producto.png" alt="Holy State Divinity - Back View" />
-      </div>
-
-      <div
-        class="image-wrapper detail-1"
-        (click)="openImage('/assets/buzo N/buzo_N_frente.png')"
-        (touchstart)="onTouchStart($event)"
-        (touchend)="onTouchEnd($event, 'assets/buzo N/buzo N espalda.png')"
-      >
-        <img src="/assets/buzo N/buzo_N_frente.png" alt="Detail Macro 1" />
-      </div>
-
-      <div
-        class="image-wrapper detail-2"
-        (click)="openImage('/assets/buzo N/buzo_N_45_gr.png')"
-        (touchstart)="onTouchStart($event)"
-        (touchend)="onTouchEnd($event, 'assets/buzo N/buzo N 45 gr.png')"
-      >
-        <img src="/assets/buzo N/buzo_N_45_gr.png" alt="Detail Model Side" />
-      </div>
-
-      <div
-        class="image-wrapper detail-3"
-        (click)="openImage('/assets/buzo N/buzo_N_material.png')"
-        (touchstart)="onTouchStart($event)"
-        (touchend)="onTouchEnd($event, 'assets/buzo N/buzo N material.png')"
-      >
-        <img src="/assets/buzo N/buzo_N_material.png" alt="Detail Graphic" />
-      </div>
-
-      <div
-        class="image-wrapper detail-flat"
-        (click)="openImage('/assets/buzo N/buzo_N_logo.png')"
-        (touchstart)="onTouchStart($event)"
-        (touchend)="onTouchEnd($event, 'assets/buzo N/buzo N logo.png')"
-      >
-        <img src="/assets/buzo N/buzo_N_logo.png" alt="Flat Lay Product" />
-      </div>
+  @case ('loading') {
+    <div class="pd-state">
+      <p>Cargando producto…</p>
     </div>
-  </section>
+  }
 
-  <section class="product-info">
-    <div class="sticky-wrapper">
-      <header class="product-header">
-        <span class="brand-tag">HOLY STATE</span>
-        <h1 class="product-title">DIVINITY BOXY FIT TSHIRT</h1>
-        <p class="product-color">VINTAGE BLACK</p>
-        <div class="product-price">$350.000 COP</div>
-      </header>
-      <div class="model-info">
-        <p>El modelo utiliza talla <strong>M</strong> y mide 1.88 m.</p>
-      </div>
-      <div class="size-selector-container">
-        <div class="size-header">
-          <span class="label">TALLA</span>
-          <button class="size-guide-btn">Guía de tallas</button>
-        </div>
+  @case ('not-found') {
+    <div class="pd-state">
+      <p class="pd-state__title serif">Producto no encontrado</p>
+      <p>El producto que buscas no existe o ya no está disponible.</p>
+      <a routerLink="/basicos" class="pd-btn pd-btn--solid">Ver Básicos</a>
+    </div>
+  }
 
-        <div class="size-options">
-          @for (size of sizes; track size) {
-            <button
-              type="button"
-              class="size-btn"
-              [class.active]="selectedSize === size"
-              (click)="selectSize(size)"
-            >
-              {{ size }}
-            </button>
+  @case ('error') {
+    <div class="pd-state">
+      <p class="pd-state__title serif">No pudimos cargar el producto</p>
+      <p>Hubo un problema de conexión. Intenta de nuevo en unos minutos.</p>
+      <a routerLink="/basicos" class="pd-btn pd-btn--ghost">Volver al catálogo</a>
+    </div>
+  }
+
+  @case ('ready') {
+    <article class="pd">
+
+      <!-- ============ GALERÍA ============ -->
+      <section class="pd-gallery">
+        @if (mainImage(); as main) {
+          <button type="button" class="pd-gallery__main" (click)="openZoom(main)">
+            <img [src]="main" [alt]="product().name">
+          </button>
+          @if (images().length > 1) {
+            <div class="pd-gallery__thumbs">
+              @for (url of images(); track url) {
+                <button type="button" class="pd-thumb" (click)="openZoom(url)">
+                  <img [src]="url" [alt]="product().name">
+                </button>
+              }
+            </div>
           }
+        } @else {
+          <div class="pd-gallery__empty">Sin imágenes</div>
+        }
+      </section>
+
+      <!-- ============ INFO ============ -->
+      <section class="pd-info">
+        <header class="pd-head">
+          <h1 class="pd-head__name serif">{{ product().name }}</h1>
+          <p class="pd-head__price">
+            {{ product().price | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </p>
+        </header>
+
+        <p class="pd-availability" [class.pd-availability--out]="outOfStock()">
+          @if (outOfStock()) { Agotado } @else { Disponible }
+        </p>
+
+        @if (product().description) {
+          <p class="pd-description">{{ product().description }}</p>
+        }
+
+        <!-- Compra -->
+        <div class="pd-buy">
+          <div class="pd-qty" [class.pd-qty--disabled]="outOfStock()">
+            <button type="button" (click)="decreaseQty()" [disabled]="outOfStock()" aria-label="Restar">−</button>
+            <span>{{ quantity() }}</span>
+            <button type="button" (click)="increaseQty()" [disabled]="outOfStock()" aria-label="Sumar">+</button>
+          </div>
+          <button
+            type="button"
+            class="pd-btn pd-btn--solid pd-btn--full"
+            [disabled]="outOfStock() || adding()"
+            (click)="addToCart()">
+            @if (outOfStock()) { Sin existencias }
+            @else if (adding()) { Agregando… }
+            @else { Añadir al carrito }
+          </button>
         </div>
+
+        <div class="pd-meta">
+          <p>Envíos nacionales a toda Colombia de 2 a 5 días hábiles.</p>
+          <p>Cambios y devoluciones dentro de 30 días desde la entrega.</p>
+        </div>
+      </section>
+    </article>
+
+    <!-- Visor de imagen -->
+    @if (zoomImage(); as z) {
+      <div class="pd-viewer" (click)="closeZoom()">
+        <button type="button" class="pd-viewer__close" (click)="closeZoom()" aria-label="Cerrar">✕</button>
+        <img [src]="z" [alt]="product().name" (click)="$event.stopPropagation()">
       </div>
-      <div class="purchase-actions">
-  <div class="quantity-selector">
-
-    <button
-      type="button"
-      class="qty-btn"
-      (click)="decreaseQuantity()">
-      −
-    </button>
-
-    <input
-      type="number"
-      class="qty-input"
-      [value]="quantity"
-      readonly>
-
-    <button
-      type="button"
-      class="qty-btn"
-      (click)="increaseQuantity()">
-      +
-    </button>
-
-  </div>
-        <button type="button" class="btn-add-to-cart">AÑADIR AL CARRITO</button>
-      </div>
-      <div class="product-description">
-        <p>
-          Camiseta masculina de silueta boxy en color Vintage Black con teñido artesanal
-          desmontable, elaborada en 100% algodón (290 gr). El fit boxy se caracteriza por hombros
-          marcados y un volumen amplio y cuadrado en el cuerpo, con una caída corta que aporta
-          presencia visual. Desarrollada con cuello redondo en rib e insumos propios de la marca.
-        </p>
-        <p class="collection-note">
-          Esta pieza hace parte de la segunda entrega de nuestra colección de verano Holy State.
-        </p>
-      </div>
-      <div class="accordion-menu">
-        <details class="accordion-item">
-          <summary>DETALLES <span class="icon">+</span></summary>
-          <div class="accordion-content">
-            <p>
-              Algodón de alto gramaje (290 GSM). Estampado en policromía de alta durabilidad. Hecho
-              en Colombia.
-            </p>
-          </div>
-        </details>
-        <details class="accordion-item">
-          <summary>ENVÍO Y PEDIDOS <span class="icon">+</span></summary>
-          <div class="accordion-content">
-            <p>
-              Envíos nacionales a toda Colombia de 2 a 5 días hábiles. Envío gratis por compras
-              superiores a $400.000 COP.
-            </p>
-          </div>
-        </details>
-        <details class="accordion-item">
-          <summary>CAMBIOS Y DEVOLUCIONES <span class="icon">+</span></summary>
-          <div class="accordion-content">
-            <p>
-              Dispones de 30 días calendario desde la entrega del producto para realizar cambios de
-              talla o devoluciones.
-            </p>
-          </div>
-        </details>
-      </div>
-    </div>
-  </section>
-</div>
-
-<div class="image-viewer" *ngIf="selectedImage" (click)="closeImage()">
-  <button class="close-viewer" (click)="closeImage(); $event.stopPropagation()">✕</button>
-
-  <img [src]="selectedImage" (click)="$event.stopPropagation()" />
-</div>
+    }
+  }
+}

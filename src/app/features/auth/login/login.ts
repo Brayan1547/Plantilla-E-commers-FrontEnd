@@ -1,6 +1,7 @@
 import { Component, EventEmitter, inject, Output,  } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpAuth } from '../../../core/services/http-auth';      
+import { ActivatedRoute } from '@angular/router';
+import { HttpAuth } from '../../../core/services/http-auth';
 import { Toast } from '../../../core/services/toast';
 
 
@@ -14,6 +15,7 @@ export default class Login {
   httpAuth = inject(HttpAuth)
   formData!: FormGroup;
   private toast = inject(Toast)
+  private route = inject(ActivatedRoute)
 
   @Output() loginSuccess = new EventEmitter<void>();   // Avisa  (auth-modal) que el login fue exitoso, para que se cierre el modal
   @Output() switchToRegister = new EventEmitter<void>();    // Avisa que el usuario quiere cambiar a la pestaña de registro
@@ -27,12 +29,12 @@ export default class Login {
 
   onSubmit() {
     if (this.formData.valid) {
-      console.log(this.formData.value)
+      // Ruta de origen (la puso adminGuard como ?returnUrl=...). El saneado y la
+      // decision final por rol viven en HttpAuth.loginUser().
+      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
 
-      this.httpAuth.loginUser(this.formData.value).subscribe({
-        next: ( res ) => {
-          console.log( res )
-
+      this.httpAuth.loginUser(this.formData.value, returnUrl).subscribe({
+        next: () => {
           this.formData.reset();
           this.toast.show(`¡Bienvenido de nuevo!`); // nuevo: mensaje al iniciar sesión
           this.loginSuccess.emit(); // Dispara el evento loginSuccess solo cuando el login respondió bien

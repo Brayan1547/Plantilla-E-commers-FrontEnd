@@ -1,79 +1,127 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
+import { HttpProduct } from '../../core/services/http-product';
+import { HttpCart } from '../../core/services/http-cart';
+import { HttpAuth } from '../../core/services/http-auth';
+import { UiModal } from '../../core/services/ui-modal';
+import { Toast } from '../../core/services/toast';
+
+type DetailState = 'loading' | 'ready' | 'not-found' | 'error';
+
+/**
+ * Ficha pública de producto — ruta `tienda/producto/:id` (SSR).
+ *
+ * R2.3: sustituye la maqueta estática anterior. Carga el producto REAL con
+ * `HttpProduct.getProductById(:id)` -> `GET /api/product/:id` (contrato
+ * existente; el backend NO puebla `category`). Renderiza únicamente campos
+ * reales del modelo: name, price, description, images[{url,isMain}], stock.
+ *
+ * NO hay tallas / colores / variantes: el modelo `Product` del backend no las
+ * tiene y su implementación pertenece al futuro Product Domain (rol `editor`).
+ *
+ * Estados: loading · ready · not-found (data vacía / 404 / id inválido) · error.
+ */
 @Component({
   selector: 'app-product-disign',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './product-disign.html',
   styleUrl: './product-disign.css',
 })
 export default class ProductDisign {
+  private route = inject(ActivatedRoute);
+  private httpProduct = inject(HttpProduct);
+  private httpCart = inject(HttpCart);
+  private auth = inject(HttpAuth);
+  private uiModal = inject(UiModal);
+  private toast = inject(Toast);
 
-  // ===========================
-  // Imagen seleccionada
-  // ===========================
-  selectedImage: string | null = null;
+  protected readonly state = signal<DetailState>('loading');
+  protected readonly product = signal<any | null>(null);
 
-  private touchStartX = 0;
-  private touchStartY = 0;
+  /** Imagen ampliada en el visor modal (null = cerrado). */
+  protected readonly zoomImage = signal<string | null>(null);
 
-  private readonly swipeThreshold = 15;
+  protected readonly quantity = signal(1);
+  protected readonly adding = signal(false);
 
-  // ===========================
-  // Tallas
-  // ===========================
-  sizes = ['XS', 'S', 'M', 'L', 'XL', '2XL'];
+  /** URLs de imágenes reales del producto; [] si no tiene. */
+  protected readonly images = computed<string[]>(() => {
+    const imgs = this.product()?.images ?? [];
+    return imgs.map((i: any) => i?.url).filter((u: any): u is string => !!u);
+  });
 
-  selectedSize = 'S';
+  /** Imagen principal (isMain) o la primera. */
+  protected readonly mainImage = computed<string | null>(() => {
+    const imgs = this.product()?.images ?? [];
+    const main = imgs.find((i: any) => i?.isMain);
+    return main?.url ?? imgs[0]?.url ?? null;
+  });
 
-  selectSize(size: string): void {
-    this.selectedSize = size;
-  }
+  protected readonly outOfStock = computed(() => (this.product()?.stock ?? 0) <= 0);
 
-  // ===========================
-// Cantidad
-// ===========================
-quantity = 1;
+  ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('id');
 
-increaseQuantity(): void {
-  this.quantity++;
-}
-
-decreaseQuantity(): void {
-  if (this.quantity > 1) {
-    this.quantity--;
-  }
-}
-
-  // ===========================
-  // GalerÃ­a
-  // ===========================
-  openImage(image: string): void {
-    this.selectedImage = image;
-  }
-
-  onTouchStart(event: TouchEvent): void {
-    this.touchStartX = event.touches[0].clientX;
-    this.touchStartY = event.touches[0].clientY;
-  }
-
-  onTouchEnd(event: TouchEvent, image: string): void {
-
-    const touch = event.changedTouches[0];
-
-    const deltaX = Math.abs(touch.clientX - this.touchStartX);
-    const deltaY = Math.abs(touch.clientY - this.touchStartY);
-
-    if (
-      deltaX < this.swipeThreshold &&
-      deltaY < this.swipeThreshold
-    ) {
-      this.openImage(image);
+    // Guarda barata contra ids con forma no-ObjectId antes de gastar una request.
+    if (!id || !/^[a-f\d]{24}$/i.test(id)) {
+      this.state.set('not-found');
+      return;
     }
+
+    this.httpProduct.getProductById(id).subscribe({
+      next: (res) => {
+        const data = res?.data;
+        if (!data || !data._id) {
+          this.state.set('not-found');
+          return;
+        }
+        this.product.set(data);
+        this.state.set('ready');
+      },
+      error: (err) => {
+        // El backend responde 400 (id inválido) y 404 (no existe) -> "not-found".
+        this.state.set(err?.status === 404 || err?.status === 400 ? 'not-found' : 'error');
+      },
+    });
   }
 
-  closeImage(): void {
-    this.selectedImage = null;
+  protected openZoom(url: string): void {
+    this.zoomImage.set(url);
   }
 
+  protected closeZoom(): void {
+    this.zoomImage.set(null);
+  }
+
+  protected increaseQty(): void {
+    this.quantity.update((q) => q + 1);
+  }
+
+  protected decreaseQty(): void {
+    this.quantity.update((q) => (q > 1 ? q - 1 : 1));
+  }
+
+  protected addToCart(): void {
+    const p = this.product();
+    if (!p || this.outOfStock() || this.adding()) return;
+
+    if (!this.auth.user) {
+      this.uiModal.open('login');
+      return;
+    }
+
+    this.adding.set(true);
+    this.httpCart.updateCart(p._id, this.quantity()).subscribe({
+      next: () => {
+        this.toast.show('Producto agregado al carrito');
+        this.adding.set(false);
+      },
+      error: () => {
+        this.toast.show('No se pudo agregar al carrito', 'error');
+        this.adding.set(false);
+      },
+    });
+  }
 }

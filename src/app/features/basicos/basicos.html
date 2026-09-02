@@ -1,0 +1,77 @@
+<div class="basicos">
+
+  <!-- ============ CABECERA ============ -->
+  <header class="bx-hero">
+    <p class="eyebrow">Storefront · Colección permanente</p>
+    <h1 class="serif bx-hero__title">Básicos</h1>
+    <p class="bx-hero__lead">
+      Las piezas esenciales de DUSCK: prendas de línea continua, disponibilidad regular
+      y cortes que no dependen de la temporada. Explora por categoría.
+    </p>
+  </header>
+
+  <!-- ============ FILTRO POR CATEGORÍA ============ -->
+  @if (categories().length) {
+    <nav class="bx-filter" aria-label="Filtrar por categoría">
+      <button
+        type="button"
+        class="bx-chip"
+        [class.is-active]="selectedCategoryId() === null"
+        (click)="selectCategory(null)">
+        Todo
+      </button>
+      @for (cat of categories(); track cat._id) {
+        <button
+          type="button"
+          class="bx-chip"
+          [class.is-active]="selectedCategoryId() === cat._id"
+          (click)="selectCategory(cat._id)">
+          {{ cat.name }}
+        </button>
+      }
+    </nav>
+  }
+
+  <!-- ============ ESTADOS ============ -->
+  @if (loading()) {
+    <p class="bx-state">Cargando catálogo…</p>
+  } @else if (error()) {
+    <p class="bx-state">No pudimos cargar el catálogo. Intenta de nuevo en unos minutos.</p>
+  } @else if (unknownCategory()) {
+    <p class="bx-state">
+      No encontramos la categoría «{{ unknownCategory() }}».
+      <button type="button" class="bx-link bx-link--btn" (click)="selectCategory(null)">Ver todo el catálogo</button>
+    </p>
+  } @else if (visibleProducts().length === 0) {
+    <p class="bx-state">Todavía no hay productos disponibles en esta categoría.</p>
+  } @else {
+
+    <!-- ============ GRID DE PRODUCTOS ============ -->
+    <div class="product-grid">
+      @for (product of visibleProducts(); track product._id) {
+        <a [routerLink]="['/tienda/producto', product._id]" class="product-card">
+          <div class="product-media">
+            @if (product.stock === 0) {
+              <span class="tag-flag tag-flag--muted">Agotado</span>
+            }
+            @if (hasImages(product.images)) {
+              <img class="product-img" [src]="mainImage(product.images)" [alt]="product.name">
+            } @else {
+              <div class="product-img product-img--empty"></div>
+            }
+          </div>
+          <p class="product-name">{{ product.name }}</p>
+          <p class="product-price">{{ product.price | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
+        </a>
+      }
+    </div>
+  }
+
+  <!-- ============ PIE DE SECCIÓN ============ -->
+  <footer class="bx-foot">
+    <a routerLink="/category-list" class="bx-link">Ver todas las categorías</a>
+    <span class="bx-foot__dot">·</span>
+    <a routerLink="/colecciones" class="bx-link">¿Buscas un lanzamiento? Ver Colecciones</a>
+  </footer>
+
+</div>

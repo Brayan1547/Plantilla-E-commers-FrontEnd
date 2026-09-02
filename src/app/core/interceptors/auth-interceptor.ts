@@ -10,7 +10,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   //(1) obtener el token
   const token = httpAuth.token;
-  // console.log('token', 'token');
 
   let requestHeadersToken = req;
 

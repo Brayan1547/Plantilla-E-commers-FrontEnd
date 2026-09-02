@@ -1,105 +1,43 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { AsyncPipe, JsonPipe } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
-import { BehaviorSubject, Subscription } from 'rxjs';
-
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import Swal from 'sweetalert2';
-import { faCoffee, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 import { HttpCategory } from '../../../core/services/http-category';
 
-
+/**
+ * Índice PÚBLICO de categorías del storefront (ruta `/category-list`, SSR).
+ *
+ * R2.1 — FASE 5: esta vista es de SOLO LECTURA. Se retiró toda la UI
+ * administrativa (crear / editar / eliminar) y su navegación al panel legacy
+ * (retirado en R2.2). La administración de categorías vive exclusivamente en
+ * `/admin/categories`.
+ *
+ * Datos: `GET /api/category` (público, sin auth). Solo categorías activas.
+ * Cada categoría enlaza a `/basicos?categoria=<slug>` (catálogo público).
+ */
 @Component({
   selector: 'app-category-list',
-  imports: [AsyncPipe, JsonPipe, RouterLink, FontAwesomeModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './category-list.html',
   styleUrl: './category-list.css',
 })
 export default class CategoryList {
-  //atributos de iconos con fontawesomw
-  faCoffee = faCoffee;
-  faPenToSquare = faPenToSquare ;
+  private httpCategory = inject(HttpCategory);
 
-  //Atributos de la logica del componente
-  subscribeCategory!: Subscription;
-  public categoryList$ = new BehaviorSubject<any>([]);
+  protected readonly categories = signal<any[]>([]);
+  protected readonly loading = signal(true);
+  protected readonly error = signal(false);
 
-  private httpcategory = inject(HttpCategory);
-  private router = inject(Router)
-
-  // Hook: Saber cuando se inicializa el componente
-  ngOnInit() {
-    this.loadcategory();
-  }
-
-  ngOnDestroy() {
-    //Verifica si existe una subscripcion activa y la desuscribe
-    if (this.subscribeCategory) {
-      this.subscribeCategory.unsubscribe();
-    }
-  }
-
-  private loadcategory() {
-    //Realizar la peticion de los datos en la API para que sean obtenidos antes que el componente cargue (visualmente)
-    //Guarda la subscripcion al observable para tener control sobre ella
-    this.subscribeCategory = this.httpcategory.getCategory().subscribe({
-      next: (data) => {
-        console.log(data);
-        //Asignar la lista de categorias al observable
-        this.categoryList$.next(data.data);   //Solo la lista de las categorias
+  ngOnInit(): void {
+    this.httpCategory.getCategory().subscribe({
+      next: (res) => {
+        this.categories.set((res?.data ?? []).filter((c: any) => c.isActive));
+        this.loading.set(false);
       },
-      error: (err) => {
-        console.error(err);
+      error: () => {
+        this.error.set(true);
+        this.loading.set(false);
       },
-      complete: () => {
-        console.log('Listar todas las categorias');
-      }
     });
-  }
-
-  onEdit(id: string) {
-    console.log(' Edit', id);
-    //redirecciona
-    this.router.navigate(['//dashboard/category-edit', id]);
-  }
-  onDelete(id: string) {
-    // 2. Implementar la ventana Modal de SweetAlert2
-    Swal.fire({
-      title: "¿Estás seguro?",
-      text: "¿Deseas eliminar esta categoría?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Sí, ¡bórralo!",
-      cancelButtonText: "Cancelar"
-    }).then((result) => {
-      // 3. Validar si el usuario confirmó la acción
-      if (result.isConfirmed) {
-        // Ejecutar el servicio de eliminación dentro del bloque de confirmación
-        this.httpcategory.deleteCategoryById(id).subscribe({
-          next: (data) => {
-            console.log(data);
-
-            // Mostrar la alerta de éxito opcional
-            Swal.fire({
-              title: "¡Eliminado!",
-              text: "La categoría ha sido eliminada con éxito.",
-              icon: "success"
-            });
-
-            this.loadcategory();
-          },
-          error: (err) => {
-            console.error(err);
-          },
-          complete: () => {
-            console.log('Peticion al API para eliminar el usuairio ')
-          }
-        });
-      }
-    });
-
   }
 }

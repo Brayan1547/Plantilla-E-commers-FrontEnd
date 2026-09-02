@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { inject, PLATFORM_ID, Service } from "@angular/core";
 import { Router } from "@angular/router";
 
-import { BehaviorSubject, catchError, map, of, tap } from "rxjs";
+import { BehaviorSubject, catchError, finalize, map, Observable, of, shareReplay, tap } from "rxjs";
 
 import { environment } from "../../../environments/environment";
 import { isPlatformBrowser } from "@angular/common";
@@ -26,7 +26,13 @@ export class HttpAuth {
     currentToken$ = new BehaviorSubject<any>(this.getTokenFromStorage());
     token$ = this.currentToken$.asObservable();
 
-    loginUser(credentials: any) {
+    /**
+     * Peticion `GET /auth/renew-token` en vuelo, compartida entre suscriptores
+     * concurrentes. Se libera al completar (ver `checkAuthStatus`).
+     */
+    private renewInFlight$?: Observable<boolean>;
+
+    loginUser(credentials: any, returnUrl?: string | null) {
         //credential = { "email": "tati.garcia@dominio.com", "password": "OtraClaveDiferente456" }
 
         return this.http.post<any>(`${this.BASE_URL}/auth/login`, credentials)
@@ -38,24 +44,10 @@ export class HttpAuth {
 
                         this.setAuthData(res.token, res.data);
 
-                        //Redirecciona según el rol.
-                        // administrador y shop_manager tienen acceso al Admin Panel;
-                        // editor y subscriber van a la tienda.
-                        const role = res.data?.role;
-
-                        switch (role) {
-                            case 'administrador':
-                            case 'shop_manager':
-                                this.router.navigateByUrl('/admin');
-                                break;
-                            case 'editor':
-                            case 'subscriber':
-                            default:
-                                this.router.navigateByUrl('/home');
-                                break;
-                        }
-
-
+                        // Redirecciona segun rol + returnUrl (si es una ruta interna segura).
+                        this.router.navigateByUrl(
+                            this.resolvePostLoginUrl(res.data?.role, returnUrl),
+                        );
                     }
                 }),
                 //2.map muta o transforma el valor que viene del usuario.En este caso, extraemos el mensaje de la 
@@ -82,8 +74,36 @@ export class HttpAuth {
         return this.http.post<any>(`${this.BASE_URL}/auth/register`, data)
     }
 
+    /**
+     * Destino tras un login correcto.
+     *  - administrador / shop_manager: `returnUrl` si es una ruta interna segura;
+     *    en caso contrario `/admin`.
+     *  - editor / subscriber: siempre `/home` (no tienen panel; un returnUrl a
+     *    `/admin` lo resolveria el adminGuard como "acceso restringido").
+     */
+    private resolvePostLoginUrl(role: string | undefined, returnUrl?: string | null): string {
+        const isAdminRole = role === 'administrador' || role === 'shop_manager';
+        if (isAdminRole) {
+            return this.safeInternalUrl(returnUrl) ?? '/admin';
+        }
+        return '/home';
+    }
 
-    checkAuthStatus(){
+    /**
+     * Acepta SOLO rutas internas absolutas ("/algo"). Rechaza URLs absolutas
+     * (`http://evil.com`), protocol-relative (`//evil.com`) y backslashes,
+     * para que `returnUrl` no pueda usarse como open redirect.
+     */
+    private safeInternalUrl(raw?: string | null): string | null {
+        if (!raw || typeof raw !== 'string') return null;
+        if (!raw.startsWith('/')) return null;
+        if (raw.startsWith('//') || raw.startsWith('/\\')) return null;
+        if (raw.includes('://')) return null;
+        return raw;
+    }
+
+
+    checkAuthStatus(): Observable<boolean> {
         const token = this.token;
 
         //validar si el token existe
@@ -91,20 +111,33 @@ export class HttpAuth {
             this.clearAuthData();       //Eliminar las propiedades del localstorage
             return of( false );
         }
-        //realiza la peticion para renovar token
-        return this.http.get<any>(`${this.BASE_URL}/auth/renew-token`).pipe(
+
+        // Coalescing de la peticion en vuelo. En una carga fria de /admin,
+        // adminGuard + adminChildGuard (este ultimo se evalua dos veces por el
+        // redirect '' -> 'overview') llaman a checkAuthStatus() casi a la vez:
+        // sin esto se disparan 3x GET /auth/renew-token. Compartimos la misma
+        // peticion y la liberamos al completar, de modo que cada NAVEGACION
+        // posterior sigue revalidando la sesion contra el backend.
+        if ( this.renewInFlight$ ) {
+            return this.renewInFlight$;
+        }
+
+        this.renewInFlight$ = this.http.get<any>(`${this.BASE_URL}/auth/renew-token`).pipe(
             tap( ( res ) => {
                 if ( res?.token && res?.data ) {
                     this.setAuthData(res.token, res.data );
                 }
             }),
             map( ( res ) => !!res.token ),
-            catchError( ( err: HttpErrorResponse ) => {
-                console.log( 'Error al renovar el token ');
+            catchError( () => {
                 this.clearAuthData();       //Eliminar las propiedades del localStorage
                 return of(false);
-            } )
+            } ),
+            finalize( () => { this.renewInFlight$ = undefined; } ),
+            shareReplay( { bufferSize: 1, refCount: false } ),
         );
+
+        return this.renewInFlight$;
     }
 
     setAuthData(token: string | null, user: any) {
@@ -175,7 +208,6 @@ export class HttpAuth {
         }
 
         this.currentToken$.next(token);
-        console.log('[seter token]:', token);
     }
 
     set user(user: any) {
@@ -188,7 +220,6 @@ export class HttpAuth {
         }
 
         this.currentUser$.next(user);
-        console.log(user)
     }
 
     //Getters para ontener el valor actual sincronicamnete

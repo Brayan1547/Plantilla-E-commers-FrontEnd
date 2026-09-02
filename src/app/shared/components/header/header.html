@@ -114,10 +114,10 @@
 
   <ul class="side-drawer__list">
     <li><button routerLink="/home" (click)="closeDrawer()">TIENDA</button></li>
-    <li><button routerLink="/product-ropa" (click)="closeDrawer()">HOMBRE</button></li>
-    <li><button [routerLink]="" (click)="closeDrawer()">MUJER</button></li>
-    <li><a routerLink="/category-list" routerLinkActive="active" (click)="closeDrawer()">COLECCIONES</a></li>
-    <li><a routerLink="/dashboard/product-list" routerLinkActive="active" (click)="closeDrawer()">BÁSICOS</a></li>
+    <li><a routerLink="/basicos" [queryParams]="{ categoria: 'hombre' }" routerLinkActive="active" (click)="closeDrawer()">HOMBRE</a></li>
+    <li><a routerLink="/basicos" [queryParams]="{ categoria: 'mujer' }" routerLinkActive="active" (click)="closeDrawer()">MUJER</a></li>
+    <li><a routerLink="/colecciones" routerLinkActive="active" (click)="closeDrawer()">COLECCIONES</a></li>
+    <li><a routerLink="/basicos" routerLinkActive="active" (click)="closeDrawer()">BÁSICOS</a></li>
   </ul>
 </aside>
 

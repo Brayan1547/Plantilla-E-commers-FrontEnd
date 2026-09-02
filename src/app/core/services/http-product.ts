@@ -1,5 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { HttpAuth } from './http-auth';
 
 @Service()
@@ -9,6 +10,10 @@ export class HttpProduct {
     //Inyectar una dependencia sin usar el constructor, implementarse en las funciones
     private http = inject(HttpClient);
     private authHttp = inject( HttpAuth);
+
+    // Base del backend (coherente con http-category / http-auth). Antes estaba
+    // hardcodeada como 'http://localhost:3000/api', lo que rompia el deploy.
+    private BASE_URL: string = environment.apiUrl;
 
     //Crear una cabecera y va meter dentro de ella el token
     private getHeader(): HttpHeaders {
@@ -25,25 +30,25 @@ export class HttpProduct {
     //metodo para obtener todas las categorias
     createProduct( newProduct: any) {
         //http siempre devuelve los datos dentro de un Observable
-        return this.http.post<any>( 'http://localhost:3000/api/product', newProduct, { headers: this.getHeader() } );
+        return this.http.post<any>( `${this.BASE_URL}/product`, newProduct, { headers: this.getHeader() } );
     }
 
     getProduct() {
         //http siemprem devuelve los datos dentro de un Observable
-        return this.http.get<any>( 'http://localhost:3000/api/product', { headers: this.getHeader() } );
+        return this.http.get<any>( `${this.BASE_URL}/product`, { headers: this.getHeader() } );
     }
 
     deleteProduct( id: string | null) {
         //http siemprem devuelve los datos dentro de un Observable
-        return this.http.delete<any>( `http://localhost:3000/api/product/${id}`, { headers: this.getHeader() } );
+        return this.http.delete<any>( `${this.BASE_URL}/product/${id}`, { headers: this.getHeader() } );
     }
 
     getProductById( id: string | null) {
         //http siemprem devuelve los datos dentro de un Observable
-        return this.http.get<any>(`http://localhost:3000/api/product/${id}`,  { headers: this.getHeader() } );
+        return this.http.get<any>(`${this.BASE_URL}/product/${id}`,  { headers: this.getHeader() } );
     }
 
     updateProductById( id: string | null,  updateProduct: any ) {
-        return this.http.patch<any>(`http://localhost:3000/api/product/${id}`, updateProduct,  { headers: this.getHeader() } ) ;
+        return this.http.patch<any>(`${this.BASE_URL}/product/${id}`, updateProduct,  { headers: this.getHeader() } ) ;
     }
 }

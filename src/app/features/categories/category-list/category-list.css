@@ -1,215 +1,105 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, Helvetica, sans-serif;
+/* Índice público de categorías — identidad del storefront (ver home.css). */
+:host {
+  --cream: #f6f2ea;
+  --gray-flat: #edeae3;
+  --ink: #14120f;
+  --ink-soft: #4a4640;
+  --line: rgba(20, 18, 15, 0.14);
+
+  display: block;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Jost', sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-body{
-    background:#000f06;
-    padding:40px;
+.cl {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 72px 8vw 96px;
 }
 
-.container{
-    width:95%;
-    max-width:1200px;
-    margin:auto;
-    background:#fff;
-    border-radius:12px;
-    padding:25px;
-    box-shadow:0 8px 20px rgba(0,0,0,.08);
+.serif { font-family: 'Playfair Display', serif; }
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 500;
 }
 
-.header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:25px;
+.cl-hero { margin-bottom: 44px; }
+.cl-hero__title {
+  font-size: clamp(34px, 5vw, 56px);
+  font-weight: 500;
+  line-height: 1.05;
+  margin: 14px 0 16px;
+}
+.cl-hero__lead {
+  color: var(--ink-soft);
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 44ch;
 }
 
-.header h2{
-    color:#241919;
+.cl-state {
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  padding: 40px 0;
 }
 
-.header button{
-    background:#111827;
-    color:white;
-    border:none;
-    padding:12px 20px;
-    border-radius:8px;
-    cursor:pointer;
-    transition:.3s;
-    font-size:15px;
+.cl-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
 
-.header button:hover{
-    background:#374151;
+.cl-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 180px;
+  padding: 28px;
+  background: #fff;
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+  transition: transform .3s cubic-bezier(.2, .8, .2, 1), border-color .3s ease;
+}
+.cl-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--ink);
+}
+.cl-card:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.cl-card__name { font-size: 22px; font-weight: 500; }
+.cl-card__desc {
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  line-height: 1.6;
+  flex: 1;
+}
+.cl-card__cta {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink);
 }
 
-table{
-    width:100%;
-    border-collapse:collapse;
+@media (max-width: 1000px) {
+  .cl-grid { grid-template-columns: 1fr 1fr; }
+  .cl { padding: 60px 7vw 80px; }
+}
+@media (max-width: 620px) {
+  .cl-grid { grid-template-columns: 1fr; }
+  .cl { padding: 48px 6vw 64px; }
 }
 
-thead{
-    background:#111827;
-    color:white;
-}
-
-thead th{
-    padding:15px;
-    text-align:left;
-}
-
-tbody td{
-    padding:15px;
-    border-bottom:1px solid #e5e7eb;
-}
-
-tbody tr:hover{
-    background:#f8fafc;
-}
-
-.activo{
-    background:#dcfce7;
-    color:#15803d;
-    padding:6px 12px;
-    border-radius:20px;
-    font-size:13px;
-    font-weight:bold;
-}
-
-.inactivo{
-    background:#fee2e2;
-    color:#dc2626;
-    padding:6px 12px;
-    border-radius:20px;
-    font-size:13px;
-    font-weight:bold;
-}
-
-.editar{
-    background:#2563eb;
-    color:white;
-    border:none;
-    padding:8px 14px;
-    border-radius:6px;
-    cursor:pointer;
-    margin-right:8px;
-    transition:.3s;
-}
-
-.editar:hover{
-    background:#1d4ed8;
-}
-
-.eliminar{
-    background:#dc2626;
-    color:white;
-    border:none;
-    padding:8px 14px;
-    border-radius:6px;
-    cursor:pointer;
-    transition:.3s;
-}
-
-.eliminar:hover{
-    background:#b91c1c;
-}
-
-/* Estilo para el botón de nueva categoría basado en enlace */
-.btn-new-category {
-    background: #111827;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: .3s;
-    font-size: 15px;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.btn-new-category:hover {
-    background: #374151;
-    color: white;
-}
-
-/* ==========================================
-    Quitar eso caundo quite el objeto json
-============================================= */
-pre{
-    white-space: pre-wrap;   /* permite que el texto haga salto de línea */
-    word-break: break-word;  /* corta palabras/strings largos si hace falta */
-    overflow-x: auto;        /* si aun así algo es muy largo, scroll solo ahí, no en toda la página */
-    background:#f4f6f9;
-    padding:10px;
-    border-radius:6px;
-    font-size:13px;
-}
-
-/* ========================================
-   Responsivo para celular
-======================================== */
-
-@media (max-width: 768px) {
-
-    body{
-        padding: 15px;
-    }
-
-    .container{
-        width: 100%;
-        padding: 15px;
-    }
-
-    .header{
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-
-    .header button{
-        width: 100%;
-    }
-
-    /* Convertimos la tabla en tarjetas apiladas */
-    thead{
-        display: none; /* ocultamos el encabezado original */
-    }
-
-    table, tbody, tr, td{
-        display: block;
-        width: 100%;
-    }
-
-    tbody tr{
-        margin-bottom: 15px;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        padding: 10px;
-    }
-
-    tbody td{
-        border-bottom: none;
-        padding: 10px 5px;
-        text-align: right; /* el valor a la derecha */
-    }
-
-    /* Mostramos una etiqueta antes de cada dato, usando el nombre de columna */
-    tbody td::before{
-        content: attr(data-label);
-        float: left;
-        font-weight: bold;
-        color: #111827;
-    }
-
-    tbody td:last-child{
-        text-align: left; /* los botones de acción se ven mejor a la izquierda */
-    }
-
-    tbody td:last-child > * {
-        margin-bottom: 8px;
-    }
+@media (prefers-reduced-motion: reduce) {
+  .cl-card { transition: none; }
 }

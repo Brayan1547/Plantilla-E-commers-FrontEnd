@@ -1,44 +1,33 @@
-<div class="container">
-    <div class="header">
-        <h2>Categorías</h2>
-        <button>
-            <a routerLink="/category-new" class="btn-new-category"> Nueva Categoría</a>
-        </button>
-        
-    </div>
+<div class="cl">
 
-    <!-- <pre>{{categoryList$ | async | json}}</pre> -->
+  <header class="cl-hero">
+    <p class="eyebrow">Storefront</p>
+    <h1 class="serif cl-hero__title">Categorías</h1>
+    <p class="cl-hero__lead">
+      Todas las líneas de producto de DUSCK. Elige una para ver sus prendas.
+    </p>
+  </header>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Slug</th>
-                <th>Descripción</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (category of ( categoryList$ | async); track $index) {
-            <tr>
-                <td>
-                    {{category.name}}
-                    <fa-icon [icon]="faCoffee" />
-                </td>
-                <td>{{category.slug}}</td>
-                <td>{{category.description}}</td>
-                <td><span class="activo">Activo</span></td>
-                <td>
-                    <a [routerLink]="['/dashboard/category-edit', category._id]">
-                        <fa-icon [icon]="faPenToSquare" />
-                        Editar
-                    </a>
-                    <button (click)="onEdit( category._id)">Editar</button>
-                    <button class="onDelete" (click)="onDelete(category._id)">Eliminar</button>
-                </td>
-            </tr>
+  @if (loading()) {
+    <p class="cl-state">Cargando categorías…</p>
+  } @else if (error()) {
+    <p class="cl-state">No pudimos cargar las categorías. Intenta de nuevo en unos minutos.</p>
+  } @else if (categories().length === 0) {
+    <p class="cl-state">Todavía no hay categorías publicadas.</p>
+  } @else {
+    <ul class="cl-grid">
+      @for (category of categories(); track category._id) {
+        <li>
+          <a class="cl-card" [routerLink]="['/basicos']" [queryParams]="{ categoria: category.slug }">
+            <span class="cl-card__name serif">{{ category.name }}</span>
+            @if (category.description) {
+              <span class="cl-card__desc">{{ category.description }}</span>
             }
-        </tbody>
-    </table>
+            <span class="cl-card__cta">Ver prendas →</span>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+
 </div>

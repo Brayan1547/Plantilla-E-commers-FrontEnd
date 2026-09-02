@@ -1,0 +1,156 @@
+/* COLECCIONES — misma familia visual que el storefront, tratamiento "lanzamiento":
+   fondo tinta + acento gradiente dusk, para diferenciarlo de Básicos (fondo crema). */
+:host {
+  --cream: #f6f2ea;
+  --ink: #14120f;
+  --ink-2: #1d1a16;
+  --ink-soft: rgba(246, 242, 234, 0.68);
+  --line: rgba(246, 242, 234, 0.16);
+  --dusk-gradient: linear-gradient(90deg, #e3a76f 0%, #c97b84 50%, #4b3f72 100%);
+
+  display: block;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: 'Jost', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.colecciones {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 80px 8vw 104px;
+}
+
+.serif { font-family: 'Playfair Display', serif; }
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(20, 18, 15, 0.55);
+  font-weight: 500;
+}
+.eyebrow--light { color: var(--ink-soft); }
+
+/* ---------- hero ---------- */
+.cx-hero {
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--line);
+}
+.cx-hero__title {
+  font-size: clamp(38px, 6vw, 68px);
+  font-weight: 500;
+  line-height: 1.02;
+  margin: 16px 0 22px;
+}
+.cx-hero__title::after {
+  content: "";
+  display: block;
+  width: 96px;
+  height: 3px;
+  margin-top: 22px;
+  background: var(--dusk-gradient);
+}
+.cx-hero__lead {
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.75;
+  max-width: 52ch;
+}
+.cx-hero__lead a {
+  color: var(--cream);
+  text-decoration: none;
+  border-bottom: 1px solid var(--cream);
+  padding-bottom: 1px;
+}
+
+/* ---------- cómo funciona ---------- */
+.cx-how { padding: 56px 0; border-bottom: 1px solid var(--line); }
+.cx-how__title {
+  font-size: clamp(22px, 2.6vw, 30px);
+  font-weight: 500;
+  margin-bottom: 36px;
+}
+.cx-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 22px;
+}
+.cx-step {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 20px;
+  align-items: start;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+.cx-step:last-child { border-bottom: none; padding-bottom: 0; }
+.cx-step__n {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: transparent;
+  background: var(--dusk-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.cx-step h3 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  margin: 2px 0 6px;
+}
+.cx-step p {
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.7;
+  max-width: 48ch;
+}
+
+/* ---------- estado actual ---------- */
+.cx-current { padding-top: 52px; }
+.cx-current .eyebrow { color: var(--ink-soft); }
+.cx-current__msg {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(20px, 2.4vw, 26px);
+  line-height: 1.4;
+  margin: 14px 0 8px;
+  max-width: 30ch;
+}
+.cx-current__sub {
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+.cx-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.cx-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 13px 24px;
+  font-size: 12px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background .3s ease, color .3s ease, transform .3s ease;
+}
+.cx-btn--solid { background: var(--cream); color: var(--ink); }
+.cx-btn--solid:hover { transform: translateY(-2px); }
+.cx-btn--ghost { border: 1px solid var(--line); color: var(--cream); }
+.cx-btn--ghost:hover { border-color: var(--cream); }
+.cx-btn:focus-visible { outline: 2px solid var(--cream); outline-offset: 2px; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 720px) {
+  .colecciones { padding: 60px 6vw 80px; }
+  .cx-step { grid-template-columns: 44px 1fr; gap: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cx-btn { transition: none; }
+}

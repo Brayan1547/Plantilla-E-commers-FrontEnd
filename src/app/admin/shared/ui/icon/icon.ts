@@ -3,9 +3,9 @@ import { DomSanitizer } from '@angular/platform-browser';
 
 /**
  * Set de iconos del panel: SVG inline, trazo 1.5, hereda `currentColor`.
- * Se prefiere a `@fortawesome` / `@hugeicons` (ya instalados pero apenas usados)
- * para tener control total del peso de trazo y coherencia editorial, sin sumar
- * módulos al bundle del panel.
+ * SVG propio en lugar de una librería de iconos: control total del peso de
+ * trazo y coherencia editorial, sin sumar módulos al bundle del panel.
+ * (Las librerías `@fortawesome` / `@hugeicons` se retiraron en R2.3: 0 usos.)
  *
  * El `bypassSecurityTrustHtml` es seguro: los strings son constantes escritas
  * en este archivo, nunca entra contenido del usuario.

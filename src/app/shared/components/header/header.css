@@ -100,7 +100,7 @@ header.scrolled .navbar {
 }
 
 /* Letras de los menús pequeñas y estilizadas */
-.nav-left button, .menu-link {
+.nav-left button {
   background: none;
   border: none;
   cursor: pointer;
@@ -114,7 +114,7 @@ header.scrolled .navbar {
   transition: color var(--transition-smooth);
 }
 
-.nav-left button::after, .menu-link::after {
+.nav-left button::after {
   content: '';
   position: absolute;
   left: 0;
@@ -125,8 +125,8 @@ header.scrolled .navbar {
   transition: width var(--transition-smooth);
 }
 
-.nav-left button:hover::after, .menu-link:hover::after,
-.nav-left button:hover, .menu-link:hover { 
+.nav-left button:hover::after,
+.nav-left button:hover {
   width: 100%;
   color: var(--color-accent);
 }
@@ -259,62 +259,8 @@ header:not(.scrolled) .icon-mask {
 .icon-mask--user   { -webkit-mask-image: url('/assets/imagenes/usuario.png'); mask-image: url('/assets/imagenes/usuario.png'); }
 
 /* ========================================
-   MEGA MENÚ DESPLEGABLE
+   MENÚ DE CUENTA (desplegable)
 ======================================== */
-.mega-menu {
-  padding: 40px;
-  background: var(--color-white);
-  border-top: 1px solid var(--color-cream);
-  border-bottom: 1px solid var(--color-cream);
-  position: absolute;
-  width: 100%;
-  left: 0;
-  z-index: 10;
-  box-shadow: 0 10px 30px rgba(15, 15, 16, 0.03);
-  animation: fadeIn var(--transition-smooth);
-}
-
-.mega-menu h3 {
-  font-family: var(--font-heading);
-  font-size: 24px;
-  font-weight: 400;
-  margin-bottom: 16px;
-  color: var(--color-primary);
-}
-
-.mega-menu ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 32px;
-}
-
-.mega-menu li {
-  font-family: var(--font-body);
-  font-size: 13px;
-  color: var(--color-gray);
-  cursor: pointer;
-  transition: color var(--transition-smooth);
-}
-
-.mega-menu li:hover {
-  color: var(--color-accent);
-}
-
-/* =========================================
-  MENU DESPLEGABLE
-============================================
-*/
-
-.auth-link {
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  text-decoration: underline;
-}
 .account-wrapper {
   position: relative;
   display: inline-block;
@@ -483,42 +429,7 @@ header:not(.scrolled) .icon-mask {
 }
 
 /* ========================================
-   BARRA FLOTANTE INFERIOR
-======================================== */
-.floating-nav {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 900;
-  background: var(--color-primary);
-  display: flex;
-  gap: 4px;
-  padding: 6px;
-  box-shadow: 0 8px 24px rgba(15, 15, 16, 0.25);
-}
-
-.floating-nav button,
-.floating-nav a {
-  background: none;
-  border: none;
-  color: var(--color-white);
-  font-family: var(--font-body);
-  font-size: 11px;
-  letter-spacing: 1px;
-  padding: 10px 16px;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background var(--transition-smooth);
-}
-
-.floating-nav button:hover,
-.floating-nav a:hover {
-  background: var(--color-accent);
-}
-
-/* ========================================
-   Responsil cel
+   Responsive móvil
 ======================================== */
 @media (max-width: 768px) {
   .navbar {
