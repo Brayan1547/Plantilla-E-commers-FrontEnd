@@ -9,14 +9,17 @@ import { HttpCategory } from '../../core/services/http-category';
  * BÁSICOS — sección pública permanente del storefront.
  *
  * Representa las prendas esenciales de DUSCK. La clasificación se hace mediante
- * la CATEGORÍA del producto (único mecanismo real disponible en el backend
- * actual: `product.category` -> `GET /api/category`). No existe un dominio
- * "básico vs colección" persistido; ver el informe R2.1 (§14) para la
- * limitación documentada.
+ * las CATEGORÍAS del producto (Product Domain: `product.categories[]`, una
+ * relación N:M real -> `GET /api/category`; HOMBRE/MUJER son categorías igual
+ * que CAMISETAS/PANTALONES). No existe un dominio "básico vs colección"
+ * persistido; ver el informe R2.1 (§14) para la limitación documentada.
  *
- * Datos: `GET /api/product` (público) + `GET /api/category` (público). Solo se
- * muestran productos y categorías con `isActive: true`. Sin UI administrativa.
- * El detalle usa la ruta pública existente `tienda/producto/:id`.
+ * Datos: `GET /api/product` (público). Desde el Product Domain, este endpoint
+ * YA filtra en el BACKEND a `status: PUBLISHED` + `isActive: true` (Regla §24:
+ * el backend es la barrera real, no Angular) — el `.filter(isActive)` de abajo
+ * queda como defensa adicional, no como el único mecanismo. Categorías: solo
+ * se muestran las `isActive: true`. Sin UI administrativa. El detalle usa la
+ * ruta pública existente `tienda/producto/:id`.
  */
 @Component({
   selector: 'app-basicos',
@@ -49,7 +52,7 @@ export default class Basicos {
     const catId = this.selectedCategoryId();
     const list = this.products();
     if (!catId) return list;
-    return list.filter((p) => this.categoryIdOf(p) === catId);
+    return list.filter((p) => this.categoryIdsOf(p).includes(catId));
   });
 
   ngOnInit(): void {
@@ -103,11 +106,11 @@ export default class Basicos {
     this.selectedCategoryId.set(id);
   }
 
-  /** `product.category` llega como string id (sin poblar); se contempla objeto por robustez. */
-  private categoryIdOf(product: any): string | null {
-    const c = product?.category;
-    if (!c) return null;
-    return typeof c === 'string' ? c : (c._id ?? null);
+  /** `product.categories` llega como array de ids (sin poblar); se contemplan objetos por robustez. */
+  private categoryIdsOf(product: any): string[] {
+    const cats = product?.categories;
+    if (!Array.isArray(cats)) return [];
+    return cats.map((c: any) => (typeof c === 'string' ? c : c?._id)).filter(Boolean);
   }
 
   /** Imagen principal del producto (misma lógica que home). */

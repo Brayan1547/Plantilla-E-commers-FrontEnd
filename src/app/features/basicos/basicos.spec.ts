@@ -19,9 +19,9 @@ describe('Basicos (storefront)', () => {
     { _id: 'c3', name: 'Accesorios', slug: 'accesorios', isActive: false },
   ];
   const PRODUCTS = [
-    { _id: 'p1', name: 'Camiseta Negra', price: 89000, stock: 5, isActive: true, category: 'c1', images: [] },
-    { _id: 'p2', name: 'Pantalón Gris', price: 219000, stock: 0, isActive: true, category: 'c2', images: [] },
-    { _id: 'p3', name: 'Borrador', price: 10, stock: 1, isActive: false, category: 'c1', images: [] },
+    { _id: 'p1', name: 'Camiseta Negra', price: 89000, stock: 5, isActive: true, categories: ['c1'], images: [] },
+    { _id: 'p2', name: 'Pantalón Gris', price: 219000, stock: 0, isActive: true, categories: ['c2'], images: [] },
+    { _id: 'p3', name: 'Borrador', price: 10, stock: 1, isActive: false, categories: ['c1'], images: [] },
   ];
 
   function setup(queryParams: Record<string, string> = {}) {

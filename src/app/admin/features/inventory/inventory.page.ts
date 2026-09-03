@@ -7,7 +7,7 @@ import { AdminProductsApi } from '../../core/services/admin-products.api';
 import { AdminCategoriesApi } from '../../core/services/admin-categories.api';
 import { normalizeError } from '../../core/services/api-error';
 import {
-  categoryId,
+  categoryIds,
   mainImageUrl,
   stockLevel,
   STOCK_LOW_THRESHOLD,
@@ -88,8 +88,10 @@ export default class InventoryPage {
   });
 
   protected categoryName(product: AdminProduct): string {
-    const id = categoryId(product.category);
-    return (id && this.categoryMap().get(id)) || 'Sin categoría';
+    const names = categoryIds(product.categories)
+      .map((id) => this.categoryMap().get(id))
+      .filter((n): n is string => !!n);
+    return names.length ? names.join(', ') : 'Sin categoría';
   }
 
   /** Contadores globales (sobre todo el catálogo, no la página). */
@@ -112,7 +114,7 @@ export default class InventoryPage {
       search: this.search(),
       searchFields: ['name', 'slug'],
       filters: [
-        (p) => (this.categoryFilter() ? categoryId(p.category) === this.categoryFilter() : true),
+        (p) => (this.categoryFilter() ? categoryIds(p.categories).includes(this.categoryFilter()) : true),
         (p) => (this.levelFilter() ? stockLevel(p.stock) === this.levelFilter() : true),
         (p) =>
           this.statusFilter() === ''

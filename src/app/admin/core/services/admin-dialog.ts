@@ -60,6 +60,38 @@ export class AdminDialog {
     });
   }
 
+  /**
+   * Captura un texto obligatorio del operador (p. ej. el motivo de rechazo de
+   * un producto). Devuelve el texto recortado, o `null` si cancela o deja el
+   * campo vacío — el backend exige `rejectionReason` no vacío de todas formas,
+   * pero se valida aquí también para no abrir un request condenado a 400.
+   */
+  async promptText(opts: {
+    title: string;
+    message?: string;
+    placeholder?: string;
+    confirmText?: string;
+  }): Promise<string | null> {
+    if (!this.canUseDom) return null;
+    const result = await Swal.fire({
+      title: opts.title,
+      text: opts.message,
+      input: 'textarea',
+      inputPlaceholder: opts.placeholder ?? '',
+      showCancelButton: true,
+      reverseButtons: true,
+      confirmButtonText: opts.confirmText ?? 'Confirmar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#a23b3b',
+      cancelButtonColor: '#8a847b',
+      customClass: { popup: 'adm-swal' },
+      inputValidator: (value) => (value?.trim() ? undefined : 'Este campo es obligatorio.'),
+    });
+    if (!result.isConfirmed) return null;
+    const text = String(result.value ?? '').trim();
+    return text || null;
+  }
+
   success(message: string): void {
     this.toast.show(message, 'success');
   }

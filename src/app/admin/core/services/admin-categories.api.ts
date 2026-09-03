@@ -12,10 +12,15 @@ import { unwrap } from './api.util';
  *   GET    /category/:id  -> { msg, data: Category }
  *   POST   /category      -> { msg, data: Category }      (admin | shop_manager)
  *   PATCH  /category/:id  -> { msg, data: Category }      whitelist: name,slug,description,isActive
- *   DELETE /category/:id  -> { msg, data: Category }
+ *   DELETE /category/:id  -> { msg, data: Category }       409 si algún producto la usa (`categories[]`)
  *
  * Modelo: name (2–50, único), slug (`^[a-z0-9-]+$`, único), description (≤250),
  * isActive (bool, default true). Sin jerarquía/subcategorías/atributos.
+ *
+ * Product Domain: un producto pertenece a VARIAS categorías a la vez
+ * (`Product.categories: ObjectId[]`) — HOMBRE/MUJER son categorías igual que
+ * CAMISETAS/PANTALONES, nunca un campo `gender` aparte. Este servicio no
+ * cambia de forma por eso; solo lo consume `AdminProductsApi`.
  */
 export interface CategoryPayload {
   name: string;

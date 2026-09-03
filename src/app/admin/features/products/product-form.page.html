@@ -1,4 +1,4 @@
-<adm-page-header [title]="title()" subtitle="Campos soportados por la API. Sin variantes, tallas, colores ni SKU (requieren backend adicional).">
+<adm-page-header [title]="title()" subtitle="Borrador flexible; enviar a revisión exige información completa.">
   <a actions class="adm-btn adm-btn--ghost adm-btn--sm" routerLink="/admin/products">
     <adm-icon name="chevron-left" [size]="14" /> Cancelar
   </a>
@@ -12,7 +12,38 @@
     <div class="adm-card"><adm-error-state [message]="errorMsg()" (retry)="retry()" /></div>
   }
   @default {
-    <form class="adm-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @if (product(); as p) {
+      <div class="adm-card" style="margin-bottom:16px">
+        <div class="adm-card__body adm-inline" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div class="adm-inline" style="gap:10px">
+            <span class="adm-field__label" style="margin:0">Estado del workflow:</span>
+            <adm-status-badge [label]="statusLabels[p.status]" [tone]="statusTone[p.status]" />
+            @if (p.status === 'REJECTED' && p.rejectionReason) {
+              <span class="adm-muted" style="font-size:12.5px">Motivo: {{ p.rejectionReason }}</span>
+            }
+          </div>
+          @if (canReopen()) {
+            <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" [disabled]="reopening()" (click)="reopenForEditing()">
+              <adm-icon name="refresh" [size]="13" />
+              {{ reopening() ? 'Reabriendo…' : 'Volver a borrador para editar' }}
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (contentLocked()) {
+        <div class="adm-card" style="margin-bottom:16px">
+          <div class="adm-card__body adm-inline" style="gap:8px">
+            <adm-icon name="lock" [size]="14" />
+            <span class="adm-muted" style="font-size:12.5px">
+              Este producto no admite edición de contenido en su estado actual. Usa "Volver a borrador" para reabrir el ciclo de revisión.
+            </span>
+          </div>
+        </div>
+      }
+    }
+
+    <form class="adm-card" [formGroup]="form" (ngSubmit)="saveDraft()" novalidate>
       <div class="adm-card__body adm-grid-2">
         <!-- Columna izquierda -->
         <div>
@@ -46,7 +77,7 @@
           <div class="adm-field">
             <label class="adm-field__label" for="pf-desc">Descripción</label>
             <textarea id="pf-desc" class="adm-textarea" formControlName="description"></textarea>
-            <span class="adm-field__hint">{{ form.controls.description.value.length }}/500</span>
+            <span class="adm-field__hint">{{ form.controls.description.value.length }}/500 · obligatoria para enviar a revisión</span>
             <span class="adm-field__error">
               @if (ctrl('description').touched && ctrl('description').errors?.['maxlength']) {
                 Máximo 500 caracteres.
@@ -65,38 +96,39 @@
               </span>
             </div>
             <div class="adm-field" style="flex:1">
-              <label class="adm-field__label" for="pf-stock">Stock</label>
-              <input id="pf-stock" class="adm-input" type="number" min="0" step="1"
-                formControlName="stock"
-                [attr.aria-invalid]="ctrl('stock').touched && ctrl('stock').invalid" />
-              <span class="adm-field__error">
-                @if (ctrl('stock').touched && ctrl('stock').invalid) { Debe ser un número ≥ 0. }
-              </span>
+              @if (!hasVariants()) {
+                <label class="adm-field__label" for="pf-stock">Stock</label>
+                <input id="pf-stock" class="adm-input" type="number" min="0" step="1"
+                  formControlName="stock"
+                  [attr.aria-invalid]="ctrl('stock').touched && ctrl('stock').invalid" />
+                <span class="adm-field__error">
+                  @if (ctrl('stock').touched && ctrl('stock').invalid) { Debe ser un número ≥ 0. }
+                </span>
+              } @else {
+                <span class="adm-field__label">Stock (suma de variantes)</span>
+                <input class="adm-input" type="text" [value]="variantsStockTotal() + ' uds'" disabled />
+                <span class="adm-field__hint">Se calcula solo; edítalo desde las variantes.</span>
+              }
             </div>
           </div>
 
           <div class="adm-field">
-            <label class="adm-field__label" for="pf-cat">Categoría</label>
-            <select id="pf-cat" class="adm-select" formControlName="category"
-              [attr.aria-invalid]="ctrl('category').touched && ctrl('category').invalid">
-              <option value="" disabled>Selecciona una categoría</option>
-              @for (c of categories(); track c._id) {
-                <option [value]="c._id">{{ c.name }}{{ c.isActive ? '' : ' (inactiva)' }}</option>
-              }
-            </select>
-            <span class="adm-field__error">
-              @if (ctrl('category').touched && ctrl('category').invalid) { La categoría es obligatoria. }
-              @else if (categories().length === 0) { No hay categorías. Crea una primero. }
-            </span>
-          </div>
-
-          <div class="adm-field">
-            <span class="adm-field__label">Estado</span>
-            <label class="adm-switch">
-              <input type="checkbox" formControlName="isActive" />
-              <span class="adm-switch__track"></span>
-              <span>{{ form.controls.isActive.value ? 'Activo (visible en tienda)' : 'Inactivo' }}</span>
-            </label>
+            <span class="adm-field__label">Categorías</span>
+            @if (categories().length === 0) {
+              <p class="adm-muted" style="font-size:12.5px">No hay categorías. Pide a un administrador que cree una.</p>
+            } @else {
+              <div class="adm-stack" style="gap:6px">
+                @for (c of categories(); track c._id) {
+                  <label class="adm-inline" style="gap:8px;cursor:pointer">
+                    <input type="checkbox" [checked]="isCategorySelected(c._id)"
+                      [disabled]="form.disabled"
+                      (change)="toggleCategory(c._id)" />
+                    <span>{{ c.name }}{{ c.isActive ? '' : ' (inactiva)' }}</span>
+                  </label>
+                }
+              </div>
+            }
+            <span class="adm-field__hint">Al menos una es obligatoria para enviar a revisión. Un producto puede tener varias (p. ej. HOMBRE + CAMISETAS).</span>
           </div>
         </div>
 
@@ -104,14 +136,14 @@
         <div>
           <div class="adm-inline" style="justify-content:space-between;margin-bottom:10px">
             <span class="adm-field__label">Imágenes</span>
-            <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" (click)="addImage()">
+            <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" [disabled]="form.disabled" (click)="addImage()">
               <adm-icon name="plus" [size]="13" /> Añadir
             </button>
           </div>
 
           @if (images.length === 0) {
             <p class="adm-muted" style="font-size:12.5px">
-              Sin imágenes. El producto se puede guardar igual.
+              Sin imágenes. El borrador se puede guardar igual; se exige al menos una para enviar a revisión.
             </p>
           }
 
@@ -129,11 +161,46 @@
                     <label class="adm-inline" style="gap:6px;cursor:pointer">
                       <input type="radio" name="mainImage"
                         [checked]="img.controls.isMain.value"
+                        [disabled]="form.disabled"
                         (change)="setMain($index)" />
                       <span style="font-size:12px">Principal</span>
                     </label>
                     <button type="button" class="adm-icon-btn" aria-label="Quitar imagen"
+                      [disabled]="form.disabled"
                       (click)="removeImage($index)">
+                      <adm-icon name="trash" [size]="14" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="adm-inline" style="justify-content:space-between;margin:20px 0 10px">
+            <span class="adm-field__label">Variantes (color / talla / SKU / stock)</span>
+            <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" [disabled]="form.disabled" (click)="addVariant()">
+              <adm-icon name="plus" [size]="13" /> Añadir variante
+            </button>
+          </div>
+
+          @if (variants.length === 0) {
+            <p class="adm-muted" style="font-size:12.5px">
+              Sin variantes: el producto usa el stock plano de arriba (p. ej. accesorios sin talla).
+            </p>
+          }
+
+          <div class="adm-stack" formArrayName="variants" style="gap:10px">
+            @for (v of variants.controls; track $index) {
+              <div class="adm-card" [formGroupName]="$index">
+                <div class="adm-card__body adm-grid-2" style="gap:8px">
+                  <input class="adm-input adm-mono" type="text" formControlName="sku" placeholder="SKU (p. ej. DUS-CAM-ESS-NEG-S)" />
+                  <input class="adm-input" type="text" formControlName="color" placeholder="Color" />
+                  <input class="adm-input" type="text" formControlName="size" placeholder="Talla (opcional)" />
+                  <div class="adm-inline" style="gap:8px">
+                    <input class="adm-input" type="number" min="0" step="1" formControlName="stock" placeholder="Stock" />
+                    <button type="button" class="adm-icon-btn" aria-label="Quitar variante"
+                      [disabled]="form.disabled"
+                      (click)="removeVariant($index)">
                       <adm-icon name="trash" [size]="14" />
                     </button>
                   </div>
@@ -146,13 +213,21 @@
 
       <div class="adm-card__header" style="border-top:1px solid var(--adm-line);border-bottom:0">
         <span class="adm-muted" style="font-size:12px">
-          @if (form.dirty && !submitting()) { Cambios sin guardar }
+          @if (form.dirty && !submitting() && !submittingReview()) { Cambios sin guardar }
         </span>
         <div class="adm-inline">
           <a class="adm-btn adm-btn--ghost adm-btn--sm" routerLink="/admin/products">Cancelar</a>
-          <button type="submit" class="adm-btn adm-btn--sm" [disabled]="submitting() || form.invalid">
-            @if (submitting()) { Guardando… } @else { {{ isEdit ? 'Guardar cambios' : 'Crear producto' }} }
+          <button type="submit" class="adm-btn adm-btn--ghost adm-btn--sm"
+            [disabled]="form.disabled || submitting() || submittingReview() || form.invalid">
+            @if (submitting()) { Guardando… } @else { Guardar borrador }
           </button>
+          @if (canSubmitReview()) {
+            <button type="button" class="adm-btn adm-btn--sm"
+              [disabled]="form.disabled || submitting() || submittingReview() || form.invalid"
+              (click)="submitForReview()">
+              @if (submittingReview()) { Enviando… } @else { Enviar a revisión }
+            </button>
+          }
         </div>
       </div>
     </form>

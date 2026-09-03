@@ -39,7 +39,10 @@ export class Home {
   onLoadData(){
     this.httpProduct.getProduct().subscribe({
       next: (data) => {
-        // Solo productos activos (isActive: true)
+        // Product Domain: GET /api/product publico YA filtra en el BACKEND a
+        // status:PUBLISHED + isActive:true (Regla §24 — el backend es la
+        // barrera real). Este filtro queda como defensa adicional, no como
+        // el unico mecanismo de visibilidad.
         this.products = data.data.filter((p: any) => p.isActive);
         this.updateDisplayedProducts();
       },

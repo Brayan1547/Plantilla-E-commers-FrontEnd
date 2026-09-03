@@ -9,8 +9,20 @@ import { join } from 'node:path';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
+// `angular.json` fija `security.allowedHosts: []` (deny-by-default, correcto
+// para el build). `AngularNodeAppEngine` documenta `NG_ALLOWED_HOSTS` como el
+// mecanismo para autorizar el host en runtime SIN rebuild, pero el scaffold
+// del CLI no lo conecta — sin esto, el servidor SSR rechaza el 100% de las
+// requests (cualquier `Host` real) con 400. Se activa aquí, explícito y
+// opt-in: si `NG_ALLOWED_HOSTS` no está definida, el comportamiento (deny-all)
+// no cambia.
+const allowedHosts = (process.env['NG_ALLOWED_HOSTS'] ?? '')
+  .split(',')
+  .map((h) => h.trim())
+  .filter(Boolean);
+
 const app = express();
-const angularApp = new AngularNodeAppEngine();
+const angularApp = new AngularNodeAppEngine({ allowedHosts });
 
 /**
  * Example Express Rest API endpoints can be defined here.

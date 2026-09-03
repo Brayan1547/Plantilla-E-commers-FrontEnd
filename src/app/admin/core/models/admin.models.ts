@@ -30,7 +30,52 @@ export interface ProductImage {
   isMain?: boolean;
 }
 
-/** Producto (`product.model.js`). `category` llega como id o poblado. */
+/** Variante de producto (`product.model.js` -> variants[], subdocumentos embebidos). */
+export interface ProductVariant {
+  _id?: string;
+  sku: string;
+  color: string;
+  /** Vacío = "sin talla" (p. ej. accesorios). */
+  size?: string;
+  stock: number;
+}
+
+/**
+ * Ciclo de vida editorial (workflow). SEPARADO de `isActive` (activación
+ * operacional) — ver Product Domain Design Proposal §8. El backend es la
+ * única autoridad real de las transiciones; este enum solo describe la UI.
+ */
+export const PRODUCT_STATUSES = [
+  'DRAFT',
+  'PENDING_REVIEW',
+  'APPROVED',
+  'REJECTED',
+  'PUBLISHED',
+] as const;
+export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
+
+export const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {
+  DRAFT: 'Borrador',
+  PENDING_REVIEW: 'En revisión',
+  APPROVED: 'Aprobado',
+  REJECTED: 'Rechazado',
+  PUBLISHED: 'Publicado',
+};
+
+export const PRODUCT_STATUS_TONE: Record<ProductStatus, 'ok' | 'warn' | 'danger' | 'info' | 'neutral'> = {
+  DRAFT: 'neutral',
+  PENDING_REVIEW: 'info',
+  APPROVED: 'warn',
+  REJECTED: 'danger',
+  PUBLISHED: 'ok',
+};
+
+/** Estados en los que el contenido admite edición directa (DRAFT/REJECTED). Ver `editableFieldsFor` en el backend. */
+export function isContentEditableStatus(status: ProductStatus): boolean {
+  return status === 'DRAFT' || status === 'REJECTED';
+}
+
+/** Producto (`product.model.js`). `categories` llega como ids o poblados. */
 export interface AdminProduct {
   _id: string;
   name: string;
@@ -39,9 +84,21 @@ export interface AdminProduct {
   price: number;
   stock: number;
   images: ProductImage[];
-  category: string | AdminCategory | null;
+  categories: (string | AdminCategory)[];
+  variants: ProductVariant[];
+  status: ProductStatus;
   isActive: boolean;
+  rejectionReason?: string;
   createdBy?: string;
+  updatedBy?: string;
+  submittedBy?: string;
+  submittedAt?: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  rejectedBy?: string;
+  rejectedAt?: string;
+  publishedBy?: string;
+  publishedAt?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -57,6 +114,8 @@ export interface ApiEnvelope<T> {
   msg: string;
   data: T;
   token?: string;
+  /** Solo en el 400 de `PATCH /product/:id/status` -> PENDING_REVIEW con datos incompletos. */
+  errors?: string[];
 }
 
 /** Item de carrito administrativo (`cart.model.js`). */
@@ -89,8 +148,18 @@ export function mainImageUrl(images: ProductImage[] | undefined): string | null 
   return (images.find((img) => img.isMain) ?? images[0]).url || null;
 }
 
-/** `category` puede llegar como id (string) o poblado (objeto). Devuelve el id. */
-export function categoryId(category: AdminProduct['category']): string | null {
-  if (!category) return null;
-  return typeof category === 'string' ? category : category._id;
+/** `categories` puede traer ids (string) u objetos poblados. Devuelve los ids. */
+export function categoryIds(categories: AdminProduct['categories'] | undefined): string[] {
+  if (!categories?.length) return [];
+  return categories.map((c) => (typeof c === 'string' ? c : c._id)).filter(Boolean);
+}
+
+/** Nombres de categoría para mostrar (usa el mapa id->nombre del listado). */
+export function categoryNames(
+  categories: AdminProduct['categories'] | undefined,
+  nameById: Map<string, string>,
+): string[] {
+  return categoryIds(categories)
+    .map((id) => nameById.get(id))
+    .filter((n): n is string => !!n);
 }

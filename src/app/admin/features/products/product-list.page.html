@@ -1,4 +1,4 @@
-<adm-page-header title="Productos" subtitle="Catálogo: precio, stock, imágenes, categoría y estado.">
+<adm-page-header title="Productos" subtitle="Catálogo, workflow editorial y activación.">
   @if (perms.can('products.create')) {
     <button actions type="button" class="adm-btn" (click)="goNew()">
       <adm-icon name="plus" [size]="15" /> Nuevo producto
@@ -26,6 +26,17 @@
   </label>
 
   <label class="adm-field">
+    <span class="adm-sr-only">Filtrar por estado del workflow</span>
+    <select class="adm-select" [ngModel]="statusFilter()"
+      (ngModelChange)="statusFilter.set($event); page.set(1)">
+      <option value="">Todo el workflow</option>
+      @for (s of statusOptions; track s) {
+        <option [value]="s">{{ statusLabels[s] }}</option>
+      }
+    </select>
+  </label>
+
+  <label class="adm-field">
     <span class="adm-sr-only">Filtrar por stock</span>
     <select class="adm-select" [ngModel]="stockFilter()"
       (ngModelChange)="stockFilter.set($event); page.set(1)">
@@ -37,10 +48,10 @@
   </label>
 
   <label class="adm-field">
-    <span class="adm-sr-only">Filtrar por estado</span>
-    <select class="adm-select" [ngModel]="statusFilter()"
-      (ngModelChange)="statusFilter.set($event); page.set(1)">
-      <option value="">Todos los estados</option>
+    <span class="adm-sr-only">Filtrar por activación</span>
+    <select class="adm-select" [ngModel]="activeFilter()"
+      (ngModelChange)="activeFilter.set($event); page.set(1)">
+      <option value="">Activos e inactivos</option>
       <option value="active">Activos</option>
       <option value="inactive">Inactivos</option>
     </select>
@@ -75,7 +86,7 @@
       <strong>{{ p.name }}</strong>
       <div class="adm-mono adm-muted" style="font-size:11px">{{ p.slug }}</div>
     </td>
-    <td class="adm-muted">{{ categoryName(p) }}</td>
+    <td class="adm-muted">{{ categoryNames(p) }}</td>
     <td class="adm-table__num adm-mono">{{ formatCurrency(p.price) }}</td>
     <td>
       @switch (stockLevel(p.stock)) {
@@ -85,23 +96,57 @@
       }
     </td>
     <td>
-      @if (p.isActive) {
-        <adm-status-badge label="Activo" tone="ok" />
-      } @else {
-        <adm-status-badge label="Inactivo" tone="neutral" />
+      <adm-status-badge [label]="statusLabel(p)" [tone]="statusToneOf(p)" />
+      @if (p.status === 'REJECTED' && p.rejectionReason) {
+        <div class="adm-muted" style="font-size:11px;max-width:150px" [title]="p.rejectionReason">
+          {{ p.rejectionReason }}
+        </div>
       }
     </td>
     <td>
-      <div class="adm-table__actions">
+      @if (p.isActive) {
+        <adm-status-badge label="Sí" tone="ok" />
+      } @else {
+        <adm-status-badge label="No" tone="neutral" />
+      }
+    </td>
+    <td>
+      <div class="adm-table__actions" style="flex-wrap:wrap;gap:4px">
         @if (perms.can('products.update')) {
-          <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm"
-            [disabled]="busyId() === p._id" (click)="toggleActive(p)">
-            {{ p.isActive ? 'Desactivar' : 'Activar' }}
-          </button>
           <a class="adm-icon-btn" [routerLink]="['/admin/products', p._id, 'edit']"
             aria-label="Editar producto">
             <adm-icon name="edit" [size]="15" />
           </a>
+        }
+        @if (canSubmitReview(p)) {
+          <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm"
+            [disabled]="busyId() === p._id" (click)="submitReview(p)">
+            Enviar a revisión
+          </button>
+        }
+        @if (canApprove(p)) {
+          <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm"
+            [disabled]="busyId() === p._id" (click)="approve(p)">
+            <adm-icon name="check" [size]="13" /> Aprobar
+          </button>
+        }
+        @if (canReject(p)) {
+          <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm"
+            [disabled]="busyId() === p._id" (click)="reject(p)">
+            <adm-icon name="x" [size]="13" /> Rechazar
+          </button>
+        }
+        @if (canPublish(p)) {
+          <button type="button" class="adm-btn adm-btn--sm"
+            [disabled]="busyId() === p._id" (click)="publish(p)">
+            <adm-icon name="check" [size]="13" /> Publicar
+          </button>
+        }
+        @if (canToggleActive()) {
+          <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm"
+            [disabled]="busyId() === p._id" (click)="toggleActive(p)">
+            {{ p.isActive ? 'Desactivar' : 'Activar' }}
+          </button>
         }
         @if (perms.can('products.delete')) {
           <button type="button" class="adm-icon-btn" aria-label="Eliminar producto"

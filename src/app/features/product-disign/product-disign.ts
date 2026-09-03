@@ -13,13 +13,18 @@ type DetailState = 'loading' | 'ready' | 'not-found' | 'error';
 /**
  * Ficha pública de producto — ruta `tienda/producto/:id` (SSR).
  *
- * R2.3: sustituye la maqueta estática anterior. Carga el producto REAL con
- * `HttpProduct.getProductById(:id)` -> `GET /api/product/:id` (contrato
- * existente; el backend NO puebla `category`). Renderiza únicamente campos
- * reales del modelo: name, price, description, images[{url,isMain}], stock.
+ * Carga el producto REAL con `HttpProduct.getProductById(:id)` ->
+ * `GET /api/product/:id`. Product Domain: el backend YA aplica la regla de
+ * publicación aquí mismo (Regla §25) — un producto que no esté
+ * `status:PUBLISHED` + `isActive:true` responde 404, así que "no encontrado"
+ * cubre tanto "no existe" como "no está publicado", sin filtrar más en Angular.
  *
- * NO hay tallas / colores / variantes: el modelo `Product` del backend no las
- * tiene y su implementación pertenece al futuro Product Domain (rol `editor`).
+ * Renderiza los campos reales del modelo: name, price, description,
+ * images[{url,isMain}], stock. El modelo ya soporta `categories[]` y
+ * `variants[]` (color/talla/SKU/stock por variante), pero esta ficha compra
+ * el producto de forma AGREGADA (sin selector de variante todavía) — el
+ * carrito (`HttpCart`) tampoco distingue variantes hoy; es deuda conocida
+ * hacia la futura fase de Orders, no algo que se resuelva aquí.
  *
  * Estados: loading · ready · not-found (data vacía / 404 / id inválido) · error.
  */

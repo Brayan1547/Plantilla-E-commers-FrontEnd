@@ -2,9 +2,10 @@
  * Catálogo de permisos del Admin Panel (DUSCK).
  *
  * IMPORTANTE — el frontend NO es el mecanismo de seguridad. El backend
- * (`autentication.middleware.js` + `requireAdmin` / `authorizationUser`) es la
- * autoridad real. Este catálogo solo decide qué se MUESTRA y qué rutas se
- * pueden activar en el cliente.
+ * (`autentication.middleware.js` + `requireAdmin` / `authorizationUser` +
+ * `productWorkflow.helper.js` -> `canTransitionProduct`/`editableFieldsFor`)
+ * es la autoridad real. Este catálogo solo decide qué se MUESTRA y qué rutas
+ * se pueden activar en el cliente.
  *
  * Cada permiso se deriva de un endpoint REAL existente hoy. Cuando el backend
  * incorpore un sistema de permisos granulares, este archivo pasa a alimentarse
@@ -23,11 +24,21 @@ export const PERMISSIONS = [
   // Roles — solo lectura (role.routes.js -> authorizationUser(['administrador']))
   'roles.read',
 
-  // Productos (product.routes.js -> ['administrador','shop_manager'])
+  // Productos (product.routes.js -> ['administrador','shop_manager','editor'])
   'products.read',
   'products.create',
   'products.update',
   'products.delete',
+  // Workflow editorial (PATCH /product/:id/status) — cada paso es un permiso
+  // aparte porque cada rol tiene una porción distinta de la maquina de estados:
+  'products.submitReview', // DRAFT/REJECTED -> PENDING_REVIEW (editor dueño, shop_manager, admin)
+  'products.approve', // PENDING_REVIEW -> APPROVED (solo admin)
+  'products.reject', // PENDING_REVIEW -> REJECTED (solo admin)
+  'products.publish', // APPROVED -> PUBLISHED (solo admin)
+  // Activar/desactivar (`isActive`) es una palanca OPERATIVA, no editorial —
+  // `editableFieldsFor` en el backend la deja fuera de lo que un `editor`
+  // puede tocar (el editor no publica, y esta palanca es publish-adjacente).
+  'products.toggleActive',
 
   // Inventario — vista derivada de productos (mismo contrato)
   'inventory.read',
@@ -61,9 +72,14 @@ export const ROLE_LABELS: Record<AdminRole, string> = {
 /**
  * Mapa rol -> permisos. Refleja EXACTAMENTE lo que cada rol puede hacer contra
  * la API hoy:
- *  - `administrador`: acceso total.
- *  - `shop_manager`: catálogo (productos/categorías/inventario) + dashboard.
- *  - `editor` / `subscriber`: NINGÚN endpoint administrativo -> sin acceso al panel.
+ *  - `administrador`: acceso total, incluida la aprobación/publicación.
+ *  - `shop_manager`: catálogo (productos/categorías/inventario) + dashboard +
+ *    enviar a revisión — PERO NUNCA aprobar/rechazar/publicar (Decisión
+ *    funcional §2: la aprobación y publicación son exclusivas del administrador).
+ *  - `editor`: crear/editar productos PROPIOS y enviarlos a revisión. Sin
+ *    acceso a usuarios/roles/carritos/categorías/inventario/dashboard, y sin
+ *    autoridad de aprobación/publicación bajo ninguna circunstancia.
+ *  - `subscriber`: ningún endpoint administrativo -> sin acceso al panel.
  *
  * Estructurado como listas para que sea trivial migrar a permisos por-rol
  * servidos desde el backend.
@@ -75,6 +91,8 @@ export const ROLE_PERMISSIONS: Record<AdminRole, Permission[]> = {
     'products.create',
     'products.update',
     'products.delete',
+    'products.submitReview',
+    'products.toggleActive',
     'inventory.read',
     'categories.read',
     'categories.create',
@@ -82,7 +100,17 @@ export const ROLE_PERMISSIONS: Record<AdminRole, Permission[]> = {
     'categories.delete',
     'dashboard.read',
   ],
-  editor: [],
+  // 'dashboard.read' incluido porque `/admin` redirige por defecto a
+  // `overview` (el lanzador de módulos, sin datos sensibles: la pagina ya
+  // filtra que modulos mostrar segun `perms.canAny`) — sin este permiso el
+  // editor no tendria ninguna pantalla de aterrizaje al entrar al panel.
+  editor: [
+    'products.read',
+    'products.create',
+    'products.update',
+    'products.submitReview',
+    'dashboard.read',
+  ],
   subscriber: [],
 };
 
