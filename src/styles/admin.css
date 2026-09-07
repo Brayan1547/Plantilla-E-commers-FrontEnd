@@ -19,7 +19,8 @@
   /* --- Superficie / tinta (tema claro editorial) --- */
   --adm-ink: #14120f;
   --adm-ink-soft: #4a4640;
-  --adm-ink-faint: #8a847b;
+  /* UI-2: #8a847b daba ~3.5:1 sobre superficie -> se oscurece a ~6.2:1 (AA). */
+  --adm-ink-faint: #645f57;
   --adm-cream: #f6f2ea;
   --adm-cream-soft: #efe9de;
   --adm-surface: #fffdf8;
@@ -31,13 +32,31 @@
   --adm-nav-bg: #14120f;
   --adm-nav-fg: #cfc9bd;
   --adm-nav-fg-strong: #f6f2ea;
+  /* UI-2: etiquetas de sección — reemplaza `opacity: 0.45` (contraste ~2:1)
+     por un color legible (~6:1 sobre --adm-nav-bg). */
+  --adm-nav-fg-dim: #9b9488;
   --adm-nav-line: rgba(246, 242, 234, 0.1);
-  --adm-nav-active: rgba(246, 242, 234, 0.08);
+  --adm-nav-active: rgba(246, 242, 234, 0.12);
 
   /* --- Acento unico --- */
   --adm-accent: #a67c52;
   --adm-accent-soft: rgba(166, 124, 82, 0.12);
   --adm-accent-contrast: #ffffff;
+
+  /* --- Foco (UI-2): anillo propio, no depende solo del color y con contraste
+     >=3:1 en claro y oscuro. `--adm-accent` como outline daba ~2.3:1. --- */
+  --adm-focus: #4b3f72;
+  --adm-focus-soft: rgba(75, 63, 114, 0.28);
+
+  /* --- Escala tipográfica (UI-2): proporción ~1.2, base 15px --- */
+  --adm-fs-2xs: 11.5px; /* microcopy justificado: badge, dot, cabecera de tabla */
+  --adm-fs-xs: 12.5px;  /* labels, hints, breadcrumbs */
+  --adm-fs-sm: 14px;    /* tablas, metadatos densos, sidebar */
+  --adm-fs-base: 15px;  /* cuerpo general */
+  --adm-fs-md: 16px;    /* controles principales (inputs) */
+  --adm-fs-lg: 17px;    /* h3 / cabecera de card */
+  --adm-fs-xl: 20px;    /* h2 */
+  --adm-fs-2xl: 26px;   /* h1 */
 
   /* --- Semantica de estado (derivada de styles.css legacy + dusk) --- */
   --adm-ok: #3f7d58;
@@ -71,15 +90,16 @@
   color: var(--adm-ink);
   font-family: var(--adm-font-body);
   -webkit-font-smoothing: antialiased;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: var(--adm-fs-base);
+  line-height: 1.55;
 }
 
 @media (prefers-color-scheme: dark) {
   .adm[data-adm-theme="auto"] {
     --adm-ink: #ece7dd;
     --adm-ink-soft: #b7b1a5;
-    --adm-ink-faint: #837d72;
+    /* UI-2: #837d72 daba ~4:1 sobre superficie oscura -> ~5.9:1 (AA). */
+    --adm-ink-faint: #9a9488;
     --adm-cream: #16140f;
     --adm-cream-soft: #1d1a14;
     --adm-surface: #1b1813;
@@ -91,6 +111,9 @@
     --adm-danger-bg: #2e1b19;
     --adm-info-bg: #211d2c;
     --adm-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+    /* UI-2: foco claro sobre fondos oscuros (~8.9:1). */
+    --adm-focus: #a9b8e0;
+    --adm-focus-soft: rgba(169, 184, 224, 0.32);
   }
 }
 
@@ -118,11 +141,19 @@
   color: var(--adm-ink);
 }
 
-.adm h1 { font-size: 26px; line-height: 1.2; }
-.adm h2 { font-size: 19px; }
-.adm h3 { font-size: 16px; }
+.adm h1 { font-size: var(--adm-fs-2xl); line-height: 1.2; }
+.adm h2 { font-size: var(--adm-fs-xl); line-height: 1.3; }
+.adm h3 { font-size: var(--adm-fs-lg); line-height: 1.35; }
 
 .adm p { margin: 0; }
+
+/* UI-2: el fondo del panel no depende del <body> (que la tienda pública pinta
+   en un gris frío). El shell ya lo cubre; esto es defensa adicional del host. */
+adm-layout {
+  display: block;
+  min-height: 100vh;
+  background: var(--adm-cream);
+}
 
 .adm a { text-decoration: none; }
 /* Solo los enlaces "desnudos" heredan el color; un <a class="..."> conserva
@@ -189,10 +220,9 @@
 }
 .adm-sidebar__brand small {
   font-family: var(--adm-font-body);
-  font-size: 9px;
+  font-size: 9.5px;
   letter-spacing: 2px;
-  color: var(--adm-nav-fg);
-  opacity: 0.7;
+  color: var(--adm-nav-fg-dim);
 }
 .adm-sidebar__nav {
   flex: 1;
@@ -200,22 +230,23 @@
   padding: 12px 10px 24px;
 }
 .adm-sidebar__section {
-  font-size: 10px;
-  letter-spacing: 1.6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: var(--adm-nav-fg);
-  opacity: 0.45;
-  padding: 16px 12px 6px;
+  color: var(--adm-nav-fg-dim);
+  padding: 18px 12px 6px;
 }
 .adm-nav-item {
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 9px 12px;
+  padding: 10px 12px;
+  min-height: 40px;
   border-radius: var(--adm-radius);
   color: var(--adm-nav-fg);
-  font-size: 13px;
-  letter-spacing: 0.3px;
+  font-size: var(--adm-fs-sm);
+  letter-spacing: 0.2px;
   cursor: pointer;
   transition: background var(--adm-transition), color var(--adm-transition);
   white-space: nowrap;
@@ -225,9 +256,10 @@
   color: var(--adm-nav-fg-strong);
 }
 .adm-nav-item.is-active {
-  background: var(--adm-nav-active);
+  background: rgba(246, 242, 234, 0.14);
   color: var(--adm-nav-fg-strong);
-  box-shadow: inset 2px 0 0 var(--adm-accent);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--adm-accent);
 }
 .adm-nav-item__icon {
   width: 18px;
@@ -246,19 +278,46 @@
 .adm-topbar {
   height: var(--adm-topbar-h);
   background: var(--adm-surface);
-  border-bottom: 1px solid var(--adm-line);
+  /* UI-2: separación visible del contenido (antes casi imperceptible). Borde
+     más marcado + sombra de una sola capa, muy discreta. */
+  border-bottom: 1px solid var(--adm-line-strong);
+  box-shadow: 0 1px 3px rgba(20, 18, 15, 0.06);
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   padding: 0 20px;
   position: sticky;
   top: 0;
   z-index: 40;
 }
 .adm-topbar__spacer { flex: 1; }
+
+/* UI-2: identidad del panel en la zona izquierda (marca + contexto).
+   Texto estático, sin datos derivados ni APIs nuevas. */
+.adm-topbar__brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-shrink: 0;
+  user-select: none;
+}
+.adm-topbar__brand-name {
+  font-family: var(--adm-font-head);
+  font-size: 17px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--adm-ink);
+}
+.adm-topbar__brand-tag {
+  font-size: var(--adm-fs-xs);
+  letter-spacing: 0.6px;
+  color: var(--adm-ink-faint);
+}
+@media (max-width: 480px) { .adm-topbar__brand-tag { display: none; } }
+
 .adm-icon-btn {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -272,26 +331,30 @@
 .adm-icon-btn:hover { background: var(--adm-surface-2); border-color: var(--adm-line); }
 .adm-icon-btn svg { width: 18px; height: 18px; }
 
+/* UI-2: la búsqueda global no tiene backend. Deja de ser un <input disabled>
+   (control roto anunciado por el lector de pantalla) y pasa a ser un
+   indicador presentacional, fuera del árbol accesible (aria-hidden en el HTML). */
 .adm-topbar__search {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 36px;
+  height: 38px;
   padding: 0 12px;
   border: 1px solid var(--adm-line);
   border-radius: var(--adm-radius);
   background: var(--adm-surface-2);
+  color: var(--adm-ink-faint);
   min-width: 200px;
   max-width: 360px;
   flex: 1;
+  cursor: default;
+  user-select: none;
 }
-.adm-topbar__search input {
-  border: 0;
-  background: transparent;
-  outline: none;
-  font: inherit;
-  color: var(--adm-ink);
-  width: 100%;
+.adm-topbar__search span {
+  font-size: var(--adm-fs-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 @media (max-width: 640px) { .adm-topbar__search { display: none; } }
 
@@ -300,15 +363,19 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 4px 8px 4px 4px;
+  min-height: 40px;
+  padding: 4px 10px 4px 4px;
   border: 1px solid var(--adm-line);
   border-radius: 999px;
   background: var(--adm-surface);
+  color: var(--adm-ink);
   cursor: pointer;
+  transition: background var(--adm-transition), border-color var(--adm-transition);
 }
+.adm-account:hover { background: var(--adm-surface-2); border-color: var(--adm-line-strong); }
 .adm-avatar {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: var(--adm-ink);
   color: var(--adm-cream);
@@ -322,9 +389,9 @@
   flex-shrink: 0;
 }
 .adm-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.adm-account__meta { line-height: 1.15; text-align: left; }
-.adm-account__name { font-size: 12.5px; font-weight: 600; }
-.adm-account__role { font-size: 10.5px; color: var(--adm-ink-faint); letter-spacing: 0.4px; }
+.adm-account__meta { line-height: 1.2; text-align: left; }
+.adm-account__name { font-size: var(--adm-fs-xs); font-weight: 600; }
+.adm-account__role { font-size: var(--adm-fs-2xs); color: var(--adm-ink-faint); letter-spacing: 0.3px; }
 @media (max-width: 480px) { .adm-account__meta { display: none; } }
 
 /* popover */
@@ -346,17 +413,19 @@
   align-items: center;
   gap: 10px;
   width: 100%;
+  min-height: 40px;
   padding: 9px 12px;
   border: 0;
   background: transparent;
   border-radius: var(--adm-radius);
   font: inherit;
+  font-size: var(--adm-fs-sm);
   color: var(--adm-ink);
   text-align: left;
   cursor: pointer;
 }
 .adm-popover__item:hover { background: var(--adm-surface-2); }
-.adm-popover__empty { padding: 20px 12px; text-align: center; color: var(--adm-ink-faint); font-size: 12.5px; }
+.adm-popover__empty { padding: 20px 12px; text-align: center; color: var(--adm-ink-faint); font-size: var(--adm-fs-xs); }
 
 /* --------------------------------------------------------------- breadcrumbs */
 .adm-breadcrumbs {
@@ -364,13 +433,13 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  font-size: 12px;
+  font-size: var(--adm-fs-xs);
   color: var(--adm-ink-faint);
-  letter-spacing: 0.4px;
+  letter-spacing: 0.2px;
   margin-bottom: 18px;
 }
 .adm-breadcrumbs a:hover { color: var(--adm-accent); }
-.adm-breadcrumbs__sep { opacity: 0.5; }
+.adm-breadcrumbs__sep { opacity: 0.6; }
 .adm-breadcrumbs__current { color: var(--adm-ink-soft); }
 
 /* --------------------------------------------------------------- page header */
@@ -385,8 +454,9 @@
 .adm-page-header__titles { min-width: 0; }
 .adm-page-header__subtitle {
   color: var(--adm-ink-faint);
-  font-size: 13px;
-  margin-top: 4px;
+  font-size: var(--adm-fs-sm);
+  line-height: 1.5;
+  margin-top: 5px;
 }
 .adm-page-header__actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
@@ -412,16 +482,18 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 38px;
+  height: 40px;
   padding: 0 18px;
   border-radius: var(--adm-radius);
   border: 1px solid var(--adm-ink);
   background: var(--adm-ink);
   color: var(--adm-cream);
   font: inherit;
-  font-size: 12.5px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  /* UI-2: sin uppercase (etiquetas largas como "Volver a borrador para editar")
+     ni tracking excesivo; el peso 600 mantiene la presencia del botón. */
+  font-size: var(--adm-fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.2px;
   cursor: pointer;
   transition: background var(--adm-transition), color var(--adm-transition),
     border-color var(--adm-transition), opacity var(--adm-transition);
@@ -436,38 +508,40 @@
 .adm-btn--ghost:hover { background: var(--adm-surface-2); border-color: var(--adm-ink); }
 .adm-btn--danger { background: var(--adm-danger); border-color: var(--adm-danger); color: #fff; }
 .adm-btn--danger:hover { background: #862f2f; border-color: #862f2f; }
-.adm-btn--sm { height: 32px; padding: 0 12px; font-size: 11px; }
+.adm-btn--sm { height: 34px; padding: 0 12px; font-size: var(--adm-fs-xs); }
 .adm-btn--block { width: 100%; }
 
 .adm-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
 .adm-field__label {
-  font-size: 11.5px;
-  letter-spacing: 0.8px;
+  font-size: var(--adm-fs-xs);
+  letter-spacing: 0.4px;
   text-transform: uppercase;
   color: var(--adm-ink-soft);
   font-weight: 600;
 }
-.adm-field__hint { font-size: 11.5px; color: var(--adm-ink-faint); }
-.adm-field__error { font-size: 11.5px; color: var(--adm-danger); min-height: 1em; }
+.adm-field__hint { font-size: var(--adm-fs-xs); color: var(--adm-ink-faint); line-height: 1.45; }
+.adm-field__error { font-size: var(--adm-fs-xs); color: var(--adm-danger); min-height: 1em; }
 .adm-input,
 .adm-select,
 .adm-textarea {
   width: 100%;
-  min-height: 38px;
-  padding: 8px 12px;
+  min-height: 40px;
+  padding: 9px 12px;
   border: 1px solid var(--adm-line-strong);
   border-radius: var(--adm-radius);
   background: var(--adm-surface);
   color: var(--adm-ink);
   font: inherit;
+  /* UI-2: 16px — evita el zoom automático en iOS y es el tamaño de control principal. */
+  font-size: var(--adm-fs-md);
   transition: border-color var(--adm-transition), box-shadow var(--adm-transition);
 }
 .adm-input:focus,
 .adm-select:focus,
 .adm-textarea:focus {
   outline: none;
-  border-color: var(--adm-accent);
-  box-shadow: 0 0 0 3px var(--adm-accent-soft);
+  border-color: var(--adm-focus);
+  box-shadow: 0 0 0 3px var(--adm-focus-soft);
 }
 .adm-input[aria-invalid="true"],
 .adm-select[aria-invalid="true"],
@@ -503,7 +577,7 @@
 }
 .adm-switch input:checked + .adm-switch__track { background: var(--adm-ok); }
 .adm-switch input:checked + .adm-switch__track::after { transform: translateX(18px); }
-.adm-switch input:focus-visible + .adm-switch__track { box-shadow: 0 0 0 3px var(--adm-accent-soft); }
+.adm-switch input:focus-visible + .adm-switch__track { box-shadow: 0 0 0 3px var(--adm-focus-soft); }
 
 /* badges */
 .adm-badge {
@@ -512,9 +586,9 @@
   gap: 6px;
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: var(--adm-fs-2xs);
   font-weight: 600;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   border: 1px solid transparent;
 }
 .adm-badge--ok { background: var(--adm-ok-bg); color: var(--adm-ok); }
@@ -532,7 +606,7 @@
   border-radius: var(--adm-radius-lg);
   background: var(--adm-surface);
 }
-.adm-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 0; }
+.adm-table { width: 100%; border-collapse: collapse; font-size: var(--adm-fs-sm); min-width: 0; }
 /* Defensa contra el skin de tabla legacy de styles.css (`td,th{border}`,
    `tr:nth-child(even){background:#ddd}`, `@media table{min-width:900px}`). */
 .adm-table th,
@@ -541,8 +615,8 @@
 .adm-table thead th {
   text-align: left;
   padding: 12px 16px;
-  font-size: 10.5px;
-  letter-spacing: 1px;
+  font-size: var(--adm-fs-2xs);
+  letter-spacing: 0.8px;
   text-transform: uppercase;
   color: var(--adm-ink-faint);
   border-bottom: 1px solid var(--adm-line);
@@ -584,13 +658,13 @@
   gap: 12px;
   flex-wrap: wrap;
   padding: 12px 4px;
-  font-size: 12.5px;
+  font-size: var(--adm-fs-xs);
   color: var(--adm-ink-faint);
 }
 .adm-pagination__pages { display: flex; gap: 4px; }
 .adm-pagination__btn {
-  min-width: 32px;
-  height: 32px;
+  min-width: 36px;
+  height: 36px;
   padding: 0 8px;
   border: 1px solid var(--adm-line);
   border-radius: var(--adm-radius);
@@ -598,7 +672,7 @@
   color: var(--adm-ink-soft);
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: var(--adm-fs-xs);
 }
 .adm-pagination__btn:hover:not(:disabled) { border-color: var(--adm-ink); color: var(--adm-ink); }
 .adm-pagination__btn.is-active { background: var(--adm-ink); color: var(--adm-cream); border-color: var(--adm-ink); }
@@ -620,8 +694,8 @@
   height: 40px;
   opacity: 0.5;
 }
-.adm-state__title { font-size: 15px; color: var(--adm-ink-soft); font-weight: 600; }
-.adm-state__msg { font-size: 13px; max-width: 380px; }
+.adm-state__title { font-size: var(--adm-fs-lg); color: var(--adm-ink-soft); font-weight: 600; }
+.adm-state__msg { font-size: var(--adm-fs-sm); line-height: 1.5; max-width: 420px; }
 
 /* skeletons */
 .adm-skel {
@@ -661,8 +735,8 @@
   box-shadow: var(--adm-shadow);
 }
 .adm-kpi__label {
-  font-size: 11px;
-  letter-spacing: 0.8px;
+  font-size: var(--adm-fs-2xs);
+  letter-spacing: 0.6px;
   text-transform: uppercase;
   color: var(--adm-ink-faint);
 }
@@ -672,8 +746,8 @@
   line-height: 1;
   color: var(--adm-ink);
 }
-.adm-kpi__value--muted { font-size: 15px; color: var(--adm-ink-faint); font-family: var(--adm-font-body); }
-.adm-kpi__foot { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.adm-kpi__value--muted { font-size: var(--adm-fs-base); color: var(--adm-ink-faint); font-family: var(--adm-font-body); }
+.adm-kpi__foot { display: flex; align-items: center; gap: 8px; font-size: var(--adm-fs-xs); }
 .adm-kpi__delta { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; }
 .adm-kpi__delta--up { color: var(--adm-ok); }
 .adm-kpi__delta--down { color: var(--adm-danger); }
@@ -692,7 +766,14 @@
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-.adm :focus-visible { outline: 2px solid var(--adm-accent); outline-offset: 2px; }
+/* UI-2: foco propio (--adm-focus), consistente, visible en claro y oscuro y
+   con contraste >=3:1 (el acento daba ~2.3:1). El anillo aparece como forma,
+   no solo como cambio de color. */
+.adm :focus-visible {
+  outline: 2px solid var(--adm-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
 
 /* mobile sidebar drawer */
 .adm-sidebar__scrim { display: none; }
@@ -717,3 +798,84 @@
 }
 .adm-topbar__burger { display: none; }
 @media (max-width: 1024px) { .adm-topbar__burger { display: inline-flex; } }
+
+/* =============================================================================
+   UI-2 — objetivos táctiles en móvil (40px) sin comprometer la densidad en
+   escritorio, e integración visual de SweetAlert2 con la identidad DUSCK.
+   ========================================================================== */
+@media (max-width: 640px) {
+  .adm-btn--sm { height: 40px; }
+  .adm-icon-btn { width: 40px; height: 40px; }
+  .adm-pagination__btn { min-width: 40px; height: 40px; }
+  .adm-nav-item { min-height: 44px; }
+}
+
+/* --- SweetAlert2 (customClass: { popup: 'adm-swal' } en AdminDialog) ---------
+   El popup se monta a nivel de <body>, FUERA de `.adm`, así que los tokens
+   `--adm-*` no llegan: se usan variables locales `--sw-*` (espejo de los tokens)
+   redeclaradas para claro/oscuro. No se tocan las llamadas de AdminDialog. */
+.adm-swal.swal2-popup {
+  --sw-surface: #fffdf8;
+  --sw-ink: #14120f;
+  --sw-ink-soft: #4a4640;
+  --sw-line: rgba(20, 18, 15, 0.24);
+  --sw-focus: #4b3f72;
+  background: var(--sw-surface);
+  color: var(--sw-ink);
+  border: 1px solid var(--sw-line);
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(20, 18, 15, 0.16);
+  font-family: "Inter", "Jost", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+}
+.adm-swal .swal2-title {
+  color: var(--sw-ink);
+  font-family: "Playfair Display", "Georgia", "Times New Roman", serif;
+  font-weight: 500;
+  font-size: 20px;
+}
+.adm-swal .swal2-html-container { color: var(--sw-ink-soft); font-size: 14px; line-height: 1.5; }
+.adm-swal .swal2-input,
+.adm-swal .swal2-textarea {
+  border: 1px solid var(--sw-line);
+  border-radius: 4px;
+  color: var(--sw-ink);
+  background: var(--sw-surface);
+  font-size: 15px;
+  box-shadow: none;
+}
+.adm-swal .swal2-input:focus,
+.adm-swal .swal2-textarea:focus {
+  border-color: var(--sw-focus);
+  box-shadow: 0 0 0 3px rgba(75, 63, 114, 0.28);
+}
+.adm-swal .swal2-actions { gap: 8px; }
+.adm-swal .swal2-confirm,
+.adm-swal .swal2-cancel {
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 20px;
+  transition: filter 180ms ease;
+}
+.adm-swal .swal2-confirm:hover,
+.adm-swal .swal2-cancel:hover { filter: brightness(0.92); }
+.adm-swal .swal2-confirm:focus-visible,
+.adm-swal .swal2-cancel:focus-visible { outline: 2px solid var(--sw-focus); outline-offset: 2px; }
+
+@media (prefers-color-scheme: dark) {
+  .adm-swal.swal2-popup {
+    --sw-surface: #1b1813;
+    --sw-ink: #ece7dd;
+    --sw-ink-soft: #b7b1a5;
+    --sw-line: rgba(246, 242, 234, 0.24);
+    --sw-focus: #a9b8e0;
+  }
+  .adm-swal .swal2-input:focus,
+  .adm-swal .swal2-textarea:focus { box-shadow: 0 0 0 3px rgba(169, 184, 224, 0.32); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adm-swal .swal2-confirm,
+  .adm-swal .swal2-cancel { transition: none; }
+}

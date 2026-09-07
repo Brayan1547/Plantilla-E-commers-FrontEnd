@@ -1,8 +1,30 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { HttpCart } from '../../../core/services/http-cart';
 
+import { HttpCart } from '../../../core/services/http-cart';
+import { GuestCart } from '../../../core/services/guest-cart';
+import { HttpAuth } from '../../../core/services/http-auth';
+
+/** Fila unificada del drawer — funciona para carrito guest y autenticado. */
+interface DrawerLine {
+  productId: string;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
+  available: boolean;
+}
+
+/**
+ * Panel lateral del carrito. UI-4B: soporta DOS orígenes sin duplicar el
+ * componente:
+ *   - invitado     -> `GuestCart` (localStorage: solo `{productId, quantity}`).
+ *   - autenticado  -> `HttpCart`  (carrito de backend, comportamiento sin cambios).
+ *
+ * El precio mostrado es informativo; el total real lo calcula el backend al
+ * crear la orden.
+ */
 @Component({
   selector: 'app-cart-drawer',
   standalone: true,
@@ -10,63 +32,94 @@ import { HttpCart } from '../../../core/services/http-cart';
   templateUrl: './cart-drawer.html',
   styleUrl: './cart-drawer.css',
 })
-export class CartDrawer {
-
-  // true/false para saber si el panel está abierto; lo controla el header (componente padre)
+export class CartDrawer implements OnChanges {
   @Input() open = false;
-
-  // avisa al header que debe cerrar el drawer (ej. al hacer click en el overlay)
   @Output() closed = new EventEmitter<void>();
 
-  httpCart = inject(HttpCart); // acceso directo al signal del carrito
+  httpCart = inject(HttpCart);
+  private guestCart = inject(GuestCart);
+  private httpAuth = inject(HttpAuth);
   private router = inject(Router);
 
-  // Atajo para leer los items del carrito sin repetir "httpCart.cart().items" en el html
-  get items(): any[] {
-    return this.httpCart.cart()?.items || [];
-  }
+  /** Sesión activa -> carrito de backend; si no -> carrito de invitado. */
+  protected readonly isGuest = computed(() => !this.httpAuth.user);
 
-  // Suma total del carrito (precio * cantidad de cada item)
-  get subtotal(): number {
-    return this.items.reduce((sum, item) => {
-      const price = item.productId?.price || 0;
-      return sum + price * item.quantity;
-    }, 0);
+  /** Filas del carrito, unificadas desde la fuente que corresponda. */
+  protected readonly lines = computed<DrawerLine[]>(() => {
+    if (this.isGuest()) {
+      return this.guestCart.hydrated().map((l) => ({
+        productId: l.productId,
+        name: l.product?.name ?? 'Producto no disponible',
+        price: l.product?.price ?? 0,
+        image: this.getMainImage(l.product?.images ?? []),
+        quantity: l.quantity,
+        available: !!l.product && l.product.isActive !== false && !l.unavailable,
+      }));
+    }
+    const items = this.httpCart.cart()?.items ?? [];
+    return items.map((it: any) => ({
+      productId: it.productId?._id ?? it.productId,
+      name: it.productId?.name ?? 'Producto',
+      price: it.productId?.price ?? 0,
+      image: this.getMainImage(it.productId?.images ?? []),
+      quantity: it.quantity,
+      available: it.productId?.isActive !== false,
+    }));
+  });
+
+  protected readonly subtotal = computed(() =>
+    this.lines().reduce((sum, l) => sum + l.price * l.quantity, 0),
+  );
+
+  protected readonly hasUnavailable = computed(() => this.lines().some((l) => !l.available));
+
+  /** Angular llama a esto cuando cambian los `@Input()`; se aprovecha para hidratar. */
+  ngOnChanges(): void {
+    if (this.open && this.isGuest()) {
+      this.guestCart.refreshHydration();
+    }
   }
 
   close() {
     this.closed.emit();
   }
 
-  // Suma 1 unidad al item (botón "+")
-  increase(item: any) {
-    this.httpCart.updateCart(item.productId._id, 1).subscribe({
-      error: (err) => console.error('Error al aumentar cantidad', err)
+  increase(line: DrawerLine) {
+    if (this.isGuest()) {
+      this.guestCart.increment(line.productId);
+      return;
+    }
+    this.httpCart.updateCart(line.productId, 1).subscribe({
+      error: (err) => console.error('Error al aumentar cantidad', err),
     });
   }
 
-  // Resta 1 unidad al item (botón "-"); si llega a 0 el backend lo elimina solo
-  decrease(item: any) {
-    this.httpCart.updateCart(item.productId._id, -1).subscribe({
-      error: (err) => console.error('Error al disminuir cantidad', err)
+  decrease(line: DrawerLine) {
+    if (this.isGuest()) {
+      this.guestCart.decrement(line.productId);
+      return;
+    }
+    this.httpCart.updateCart(line.productId, -1).subscribe({
+      error: (err) => console.error('Error al disminuir cantidad', err),
     });
   }
 
-  // Elimina el producto del carrito sin importar la cantidad (botón "eliminar")
-  remove(item: any) {
-    this.httpCart.removeItem(item.productId._id).subscribe({
-      error: (err) => console.error('Error al eliminar producto', err)
+  remove(line: DrawerLine) {
+    if (this.isGuest()) {
+      this.guestCart.remove(line.productId);
+      return;
+    }
+    this.httpCart.removeItem(line.productId).subscribe({
+      error: (err) => console.error('Error al eliminar producto', err),
     });
   }
 
-  // Obtiene la imagen principal del producto (mismo patrón que home.ts)
-  getMainImage(images: { url: string; isMain: boolean }[]): string {
+  getMainImage(images: { url: string; isMain?: boolean }[]): string {
     if (!images || images.length === 0) return '';
-    const main = images.find(img => img.isMain);
+    const main = images.find((img) => img.isMain);
     return main ? main.url : images[0].url;
   }
 
-  // Cierra el drawer y lleva al checkout
   goToCheckout() {
     this.close();
     this.router.navigateByUrl('/checkout');

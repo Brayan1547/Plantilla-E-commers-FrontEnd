@@ -1,13 +1,13 @@
 @switch (state()) {
 
   @case ('loading') {
-    <div class="pd-state">
+    <div class="pd-state" role="status" aria-live="polite">
       <p>Cargando producto…</p>
     </div>
   }
 
   @case ('not-found') {
-    <div class="pd-state">
+    <div class="pd-state" role="alert">
       <p class="pd-state__title serif">Producto no encontrado</p>
       <p>El producto que buscas no existe o ya no está disponible.</p>
       <a routerLink="/basicos" class="pd-btn pd-btn--solid">Ver Básicos</a>
@@ -15,7 +15,7 @@
   }
 
   @case ('error') {
-    <div class="pd-state">
+    <div class="pd-state" role="alert">
       <p class="pd-state__title serif">No pudimos cargar el producto</p>
       <p>Hubo un problema de conexión. Intenta de nuevo en unos minutos.</p>
       <a routerLink="/basicos" class="pd-btn pd-btn--ghost">Volver al catálogo</a>
@@ -23,76 +23,191 @@
   }
 
   @case ('ready') {
-    <article class="pd">
+    @if (product(); as p) {
+    <div class="pd-page">
 
-      <!-- ============ GALERÍA ============ -->
-      <section class="pd-gallery">
-        @if (mainImage(); as main) {
-          <button type="button" class="pd-gallery__main" (click)="openZoom(main)">
-            <img [src]="main" [alt]="product().name">
-          </button>
-          @if (images().length > 1) {
-            <div class="pd-gallery__thumbs">
-              @for (url of images(); track url) {
-                <button type="button" class="pd-thumb" (click)="openZoom(url)">
-                  <img [src]="url" [alt]="product().name">
+      <!-- ============ BREADCRUMBS (propios de la ficha, no los del Admin) ============ -->
+      <nav class="pd-crumbs" aria-label="Ruta de navegación">
+        <ol>
+          <li><a routerLink="/home">Inicio</a></li>
+          <li><a routerLink="/basicos">Básicos</a></li>
+          @if (primaryCategory(); as cat) {
+            <li><a [routerLink]="['/basicos']" [queryParams]="{ categoria: cat.slug }">{{ cat.name }}</a></li>
+          }
+          <li aria-current="page">{{ p.name }}</li>
+        </ol>
+      </nav>
+
+      <article class="pd-grid">
+
+        <!-- ============ GALERÍA ============ -->
+        <section class="pd-gallery" aria-label="Galería del producto">
+          @if (currentImage(); as cur) {
+
+            @if (gallery().length > 1) {
+              <div class="pd-gallery__rail">
+                @for (img of gallery(); track img.url; let i = $index) {
+                  <button
+                    type="button"
+                    class="pd-thumb"
+                    [class.is-active]="img.url === cur.url"
+                    [attr.aria-current]="img.url === cur.url ? 'true' : null"
+                    [attr.aria-label]="'Ver imagen ' + (i + 1) + ' de ' + gallery().length"
+                    (click)="selectImage(img.url)">
+                    <img [src]="img.url" [alt]="img.alt" loading="lazy" decoding="async">
+                  </button>
+                }
+              </div>
+            }
+
+            <div class="pd-gallery__stage">
+              <button
+                type="button"
+                class="pd-gallery__main"
+                [attr.aria-label]="'Ampliar imagen de ' + p.name"
+                (click)="openZoom(cur.url, $event)">
+                <img [src]="cur.url" [alt]="cur.alt" decoding="async">
+              </button>
+
+              @for (img of secondaryImages(); track img.url) {
+                <button
+                  type="button"
+                  class="pd-gallery__extra"
+                  [attr.aria-label]="'Ampliar ' + img.alt"
+                  (click)="openZoom(img.url, $event)">
+                  <img [src]="img.url" [alt]="img.alt" loading="lazy" decoding="async">
                 </button>
               }
             </div>
+
+          } @else {
+            <div class="pd-gallery__empty">Sin imágenes</div>
           }
-        } @else {
-          <div class="pd-gallery__empty">Sin imágenes</div>
-        }
-      </section>
+        </section>
 
-      <!-- ============ INFO ============ -->
-      <section class="pd-info">
-        <header class="pd-head">
-          <h1 class="pd-head__name serif">{{ product().name }}</h1>
-          <p class="pd-head__price">
-            {{ product().price | currency:'COP':'symbol-narrow':'1.0-0' }}
+        <!-- ============ INFO ============ -->
+        <section class="pd-info">
+
+          @if (categoryNames().length) {
+            <div class="pd-categories">
+              @for (name of categoryNames(); track name) {
+                <span class="pd-tag">{{ name }}</span>
+              }
+            </div>
+          }
+
+          <h1 class="pd-name serif">{{ p.name }}</h1>
+          <p class="pd-price">{{ p.price | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
+
+          @if (modelInfoLabel(); as modelLabel) {
+            <p class="pd-model">{{ modelLabel }}</p>
+          }
+
+          <p class="pd-availability" [class.pd-availability--out]="outOfStock()">
+            @if (outOfStock()) { Agotado } @else { Disponible }
           </p>
-        </header>
 
-        <p class="pd-availability" [class.pd-availability--out]="outOfStock()">
-          @if (outOfStock()) { Agotado } @else { Disponible }
-        </p>
+          <!-- F7-F / UI-3B — Tallas: SOLO presentación (pills). NO es un
+               selector accionable: elegir una talla no cambia `quantity()` ni
+               lo que manda `addToCart()` — el carrito sigue recibiendo
+               únicamente {productId, quantity} (ver product-disign.ts). -->
+          @if (hasVariants()) {
+            <div class="pd-sizes">
+              <p class="pd-sizes__label" id="pd-sizes-label">Talla</p>
+              <ul class="pd-sizes__list" aria-labelledby="pd-sizes-label">
+                @for (opt of sizeOptions(); track opt.size) {
+                  <li class="pd-size" [class.pd-size--out]="!opt.available">
+                    <span aria-hidden="true">{{ opt.size }}</span>
+                    <span class="sr-only">Talla {{ opt.size }}: {{ opt.available ? 'Disponible' : 'Agotado' }}</span>
+                  </li>
+                }
+              </ul>
+              @if (variantColors().length) {
+                <p class="pd-sizes__colors">Color: {{ variantColors().join(', ') }}</p>
+              }
+            </div>
+          }
 
-        @if (product().description) {
-          <p class="pd-description">{{ product().description }}</p>
-        }
+          <!-- Compra -->
+          <div class="pd-buy">
+            <p class="pd-qty__label" id="pd-qty-label">Cantidad</p>
+            <div class="pd-qty" [class.pd-qty--disabled]="outOfStock()" role="group" aria-labelledby="pd-qty-label">
+              <button type="button" (click)="decreaseQty()" [disabled]="outOfStock()" aria-label="Restar una unidad">−</button>
+              <span class="pd-qty__value" aria-live="polite">{{ quantity() }}</span>
+              <button type="button" (click)="increaseQty()" [disabled]="outOfStock()" aria-label="Sumar una unidad">+</button>
+            </div>
 
-        <!-- Compra -->
-        <div class="pd-buy">
-          <div class="pd-qty" [class.pd-qty--disabled]="outOfStock()">
-            <button type="button" (click)="decreaseQty()" [disabled]="outOfStock()" aria-label="Restar">−</button>
-            <span>{{ quantity() }}</span>
-            <button type="button" (click)="increaseQty()" [disabled]="outOfStock()" aria-label="Sumar">+</button>
+            <button
+              type="button"
+              class="pd-btn pd-btn--solid pd-btn--full"
+              [disabled]="outOfStock() || adding()"
+              (click)="addToCart()">
+              @if (outOfStock()) { Sin existencias }
+              @else if (adding()) { Agregando… }
+              @else { Añadir al carrito }
+            </button>
           </div>
-          <button
-            type="button"
-            class="pd-btn pd-btn--solid pd-btn--full"
-            [disabled]="outOfStock() || adding()"
-            (click)="addToCart()">
-            @if (outOfStock()) { Sin existencias }
-            @else if (adding()) { Agregando… }
-            @else { Añadir al carrito }
-          </button>
-        </div>
 
-        <div class="pd-meta">
-          <p>Envíos nacionales a toda Colombia de 2 a 5 días hábiles.</p>
-          <p>Cambios y devoluciones dentro de 30 días desde la entrega.</p>
-        </div>
-      </section>
-    </article>
+          <!-- Pago contra entrega — bloque INFORMATIVO. Sin pasarela, sin
+               formulario de pago, sin endpoint: DUSCK cobra al entregar. -->
+          <div class="pd-cod">
+            <p class="pd-cod__title">Pago contra entrega</p>
+            <p class="pd-cod__text">Paga en efectivo cuando recibas tu pedido. No necesitas pagar por adelantado.</p>
+          </div>
 
-    <!-- Visor de imagen -->
+          @if (p.description) {
+            <p class="pd-description">{{ p.description }}</p>
+          }
+
+          <!-- Acordeones — <details>/<summary> nativos (accesibles y con teclado
+               sin JS). `name` los hace excluyentes. Contenido real del backend
+               con los mismos textos de respaldo que ya existían. -->
+          <div class="pd-accordions">
+            <details class="pd-acc" name="pd-acc">
+              <summary>Detalles</summary>
+              <div class="pd-acc__body">
+                <p>{{ p.details || 'Ficha en preparación. Escríbenos si necesitas información adicional sobre esta prenda.' }}</p>
+              </div>
+            </details>
+            <details class="pd-acc" name="pd-acc">
+              <summary>Envío y pedidos</summary>
+              <div class="pd-acc__body">
+                <p>{{ p.shippingInfo || 'Envíos nacionales a toda Colombia de 2 a 5 días hábiles.' }}</p>
+              </div>
+            </details>
+            <details class="pd-acc" name="pd-acc">
+              <summary>Cambios y devoluciones</summary>
+              <div class="pd-acc__body">
+                <p>{{ p.returnsInfo || 'Cambios y devoluciones dentro de 30 días desde la entrega.' }}</p>
+              </div>
+            </details>
+          </div>
+
+        </section>
+      </article>
+    </div>
+
+    <!-- Visor de imagen — dialog accesible: Escape cierra, foco atrapado en el
+         botón de cierre, se devuelve el foco al disparador, scroll del body
+         bloqueado (ver product-disign.ts). No usa UiModal. -->
     @if (zoomImage(); as z) {
-      <div class="pd-viewer" (click)="closeZoom()">
-        <button type="button" class="pd-viewer__close" (click)="closeZoom()" aria-label="Cerrar">✕</button>
-        <img [src]="z" [alt]="product().name" (click)="$event.stopPropagation()">
+      <div
+        class="pd-viewer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Imagen ampliada"
+        (click)="closeZoom()"
+        (keydown.tab)="$event.preventDefault()"
+        (keydown.shift.tab)="$event.preventDefault()">
+        <button
+          #closeBtn
+          type="button"
+          class="pd-viewer__close"
+          aria-label="Cerrar imagen ampliada"
+          (click)="closeZoom(); $event.stopPropagation()">✕</button>
+        <img [src]="z" [alt]="'Imagen ampliada de ' + p.name" (click)="$event.stopPropagation()">
       </div>
+    }
     }
   }
 }

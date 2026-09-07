@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, forkJoin, of } from 'rxjs';
 
@@ -10,7 +10,9 @@ import { AdminDialog } from '../../core/services/admin-dialog';
 import { PermissionsService } from '../../core/services/permissions';
 import { normalizeError } from '../../core/services/api-error';
 import {
+  actorName,
   categoryIds,
+  lastReviewComment,
   mainImageUrl,
   stockLevel,
   STOCK_LOW_THRESHOLD,
@@ -75,6 +77,7 @@ export default class ProductListPage {
   private categoriesApi = inject(AdminCategoriesApi);
   private dialog = inject(AdminDialog);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   protected perms = inject(PermissionsService);
 
   protected readonly columns = COLUMNS;
@@ -153,8 +156,35 @@ export default class ProductListPage {
 
   protected categoryOptions = computed(() => this.categories());
 
+  /**
+   * F6 — Admin Review: cuántos productos están PENDING_REVIEW ahora mismo
+   * (sobre el universo cargado, NO sobre la página/filtro actual — así el
+   * atajo sigue siendo útil incluso si el usuario ya está filtrando por otra
+   * cosa). Solo administrador/shop_manager pueden "revisar" (ver §Roles del
+   * F6 report); el editor nunca ve esta cola aunque técnicamente reciba sus
+   * propios PENDING_REVIEW en `this.all()`.
+   */
+  protected pendingReviewCount = computed(() => this.all().filter((p) => p.status === 'PENDING_REVIEW').length);
+  protected canSeeReviewShortcut = computed(() => {
+    const r = this.perms.role();
+    return r === 'administrador' || r === 'shop_manager';
+  });
+
   constructor() {
+    // F6 — deep-link `?status=PENDING_REVIEW` (usado por el atajo de
+    // revisión del overview / sidebar). Cualquier otro valor se ignora: el
+    // filtro sigue siendo 100% manual desde el <select> existente.
+    const qp = this.route.snapshot.queryParamMap.get('status');
+    if (qp && (PRODUCT_STATUSES as readonly string[]).includes(qp)) {
+      this.statusFilter.set(qp as ProductStatus);
+    }
     this.load();
+  }
+
+  /** Atajo del F6: salta directo a la cola de PENDING_REVIEW. */
+  goToPendingReview(): void {
+    this.statusFilter.set('PENDING_REVIEW');
+    this.page.set(1);
   }
 
   load(): void {
@@ -193,11 +223,33 @@ export default class ProductListPage {
 
   // --- Acciones de workflow ------------------------------------------------
 
+  /**
+   * Acción rápida "Enviar a revisión" desde la lista. SOLO estados con arista
+   * DIRECTA a PENDING_REVIEW en el backend: DRAFT y CHANGES_REQUESTED.
+   * REJECTED requiere pasar por DRAFT (F1 §7) y ver el motivo primero -> se
+   * gestiona desde el formulario, no desde la lista.
+   */
   protected canSubmitReview(p: AdminProduct): boolean {
-    return (p.status === 'DRAFT' || p.status === 'REJECTED') && this.perms.can('products.submitReview');
+    return (
+      (p.status === 'DRAFT' || p.status === 'CHANGES_REQUESTED') && this.perms.can('products.submitReview')
+    );
+  }
+
+  /** Comentario de la última revisión (para CHANGES_REQUESTED / REJECTED en la fila). */
+  protected reviewNote(p: AdminProduct): string | null {
+    return p.status === 'CHANGES_REQUESTED' || p.status === 'REJECTED' ? lastReviewComment(p) : null;
+  }
+
+  /** F6 — nombre del creador (`createdBy` populado por el backend); `null` si no resolvió. */
+  protected creatorName(p: AdminProduct): string | null {
+    return actorName(p.createdBy);
   }
   protected canApprove(p: AdminProduct): boolean {
     return p.status === 'PENDING_REVIEW' && this.perms.can('products.approve');
+  }
+  /** F6 — PENDING_REVIEW -> CHANGES_REQUESTED (exige comentario, ver `requestChanges`). */
+  protected canRequestChanges(p: AdminProduct): boolean {
+    return p.status === 'PENDING_REVIEW' && this.perms.can('products.requestChanges');
   }
   protected canReject(p: AdminProduct): boolean {
     return p.status === 'PENDING_REVIEW' && this.perms.can('products.reject');
@@ -209,9 +261,13 @@ export default class ProductListPage {
     return this.perms.can('products.toggleActive');
   }
 
-  private transition(p: AdminProduct, toStatus: 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'PUBLISHED', rejectionReason?: string): void {
+  private transition(
+    p: AdminProduct,
+    toStatus: 'PENDING_REVIEW' | 'APPROVED' | 'CHANGES_REQUESTED' | 'REJECTED' | 'PUBLISHED',
+    comment?: string,
+  ): void {
     this.busyId.set(p._id);
-    this.api.updateStatus(p._id, toStatus, rejectionReason).subscribe({
+    this.api.updateStatus(p._id, toStatus, comment).subscribe({
       next: (updated) => {
         this.busyId.set(null);
         this.all.update((list) => list.map((x) => (x._id === updated._id ? updated : x)));
@@ -238,6 +294,18 @@ export default class ProductListPage {
 
   approve(p: AdminProduct): void {
     this.transition(p, 'APPROVED');
+  }
+
+  /** F6 — "Solicitar cambios": exige comentario (backend `requiresComment`), queda en workflowHistory. */
+  async requestChanges(p: AdminProduct): Promise<void> {
+    const comment = await this.dialog.promptText({
+      title: `Solicitar cambios en "${p.name}"`,
+      message: 'Explica qué debe corregir el editor antes de reenviar.',
+      placeholder: 'Cambios solicitados…',
+      confirmText: 'Solicitar cambios',
+    });
+    if (!comment) return;
+    this.transition(p, 'CHANGES_REQUESTED', comment);
   }
 
   async reject(p: AdminProduct): Promise<void> {

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { isPlatformBrowser } from '@angular/common';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
@@ -47,11 +48,18 @@ export class AdminLayoutComponent {
 
   constructor() {
     // La tienda pública añade `has-fixed-header` al <body>; el panel no la usa.
+    // (La reconciliación por navegación vive en `App` — ver app.ts; esto cubre
+    // el primer render del shell.)
     if (this.isBrowser) {
       document.body.classList.remove('has-fixed-header');
     }
+    // UI-2: `takeUntilDestroyed()` ata la suscripción al ciclo de vida del
+    // componente (antes quedaba viva tras destruirse el layout).
     this.router.events
-      .pipe(filter((e) => e instanceof NavigationEnd))
+      .pipe(
+        filter((e) => e instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
       .subscribe(() => this.closeMobile());
   }
 

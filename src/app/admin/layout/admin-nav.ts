@@ -16,9 +16,13 @@ export interface NavSection {
 
 /**
  * Navegación del panel. SOLO se listan módulos con backend real hoy.
- * Los dominios sin API (pedidos, cupones, pagos, finanzas, soporte, reseñas,
- * auditoría, backups, salud, notificaciones, analítica...) NO aparecen: se
+ * Los dominios sin API (cupones, finanzas, soporte, reseñas, auditoría,
+ * backups, salud, notificaciones, analítica de ventas...) NO aparecen: se
  * añadirán cuando exista su contrato. Ver PENDING BACKEND en el informe.
+ *
+ * UI-5.2 — "Pedidos" SÍ tiene backend real (UI-5.1: GET/PATCH /api/orders).
+ * El Dashboard de ventas (KPIs, gráficas, ingresos) sigue SIN backend y NO
+ * aparece: es una fase posterior.
  *
  * La visibilidad de cada item la decide `PermissionsService` (derivado del rol);
  * la protección REAL de cada ruta la hace `permissionGuard` + el backend.
@@ -33,6 +37,12 @@ export const ADMIN_NAV: NavSection[] = [
         icon: 'dashboard',
         permissions: ['dashboard.read'],
       },
+    ],
+  },
+  {
+    title: 'Ventas',
+    items: [
+      { label: 'Pedidos', route: '/admin/orders', icon: 'cart', permissions: ['orders.read'] },
     ],
   },
   {

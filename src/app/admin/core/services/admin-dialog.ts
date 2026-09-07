@@ -62,22 +62,33 @@ export class AdminDialog {
 
   /**
    * Captura un texto obligatorio del operador (p. ej. el motivo de rechazo de
-   * un producto). Devuelve el texto recortado, o `null` si cancela o deja el
-   * campo vacío — el backend exige `rejectionReason` no vacío de todas formas,
-   * pero se valida aquí también para no abrir un request condenado a 400.
+   * un producto, o el comentario de "solicitar cambios" — F6). Devuelve el
+   * texto recortado, o `null` si cancela o deja el campo vacío/solo espacios
+   * — el backend exige el comentario no vacío de todas formas
+   * (`requiresComment` en `PRODUCT_TRANSITIONS`), pero se valida aquí también
+   * para no abrir un request condenado a 400.
+   *
+   * `maxLength` refleja el límite REAL del backend del campo destino y por
+   * defecto es 500 (`WorkflowHistoryEntrySchema.comment` /
+   * `Product.rejectionReason` / `Order.statusHistory[].note`, todos
+   * `maxlength: 500`). UI-5.2 lo pasa a 300 para `payment.note`
+   * (`order.model.js`). No es un límite inventado aquí.
    */
   async promptText(opts: {
     title: string;
     message?: string;
     placeholder?: string;
     confirmText?: string;
+    maxLength?: number;
   }): Promise<string | null> {
     if (!this.canUseDom) return null;
+    const max = opts.maxLength ?? 500;
     const result = await Swal.fire({
       title: opts.title,
       text: opts.message,
       input: 'textarea',
       inputPlaceholder: opts.placeholder ?? '',
+      inputAttributes: { maxlength: String(max) },
       showCancelButton: true,
       reverseButtons: true,
       confirmButtonText: opts.confirmText ?? 'Confirmar',

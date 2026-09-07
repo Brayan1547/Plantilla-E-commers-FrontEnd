@@ -1,1 +1,170 @@
-<p>checkout works!</p>
+<section class="checkout">
+  <h1 class="checkout__title">Finalizar compra</h1>
+
+  <!-- Estado: cargando carrito autenticado -->
+  @if (loadingCart()) {
+    <p class="checkout__note">Cargando tu carrito…</p>
+  } @else if (isEmpty()) {
+    <!-- Estado: carrito vacío -> no se puede continuar -->
+    <div class="checkout__empty">
+      <p>Tu carrito está vacío.</p>
+      <a class="checkout__btn checkout__btn--ghost" routerLink="/home">Ir a la tienda</a>
+    </div>
+  } @else {
+    <div class="checkout__grid">
+      <!-- ============ Formulario ============ -->
+      <form class="checkout-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <fieldset class="checkout-form__group">
+          <legend>Datos de quien recibe</legend>
+
+          <label>
+            <span>Nombre completo <b aria-hidden="true">*</b></span>
+            <input type="text" formControlName="recipientName" autocomplete="name" maxlength="80" />
+            @if (errorText('recipientName'); as err) { <small class="checkout-form__err">{{ err }}</small> }
+          </label>
+
+          <label>
+            <span>Teléfono móvil <b aria-hidden="true">*</b></span>
+            <input type="tel" formControlName="phone" inputmode="numeric" autocomplete="tel" placeholder="3001234567" maxlength="10" />
+            @if (errorText('phone'); as err) { <small class="checkout-form__err">{{ err }}</small> }
+          </label>
+
+          <label>
+            <span>Correo electrónico <b aria-hidden="true">*</b></span>
+            <input type="email" formControlName="email" autocomplete="email" maxlength="120" />
+            @if (errorText('email'); as err) { <small class="checkout-form__err">{{ err }}</small> }
+          </label>
+
+          <label>
+            <span>Documento de identidad (opcional)</span>
+            <input type="text" formControlName="documentId" inputmode="numeric" maxlength="20" />
+            @if (errorText('documentId'); as err) { <small class="checkout-form__err">{{ err }}</small> }
+          </label>
+        </fieldset>
+
+        <fieldset class="checkout-form__group">
+          <legend>Dirección de entrega</legend>
+
+          <label>
+            <span>Departamento <b aria-hidden="true">*</b></span>
+            <input type="text" formControlName="department" autocomplete="address-level1" maxlength="60" />
+            @if (errorText('department'); as err) { <small class="checkout-form__err">{{ err }}</small> }
+          </label>
+
+          <label>
+            <span>Ciudad o municipio <b aria-hidden="true">*</b></span>
+            <input type="text" formControlName="city" autocomplete="address-level2" maxlength="80" />
+            @if (errorText('city'); as err) { <small class="checkout-form__err">{{ err }}</small> }
+          </label>
+
+          <label>
+            <span>Barrio <b aria-hidden="true">*</b></span>
+            <input type="text" formControlName="neighborhood" maxlength="80" />
+            @if (errorText('neighborhood'); as err) { <small class="checkout-form__err">{{ err }}</small> }
+          </label>
+
+          <label>
+            <span>Dirección <b aria-hidden="true">*</b></span>
+            <input type="text" formControlName="address" autocomplete="street-address" placeholder="Calle 12 # 34-56" maxlength="160" />
+            @if (errorText('address'); as err) { <small class="checkout-form__err">{{ err }}</small> }
+          </label>
+
+          <label>
+            <span>Complemento (opcional)</span>
+            <input type="text" formControlName="addressComplement" placeholder="Apto 201, torre B" maxlength="80" />
+            @if (errorText('addressComplement'); as err) { <small class="checkout-form__err">{{ err }}</small> }
+          </label>
+
+          <label>
+            <span>Referencia (opcional)</span>
+            <input type="text" formControlName="reference" placeholder="Frente al parque" maxlength="160" />
+            @if (errorText('reference'); as err) { <small class="checkout-form__err">{{ err }}</small> }
+          </label>
+        </fieldset>
+
+        <fieldset class="checkout-form__group">
+          <legend>Observaciones</legend>
+          <label>
+            <span>Notas para la entrega (opcional)</span>
+            <textarea formControlName="notes" rows="3" maxlength="500"></textarea>
+            @if (errorText('notes'); as err) { <small class="checkout-form__err">{{ err }}</small> }
+          </label>
+        </fieldset>
+
+        <!-- Pago contra entrega — informativo, sin pasarela -->
+        <div class="checkout-form__cod">
+          <p class="checkout-form__cod-title">Pago contra entrega</p>
+          <p>Pagas en efectivo cuando recibas tu pedido. No necesitas pagar por adelantado.</p>
+        </div>
+
+        @if (errorMessage(); as msg) {
+          <p class="checkout-form__alert" role="alert">{{ msg }}</p>
+        }
+
+        @if (sessionExpired()) {
+          <div class="checkout-form__session" role="alert">
+            <button type="button" class="checkout__btn checkout__btn--ghost" (click)="irALogin()">Iniciar sesión</button>
+            <button type="button" class="checkout__btn checkout__btn--ghost" (click)="continuarComoInvitado()">Continuar como invitado</button>
+          </div>
+        }
+
+        <button
+          type="submit"
+          class="checkout__btn checkout__btn--solid"
+          [disabled]="submitting() || isEmpty() || hasUnavailable()">
+          @if (submitting()) { Procesando pedido… } @else { Realizar pedido }
+        </button>
+      </form>
+
+      <!-- ============ Resumen ============ -->
+      <aside class="checkout-summary" aria-label="Resumen del pedido">
+        <h2 class="checkout-summary__title">Tu pedido</h2>
+
+        @if (hasUnavailable()) {
+          <p class="checkout-summary__warn" role="alert">
+            Hay productos que ya no están disponibles. Quítalos para poder continuar.
+          </p>
+        }
+
+        <ul class="checkout-summary__list">
+          @for (line of lines(); track line.productId) {
+            <li class="checkout-summary__item" [class.checkout-summary__item--out]="!line.available">
+              <div class="checkout-summary__thumb">
+                @if (line.image) {
+                  <img [src]="line.image" [alt]="line.name" />
+                } @else {
+                  <div class="checkout-summary__thumb--empty"></div>
+                }
+              </div>
+              <div class="checkout-summary__info">
+                <p class="checkout-summary__name">{{ line.name }}</p>
+                <p class="checkout-summary__qty">Cantidad: {{ line.quantity }}</p>
+                @if (!line.available) {
+                  <p class="checkout-summary__unavailable">No disponible</p>
+                }
+                <button type="button" class="checkout-summary__remove" (click)="removeLine(line.productId)">Quitar</button>
+              </div>
+              <p class="checkout-summary__price">
+                {{ (line.price * line.quantity) | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </p>
+            </li>
+          }
+        </ul>
+
+        <div class="checkout-summary__totals">
+          <div class="checkout-summary__row">
+            <span>Subtotal (estimado)</span>
+            <span>{{ subtotal() | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+          <div class="checkout-summary__row checkout-summary__row--muted">
+            <span>Envío</span>
+            <span>Se confirma al procesar</span>
+          </div>
+          <p class="checkout-summary__disclaimer">
+            El total definitivo lo calcula DUSCK al confirmar el pedido.
+          </p>
+        </div>
+      </aside>
+    </div>
+  }
+</section>

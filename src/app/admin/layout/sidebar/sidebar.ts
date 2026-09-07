@@ -26,6 +26,8 @@ import { ADMIN_NAV, type NavSection } from '../admin-nav';
               [routerLink]="item.route"
               routerLinkActive="is-active"
               [routerLinkActiveOptions]="{ exact: false }"
+              [title]="item.label"
+              [attr.aria-label]="item.label"
               (click)="navigate.emit()">
               <span class="adm-nav-item__icon"><adm-icon [name]="item.icon" [size]="18" /></span>
               <span class="adm-nav-item__label">{{ item.label }}</span>

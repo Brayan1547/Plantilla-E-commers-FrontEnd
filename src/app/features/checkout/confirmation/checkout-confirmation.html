@@ -1,0 +1,65 @@
+<section class="confirm">
+  @if (order(); as o) {
+    <p class="confirm__eyebrow">Pedido recibido</p>
+    <h1 class="confirm__title">Tu pedido ha sido recibido.</h1>
+
+    @if (o.orderNumber) {
+      <p class="confirm__number">Pedido {{ o.orderNumber }}</p>
+    }
+    <p class="confirm__status">Estado: {{ o.status }}</p>
+
+    <div class="confirm__payment">
+      <p class="confirm__payment-title">Pago contra entrega</p>
+      <p>Pagas en efectivo cuando recibas tu pedido.</p>
+    </div>
+
+    <h2 class="confirm__h2">Productos</h2>
+    <ul class="confirm__items">
+      @for (it of o.items; track it.productId) {
+        <li class="confirm__item">
+          <span class="confirm__item-name">{{ it.productName }}</span>
+          <span class="confirm__item-qty">x{{ it.quantity }}</span>
+          <span class="confirm__item-sub">{{ it.subtotal | currency:o.totals.currency:'symbol-narrow':'1.0-0' }}</span>
+        </li>
+      }
+    </ul>
+
+    <div class="confirm__totals">
+      <div class="confirm__row">
+        <span>Subtotal</span>
+        <span>{{ o.totals.itemsSubtotal | currency:o.totals.currency:'symbol-narrow':'1.0-0' }}</span>
+      </div>
+      <div class="confirm__row">
+        <span>Envío</span>
+        <span>{{ o.totals.shipping | currency:o.totals.currency:'symbol-narrow':'1.0-0' }}</span>
+      </div>
+      <div class="confirm__row confirm__row--total">
+        <span>Total</span>
+        <span>{{ o.totals.grandTotal | currency:o.totals.currency:'symbol-narrow':'1.0-0' }}</span>
+      </div>
+    </div>
+
+    <h2 class="confirm__h2">Entrega</h2>
+    <address class="confirm__address">
+      {{ o.customer.recipientName }}<br />
+      {{ o.customer.phone }} · {{ o.customer.email }}<br />
+      {{ o.shippingAddress.address }}<br />
+      @if (o.shippingAddress.addressComplement) { {{ o.shippingAddress.addressComplement }}<br /> }
+      {{ o.shippingAddress.neighborhood }}, {{ o.shippingAddress.city }}, {{ o.shippingAddress.department }}
+      @if (o.shippingAddress.reference) { <br />Ref: {{ o.shippingAddress.reference }} }
+    </address>
+
+    @if (o.notes) {
+      <p class="confirm__notes">Notas: {{ o.notes }}</p>
+    }
+
+    <a class="confirm__btn" routerLink="/home">Seguir comprando</a>
+  } @else {
+    <h1 class="confirm__title">Gracias por tu compra</h1>
+    <p>
+      Si acabas de completar un pedido, ya fue registrado. No pudimos mostrar el detalle en esta
+      pantalla (posiblemente recargaste la página).
+    </p>
+    <a class="confirm__btn" routerLink="/home">Volver a la tienda</a>
+  }
+</section>

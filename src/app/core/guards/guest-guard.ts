@@ -4,7 +4,8 @@ import { HttpAuth } from '../services/http-auth';
 
 import { tap, map } from 'rxjs';
 
-const ADMIN_ROLES = ['administrador', 'shop_manager'];
+// F3: `editor` también tiene panel (UI editorial de productos en `/admin`).
+const PANEL_ROLES = ['administrador', 'shop_manager', 'editor'];
 
 export const guestGuard: CanActivateFn = (route, state) => {
   const httpAuth = inject( HttpAuth );
@@ -17,7 +18,7 @@ export const guestGuard: CanActivateFn = (route, state) => {
       //si YA hay sesion, no dejamos ver login/register: se redirige segun el rol
       if( !isGuest ) {
         const role = httpAuth.user?.role;
-        router.navigateByUrl( ADMIN_ROLES.includes(role) ? '/admin' : '/home' );
+        router.navigateByUrl( PANEL_ROLES.includes(role) ? '/admin' : '/home' );
       }
     }),
   )

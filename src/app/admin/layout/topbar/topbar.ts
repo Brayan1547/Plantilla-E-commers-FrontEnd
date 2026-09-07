@@ -24,13 +24,18 @@ import { ROLE_LABELS } from '../../core/models/permission.model';
         <adm-icon name="chevron-left" [size]="18" />
       </button>
 
-      <!-- Búsqueda global: sin backend de búsqueda unificada -> deshabilitada. -->
-      <label class="adm-topbar__search">
+      <!-- Identidad del panel (texto estático, sin datos derivados). -->
+      <span class="adm-topbar__brand">
+        <span class="adm-topbar__brand-name">DUSCK</span>
+        <span class="adm-topbar__brand-tag">Panel</span>
+      </span>
+
+      <!-- Búsqueda global: sin backend -> indicador presentacional, fuera del
+           árbol accesible (ya no es un <input disabled>). -->
+      <div class="adm-topbar__search" aria-hidden="true">
         <adm-icon name="search" [size]="16" />
-        <input type="search" disabled
-          placeholder="Búsqueda global — requiere backend"
-          aria-label="Búsqueda global (no disponible)" />
-      </label>
+        <span>Búsqueda global — requiere backend</span>
+      </div>
 
       <span class="adm-topbar__spacer"></span>
 

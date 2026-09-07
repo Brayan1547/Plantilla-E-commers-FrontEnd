@@ -106,7 +106,11 @@ export default class Basicos {
     this.selectedCategoryId.set(id);
   }
 
-  /** `product.categories` llega como array de ids (sin poblar); se contemplan objetos por robustez. */
+  /**
+   * F7-A — `product.categories` llega POBLADO desde el contrato público
+   * (`{_id, name, slug}`). Se sigue contemplando el string suelto por
+   * robustez frente a datos/mocks antiguos.
+   */
   private categoryIdsOf(product: any): string[] {
     const cats = product?.categories;
     if (!Array.isArray(cats)) return [];

@@ -33,6 +33,10 @@ export const PERMISSIONS = [
   // aparte porque cada rol tiene una porción distinta de la maquina de estados:
   'products.submitReview', // DRAFT/REJECTED -> PENDING_REVIEW (editor dueño, shop_manager, admin)
   'products.approve', // PENDING_REVIEW -> APPROVED (solo admin)
+  // F6 — PENDING_REVIEW -> CHANGES_REQUESTED (solo admin; `requiresComment`
+  // en `PRODUCT_TRANSITIONS`). shop_manager NUNCA la gana (ver
+  // product-fase1.test.js "shop_manager NO gana request_changes").
+  'products.requestChanges',
   'products.reject', // PENDING_REVIEW -> REJECTED (solo admin)
   'products.publish', // APPROVED -> PUBLISHED (solo admin)
   // Activar/desactivar (`isActive`) es una palanca OPERATIVA, no editorial —
@@ -52,6 +56,16 @@ export const PERMISSIONS = [
   // Carrito administrativo (cart.routes.js -> /cart/admin -> ['administrador'])
   'carts.readAny',
   'carts.deleteAny',
+
+  // Pedidos (UI-5.1 — order.routes.js -> autenticationUser +
+  // authorizationUser(['administrador','shop_manager']) para las 4 rutas:
+  // GET /api/orders, GET /api/orders/:id, PATCH /:id/status, PATCH /:id/payment).
+  // El backend NO tiene permisos granulares: los 3 permisos se otorgan/retiran
+  // en bloque con el rol. Se dejan separados para poder ocultar acciones
+  // concretas en la UI y para migrar sin fricción cuando exista `/me/permissions`.
+  'orders.read',
+  'orders.manageStatus',
+  'orders.managePayment',
 
   // Dashboard — agregados de solo lectura sobre los recursos anteriores
   'dashboard.read',
@@ -98,6 +112,10 @@ export const ROLE_PERMISSIONS: Record<AdminRole, Permission[]> = {
     'categories.create',
     'categories.update',
     'categories.delete',
+    // UI-5.1 — shop_manager gestiona pedidos (mismo rol que en el backend).
+    'orders.read',
+    'orders.manageStatus',
+    'orders.managePayment',
     'dashboard.read',
   ],
   // 'dashboard.read' incluido porque `/admin` redirige por defecto a

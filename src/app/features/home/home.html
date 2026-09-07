@@ -35,10 +35,12 @@
 
     <div class="product-grid">
 
-       @for (product of displayedProducts; track product._id) {
+       @for (product of newArrivals(); track product._id) {
         <a [routerLink]="['/tienda/producto', product._id]" class="product-card">
           <div class="product-media">
-            <span class="tag-new">Nuevo</span>
+            @if (isNew(product)) {
+              <span class="tag-new">Nuevo</span>
+            }
             @if (product.stock === 0) {
               <span class="tag-new" style="background:#999;">Agotado</span>
             }
@@ -59,6 +61,13 @@
         </a>
       }
 
+      @if (state() === 'empty') {
+        <p class="arrivals-empty">Todavía no hay productos publicados.</p>
+      }
+      @if (state() === 'error') {
+        <p class="arrivals-empty">No pudimos cargar los productos. Intenta de nuevo más tarde.</p>
+      }
+
             <!-- Card especial: solo visible para administrador o shop_manager -->
       @if (canManageProducts) {
         <a routerLink="/admin/products/new" class="product-card product-card--add">
@@ -69,7 +78,7 @@
         </a>
       }
 
-     
+
 
       <!-- <a routerLink="/tienda/producto/2" class="product-card">
         <div class="product-media">

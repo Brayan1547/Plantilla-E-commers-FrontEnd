@@ -48,12 +48,12 @@ import { ADMIN_NAV, type NavItem } from '../../layout/admin-nav';
         <p class="adm-muted">
           El dashboard de indicadores (ventas del día/mes/año, ingresos netos,
           ticket promedio, conversión, gráficas de ventas y categorías, tráfico y
-          alertas operativas) todavía <strong>no tiene backend</strong>. Se
-          activará cuando existan los modelos de pedidos, analítica e inventario.
+          alertas operativas) todavía <strong>no tiene backend de analítica</strong>.
+          Se activará cuando exista la API de agregados sobre pedidos.
         </p>
         <p class="adm-muted" style="font-size:12.5px">
-          Módulos disponibles hoy con API real: usuarios, roles (solo lectura),
-          productos, inventario (stock) y categorías.
+          Módulos disponibles hoy con API real: pedidos (gestión operativa),
+          usuarios, roles (solo lectura), productos, inventario (stock) y categorías.
         </p>
       </div>
     </div>

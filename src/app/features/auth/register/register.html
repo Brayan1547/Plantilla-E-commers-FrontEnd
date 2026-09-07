@@ -1,56 +1,82 @@
-<form [formGroup]="formData" (ngSubmit)="onSubmit()" class="auth-form">
+<div class="auth-card" [class.auth-card--bare]="embedded">
 
-  <div class="auth-field">
-    <label for="name">Nombre</label>
-    <input formControlName="name" type="text" id="name" placeholder="Ej: carlos perez"
-      [class.invalid]="name?.invalid && (name?.dirty || name?.touched)">
-    <small class="error">
-      @if (name?.invalid && (name?.dirty || name?.touched)) {
-        @if (name?.errors?.['required']) { Ingresa tu nombre }
-        @if (name?.errors?.['minlength']) { Debe tener al menos 2 caracteres }
-      }
-    </small>
+  <div class="auth-brand">
+    <span class="auth-brand__name">DUSCK</span>
+    <span class="auth-brand__sub">MODEL</span>
   </div>
 
-  <div class="auth-field">
-    <label for="nickname">Nickname</label>
-    <input formControlName="nickname" type="text" id="nickname" placeholder="Ej: carlosperez123"
-      [class.invalid]="nickname?.invalid && (nickname?.dirty || nickname?.touched)">
-    <small class="error">
-      @if (nickname?.invalid && (nickname?.dirty || nickname?.touched)) {
-        @if (nickname?.errors?.['required']) { Ingresa un nickname }
-        @if (nickname?.errors?.['minlength']) { Debe tener al menos 3 caracteres }
+  <h1 class="auth-title">Crear cuenta</h1>
+
+  <form [formGroup]="formData" (ngSubmit)="onSubmit()" class="auth-form">
+
+    <div class="auth-field">
+      <label class="auth-label" for="name">Nombre</label>
+      <input class="auth-input" formControlName="name" type="text" id="name"
+        autocomplete="name" placeholder="Ej: carlos perez"
+        [class.invalid]="name?.invalid && (name?.dirty || name?.touched)"
+        [attr.aria-invalid]="(name?.invalid && (name?.dirty || name?.touched)) || null"
+        [attr.aria-describedby]="(name?.invalid && (name?.dirty || name?.touched)) ? 'register-name-error' : null">
+      <small class="auth-error" id="register-name-error">
+        @if (name?.invalid && (name?.dirty || name?.touched)) {
+          @if (name?.errors?.['required']) { Ingresa tu nombre }
+          @if (name?.errors?.['minlength']) { Debe tener al menos 2 caracteres }
+        }
+      </small>
+    </div>
+
+    <div class="auth-field">
+      <label class="auth-label" for="nickname">Nickname</label>
+      <input class="auth-input" formControlName="nickname" type="text" id="nickname"
+        autocomplete="username" placeholder="Ej: carlosperez123"
+        [class.invalid]="nickname?.invalid && (nickname?.dirty || nickname?.touched)"
+        [attr.aria-invalid]="(nickname?.invalid && (nickname?.dirty || nickname?.touched)) || null"
+        [attr.aria-describedby]="(nickname?.invalid && (nickname?.dirty || nickname?.touched)) ? 'register-nickname-error' : null">
+      <small class="auth-error" id="register-nickname-error">
+        @if (nickname?.invalid && (nickname?.dirty || nickname?.touched)) {
+          @if (nickname?.errors?.['required']) { Ingresa un nickname }
+          @if (nickname?.errors?.['minlength']) { Debe tener al menos 3 caracteres }
+        }
+      </small>
+    </div>
+
+    <div class="auth-field">
+      <label class="auth-label" for="reg-email">Correo electrónico</label>
+      <input class="auth-input" formControlName="email" type="email" id="reg-email"
+        autocomplete="email" placeholder="tucorreo@ejemplo.com"
+        [class.invalid]="email?.invalid && (email?.dirty || email?.touched)"
+        [attr.aria-invalid]="(email?.invalid && (email?.dirty || email?.touched)) || null"
+        [attr.aria-describedby]="(email?.invalid && (email?.dirty || email?.touched)) ? 'register-email-error' : null">
+      <small class="auth-error" id="register-email-error">
+        @if (email?.invalid && (email?.dirty || email?.touched)) {
+          @if (email?.errors?.['required']) { Ingresa tu correo electrónico }
+        }
+      </small>
+    </div>
+
+    <div class="auth-field">
+      <label class="auth-label" for="reg-password">Contraseña</label>
+      <input class="auth-input" formControlName="password" type="password" id="reg-password"
+        autocomplete="new-password" placeholder="Tu contraseña"
+        [class.invalid]="password?.invalid && (password?.dirty || password?.touched)"
+        [attr.aria-invalid]="(password?.invalid && (password?.dirty || password?.touched)) || null"
+        [attr.aria-describedby]="(password?.invalid && (password?.dirty || password?.touched)) ? 'register-password-error' : null">
+      <small class="auth-error" id="register-password-error">
+        @if (password?.invalid && (password?.dirty || password?.touched)) {
+          @if (password?.errors?.['required']) { Ingresa una contraseña }
+        }
+      </small>
+    </div>
+
+    <button type="submit" class="auth-submit" [disabled]="formData.invalid">Crear cuenta</button>
+
+    <p class="auth-switch">
+      ¿Ya tienes cuenta?
+      @if (embedded) {
+        <button type="button" (click)="switchToLogin.emit()">Inicia sesión</button>
+      } @else {
+        <a routerLink="/login">Inicia sesión</a>
       }
-    </small>
-  </div>
+    </p>
 
-  <div class="auth-field">
-    <label for="reg-email">Correo electrónico</label>
-    <input formControlName="email" type="email" id="reg-email" placeholder="tucorreo@ejemplo.com"
-      [class.invalid]="email?.invalid && (email?.dirty || email?.touched)">
-    <small class="error">
-      @if (email?.invalid && (email?.dirty || email?.touched)) {
-        @if (email?.errors?.['required']) { Ingresa tu correo electrónico }
-      }
-    </small>
-  </div>
-
-  <div class="auth-field">
-    <label for="reg-password">Contraseña</label>
-    <input formControlName="password" type="password" id="reg-password" placeholder="Tu contraseña"
-      [class.invalid]="password?.invalid && (password?.dirty || password?.touched)">
-    <small class="error">
-      @if (password?.invalid && (password?.dirty || password?.touched)) {
-        @if (password?.errors?.['required']) { Ingresa una contraseña }
-      }
-    </small>
-  </div>
-
-  <button type="submit" class="auth-submit" [disabled]="formData.invalid">Crear cuenta</button>
-
-  <p class="auth-switch">
-    ¿Ya tienes cuenta?
-    <button type="button" class="auth-switch__link" (click)="switchToLogin.emit()">Inicia sesión</button>
-  </p>
-
-</form>
+  </form>
+</div>

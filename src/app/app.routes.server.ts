@@ -45,6 +45,18 @@ export const serverRoutes: ServerRoute[] = [
     path: 'tienda/producto/:id',
     renderMode: RenderMode.Server,
   },
+  // UI-4B — Checkout y confirmacion: rutas dinamicas que dependen del estado del
+  // navegador (carrito guest en localStorage, estado de navegacion del router).
+  // No aportan SEO y no deben prerenderizarse -> Client, mismo criterio que
+  // `/admin`. Sin esto caerian en el comodin `**` (Prerender).
+  {
+    path: 'checkout',
+    renderMode: RenderMode.Client,
+  },
+  {
+    path: 'checkout/confirmacion',
+    renderMode: RenderMode.Client,
+  },
   // El bloque `dashboard` / `dashboard/**` (legacy, RenderMode.Client) se retiro
   // en R2.2 junto con las rutas. Las URLs antiguas /dashboard/* las absorbe el
   // comodin de app.routes.ts -> redirect a /404.

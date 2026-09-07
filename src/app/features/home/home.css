@@ -132,6 +132,14 @@
 /* ================= PRODUCT GRID (estilo Undergold) ================= */
 .arrivals{ background:var(--cream); }
 
+/* F7-D — estado vacío/error de "Recién llegados" (antes no existía ninguno). */
+.arrivals-empty{
+  grid-column:1 / -1;
+  color:var(--ink-soft);
+  font-size:14.5px;
+  padding:24px 0;
+}
+
 .product-grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);

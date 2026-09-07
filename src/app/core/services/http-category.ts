@@ -2,12 +2,19 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpAuth } from './http-auth';
+import type { PublicCategory } from '../models/public-product.model';
+
+/** Envoltura estándar `{ msg, data }` de las respuestas del backend. */
+interface ApiEnvelope<T> {
+  msg: string;
+  data: T;
+}
 
 @Service()
 export class HttpCategory {
-    //Inyectar una dependencia 
+    //Inyectar una dependencia
     private http = inject(HttpClient);
-    private authHttp = inject(HttpAuth); 
+    private authHttp = inject(HttpAuth);
 
     BASE_URL: string = environment.apiUrl;
 
@@ -19,13 +26,18 @@ export class HttpCategory {
         });
     }
 
-    createCategory(newCategory: any ) { 
+    createCategory(newCategory: any ) {
         return this.http.post(`${ this.BASE_URL}/category`, newCategory, { headers: this.getHeader() });
     }
-    
+
+    // F7-C / F7-CLOSURE — servicio del STOREFRONT. Nunca añade `?all=true`, así
+    // que el backend responde SIEMPRE el contrato público (solo `isActive:true`)
+    // — incluso si el `authInterceptor` global adjunta un `x-token` válido de un
+    // usuario admin-capable (recibir sesión NO basta: el gate del backend exige
+    // `?all=true` + rol, igual que `GET /product`). El panel admin usa
+    // `AdminCategoriesApi` (que sí pide `?all=true`), no este servicio.
     getCategory() {
-        //Observable (HttpClient)
-        return this.http.get<any>( `${ this.BASE_URL}/category` );
+        return this.http.get<ApiEnvelope<PublicCategory[]>>( `${ this.BASE_URL}/category` );
     }
 
     getCategoryById(id: any) {

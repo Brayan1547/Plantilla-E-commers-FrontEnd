@@ -39,15 +39,17 @@ describe('HttpAuth · destino post-login (returnUrl)', () => {
     expect(safe(undefined)).toBeNull();
   });
 
-  it('administrador / shop_manager: returnUrl válido -> destino solicitado; si no -> /admin', () => {
+  it('administrador / shop_manager / editor: returnUrl válido -> destino solicitado; si no -> /admin', () => {
     expect(resolve('administrador', '/admin/products')).toBe('/admin/products');
     expect(resolve('shop_manager', '/admin/categories')).toBe('/admin/categories');
+    // F3 — el rol `editor` YA tiene panel (UI editorial de productos).
+    expect(resolve('editor', '/admin/products')).toBe('/admin/products');
+    expect(resolve('editor', null)).toBe('/admin');
     expect(resolve('administrador', null)).toBe('/admin');
     expect(resolve('administrador', 'https://evil.com')).toBe('/admin');
   });
 
-  it('editor / subscriber: siempre /home (ignora returnUrl)', () => {
-    expect(resolve('editor', '/admin/products')).toBe('/home');
+  it('subscriber / rol desconocido: siempre /home (ignora returnUrl)', () => {
     expect(resolve('subscriber', '/admin/users')).toBe('/home');
     expect(resolve(undefined, '/admin')).toBe('/home');
   });

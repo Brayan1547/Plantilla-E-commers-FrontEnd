@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule,  } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpProduct } from '../../core/services/http-product';
@@ -6,6 +6,14 @@ import { HttpCart } from '../../core/services/http-cart';
 
 import { UiModal } from '../../core/services/ui-modal'; // nuevo: para pedir login si no hay sesión
 import { HttpAuth } from '../../core/services/http-auth'; // nuevo: saber si hay usuario logueado
+import type { PublicProduct, PublicProductImage } from '../../core/models/public-product.model';
+
+/** F7-D — ventana de "recién llegado": publicado dentro de los últimos N días. */
+const NEW_ARRIVAL_WINDOW_DAYS = 30;
+/** F7-D — cupo de la grilla de "Recién llegados" (2 filas x 4 columnas en desktop, ver home.css `.product-grid`). */
+const NEW_ARRIVALS_LIMIT = 8;
+
+type HomeState = 'loading' | 'ready' | 'empty' | 'error';
 
 @Component({
   selector: 'app-home',
@@ -20,43 +28,60 @@ export class Home {
   private httpProduct = inject(HttpProduct);
   private httpCart = inject(HttpCart); //  para agregar productos al carrito
 
-  private uiModal = inject(UiModal); 
+  private uiModal = inject(UiModal);
   httpAuth = inject(HttpAuth); // público: el html necesita leer el rol directo
 
+  protected readonly state = signal<HomeState>('loading');
 
-  // ahora guardamos el arreglo COMPLETO de productos
-  products: any[] = [];
+  // F7-D — CATÁLOGO GENERAL: todos los productos públicos+activos que
+  // devolvió el backend, SIN ordenar ni recortar. Se mantiene separado de
+  // `newArrivals` (abajo) a propósito — ver F7.AUDIT §6: "Recién llegados"
+  // NO debe alterar el orden/alcance del catálogo general, y viceversa.
+  private products = signal<PublicProduct[]>([]);
 
-  // solo se muestran los primeros "shownCount" de "products"
-  displayedProducts: any[] = [];
-
-
+  /**
+   * "Recién llegados": los `NEW_ARRIVALS_LIMIT` productos con `publishedAt`
+   * más reciente (nunca `createdAt`/`updatedAt` — un DRAFT editado meses
+   * después de creado, o un producto reabierto y vuelto a publicar, no debe
+   * "saltar" a recién llegado por eso; `publishedAt` es la única fecha con
+   * ese significado real, ver `updateProductStatus` en el backend).
+   */
+  protected readonly newArrivals = computed<PublicProduct[]>(() =>
+    [...this.products()]
+      .filter((p) => !!p.publishedAt)
+      .sort((a, b) => new Date(b.publishedAt!).getTime() - new Date(a.publishedAt!).getTime())
+      .slice(0, NEW_ARRIVALS_LIMIT),
+  );
 
   ngOnInit() {
     this.onLoadData();
   }
 
   onLoadData(){
+    this.state.set('loading');
     this.httpProduct.getProduct().subscribe({
-      next: (data) => {
+      next: (res) => {
         // Product Domain: GET /api/product publico YA filtra en el BACKEND a
         // status:PUBLISHED + isActive:true (Regla §24 — el backend es la
         // barrera real). Este filtro queda como defensa adicional, no como
         // el unico mecanismo de visibilidad.
-        this.products = data.data.filter((p: any) => p.isActive);
-        this.updateDisplayedProducts();
+        const list = (res?.data ?? []).filter((p) => p.isActive);
+        this.products.set(list);
+        this.state.set(list.length ? 'ready' : 'empty');
       },
-      error: (err) => console.error(err),
-      complete: () => console.log('productos cargados ')
-      });
+      error: (err) => {
+        console.error(err);
+        this.state.set('error');
+      },
+    });
   }
 
-    // Muestra todos los productos activos de una vez, sin límite inicial
-  private updateDisplayedProducts() {
-    this.displayedProducts = this.products;
+  /** F7-D — "Nuevo" solo si de verdad se publicó dentro de la ventana real; ya no es incondicional. */
+  protected isNew(product: PublicProduct): boolean {
+    if (!product.publishedAt) return false;
+    const ageDays = (Date.now() - new Date(product.publishedAt).getTime()) / 86_400_000;
+    return ageDays >= 0 && ageDays <= NEW_ARRIVAL_WINDOW_DAYS;
   }
-
-
 
   onWishlist(event: Event, productId: string) {
     event.preventDefault();  // evita que el clic en el corazón dispare el routerLink de la card
@@ -86,14 +111,14 @@ export class Home {
 
   // IMPORTANTE: images ahora es un arreglo [{url, isMain}] (tu nuevo schema).
   // Esta función busca la que tiene isMain: true; si ninguna la tiene, usa la primera.
-  getMainImage(images: { url:string; isMain: boolean } [] ): string {
-    if (!images || images.length === 0) return''; 
+  getMainImage(images: PublicProductImage[]): string {
+    if (!images || images.length === 0) return'';
     const main = images.find(img => img.isMain);
     return main ? main.url : images[0].url;
   }
 
   // Dice si el producto ya tiene al menos 1 imagen cargada
-  hasImages(images: { url: string; isMain: boolean }[]): boolean {
+  hasImages(images: PublicProductImage[]): boolean {
     return !!images && images.length > 0;
   }
 
@@ -102,5 +127,5 @@ export class Home {
     const role = this.httpAuth.user?.role;
     return role === 'administrador' || role === 'shop_manager';
   }
-  
+
 }

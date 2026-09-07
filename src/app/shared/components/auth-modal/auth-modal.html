@@ -19,9 +19,9 @@
 
     <div class="auth-modal__body">
       @if (activeTab === 'login') {
-        <app-login (loginSuccess)="close()" (switchToRegister)="setTab('register')" />
+        <app-login [embedded]="true" (loginSuccess)="close()" (switchToRegister)="setTab('register')" />
       } @else {
-        <app-register (switchToLogin)="setTab('login')" (registerSuccess)="close()" />
+        <app-register [embedded]="true" (switchToLogin)="setTab('login')" (registerSuccess)="close()" />
       }
     </div>
   </div>

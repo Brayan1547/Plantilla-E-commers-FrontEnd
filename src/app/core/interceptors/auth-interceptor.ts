@@ -23,10 +23,20 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     })
   }
 
+  // UI-4B — `POST /api/orders` (checkout) queda FUERA del manejo global de 401.
+  // Motivo: un token que expira a mitad del checkout haria que este interceptor
+  // borrara la sesion y navegara a /login, destruyendo el formulario ya
+  // rellenado. En su lugar, el componente de checkout captura el 401 y ofrece al
+  // usuario una decision EXPLICITA (reiniciar sesion o continuar como invitado);
+  // nunca reenvia la orden como invitado automaticamente.
+  // Comportamiento preservado: para CUALQUIER otra peticion, un 401 sigue
+  // limpiando la sesion y redirigiendo a /login igual que antes.
+  const isCheckoutOrder = req.method === 'POST' && /\/orders$/.test(req.url);
+
   //(3) Envia cabecera con o sin token al siguiente Interceptor
   return next( requestHeadersToken ).pipe(
     catchError( (error: HttpErrorResponse) => {
-      if ( error.status == 401 ) {
+      if ( error.status == 401 && !isCheckoutOrder ) {
         //(1) Eliminar los datos que tengo almacenados en mi LocalStorage (token, userData)
         httpAuth.clearAuthData();
         //(2) Redirecciona -- salvo que ya estemos en una pantalla de auth

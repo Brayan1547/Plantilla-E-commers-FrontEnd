@@ -1,8 +1,19 @@
+/* "Chrome" del modal de autenticación: backdrop, superficie, logo y tabs.
+   La presentación del formulario embebido (campos, botón, enlace) llega desde
+   los estilos propios de <app-login> / <app-register>, que incluyen
+   `features/auth/auth-forms.css`.
+
+   Los colores aquí son literales a propósito (este componente es eager: vive en
+   el bundle inicial vía el Header) pero reflejan los mismos tokens `--auth-*`
+   de `auth-forms.css`:
+     surface #faf7f1 · ink #1f1c17 · ink-soft #5f5a50 · line rgba(31,28,23,.14)
+     focus  #4b3f72 · font system-ui                                          */
+
 .auth-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(20, 18, 15, 0.55);
-  backdrop-filter: blur(3px);
+  background: rgba(31, 28, 23, 0.5);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -20,11 +31,12 @@
   position: relative;
   width: 100%;
   max-width: 420px;
-  max-height: 90vh;          /* ← nuevo: nunca más alto que el 90% de la pantalla */
-  overflow-y: auto;          /* ← nuevo: scroll interno si el contenido no cabe */
-  background: #FAF7F1;
-  border: 1px solid rgba(27, 27, 27, 0.1);
-  box-shadow: 0 24px 60px rgba(20, 18, 15, 0.25);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #faf7f1;
+  border: 1px solid rgba(31, 28, 23, 0.14);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(31, 28, 23, 0.05), 0 24px 56px rgba(31, 28, 23, 0.18);
   padding: 48px 40px 40px;
   animation: auth-rise-in 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -44,11 +56,13 @@
   background: transparent;
   font-size: 22px;
   line-height: 1;
-  color: #1B1B1B;
+  color: #1f1c17;
   cursor: pointer;
+  border-radius: 6px;
   transition: opacity 0.15s ease;
 }
 .auth-modal__close:hover { opacity: 0.5; }
+.auth-modal__close:focus-visible { outline: 2px solid #4b3f72; outline-offset: 2px; }
 
 .auth-modal__brand {
   text-align: center;
@@ -56,23 +70,24 @@
 }
 .auth-modal__brand-name {
   display: block;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 26px;
-  letter-spacing: 6px;
-  color: #1B1B1B;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: #1f1c17;
 }
 .auth-modal__brand-sub {
   display: block;
   font-size: 10px;
-  letter-spacing: 4px;
-  color: #8A8579;
+  letter-spacing: 0.3em;
+  color: #5f5a50;
   margin-top: 2px;
 }
 
 .auth-modal__tabs {
   position: relative;
   display: flex;
-  border-bottom: 1px solid rgba(27, 27, 27, 0.12);
+  border-bottom: 1px solid rgba(31, 28, 23, 0.14);
   margin-bottom: 32px;
 }
 .auth-modal__tab {
@@ -80,22 +95,24 @@
   background: none;
   border: none;
   padding: 0 0 14px;
-  font-size: 12px;
-  letter-spacing: 1.5px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8A8579;
+  color: #5f5a50;
   cursor: pointer;
   transition: color 0.2s ease;
 }
-.auth-modal__tab.active { color: #1B1B1B; }
+.auth-modal__tab.active { color: #1f1c17; }
+.auth-modal__tab:focus-visible { outline: 2px solid #4b3f72; outline-offset: 2px; }
 
 .auth-modal__tab-indicator {
   position: absolute;
   bottom: -1px;
   left: 0;
   width: 50%;
-  height: 1px;
-  background: #1B1B1B;
+  height: 2px;
+  background: #1f1c17;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .auth-modal__tab-indicator.right {
@@ -104,4 +121,10 @@
 
 @media (max-width: 480px) {
   .auth-modal { padding: 40px 24px 32px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-modal-backdrop,
+  .auth-modal { animation: none; }
+  .auth-modal__tab-indicator { transition: none; }
 }

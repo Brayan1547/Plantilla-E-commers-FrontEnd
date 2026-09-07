@@ -12,21 +12,99 @@
     <div class="adm-card"><adm-error-state [message]="errorMsg()" (retry)="retry()" /></div>
   }
   @default {
+    @if (conflict()) {
+      <div class="adm-card" style="margin-bottom:16px;border-color:var(--adm-warn)">
+        <div class="adm-card__body adm-inline" style="gap:10px;justify-content:space-between;flex-wrap:wrap">
+          <span class="adm-inline" style="gap:8px">
+            <adm-icon name="alert" [size]="14" />
+            <span style="font-size:12.5px">El producto cambió en el servidor. Recarga para obtener la versión actual.</span>
+          </span>
+          <button type="button" class="adm-btn adm-btn--sm" (click)="reloadAfterConflict()">
+            <adm-icon name="refresh" [size]="13" />
+            Recargar
+          </button>
+        </div>
+      </div>
+    }
     @if (product(); as p) {
       <div class="adm-card" style="margin-bottom:16px">
-        <div class="adm-card__body adm-inline" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
-          <div class="adm-inline" style="gap:10px">
-            <span class="adm-field__label" style="margin:0">Estado del workflow:</span>
-            <adm-status-badge [label]="statusLabels[p.status]" [tone]="statusTone[p.status]" />
-            @if (p.status === 'REJECTED' && p.rejectionReason) {
-              <span class="adm-muted" style="font-size:12.5px">Motivo: {{ p.rejectionReason }}</span>
-            }
+        <div class="adm-card__body adm-stack" style="gap:12px">
+          <div class="adm-inline" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <div class="adm-inline" style="gap:10px">
+              <span class="adm-field__label" style="margin:0">Estado del workflow:</span>
+              <adm-status-badge [label]="statusLabels[p.status]" [tone]="statusTone[p.status]" />
+            </div>
+            <div class="adm-inline" style="gap:8px">
+              @if (history().length) {
+                <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" (click)="showHistory.set(!showHistory())">
+                  <adm-icon [name]="showHistory() ? 'chevron-up' : 'chevron-down'" [size]="13" />
+                  {{ showHistory() ? 'Ocultar historial' : 'Ver historial' }}
+                </button>
+              }
+              @if (canReopen()) {
+                <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" [disabled]="reopening()" (click)="reopenForEditing()">
+                  <adm-icon name="refresh" [size]="13" />
+                  {{ reopening() ? 'Reabriendo…' : 'Volver a borrador para editar' }}
+                </button>
+              }
+            </div>
           </div>
-          @if (canReopen()) {
-            <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" [disabled]="reopening()" (click)="reopenForEditing()">
-              <adm-icon name="refresh" [size]="13" />
-              {{ reopening() ? 'Reabriendo…' : 'Volver a borrador para editar' }}
-            </button>
+
+          @if (canApproveReview() || canRequestChangesReview() || canRejectReview() || canPublishReview()) {
+            <div class="adm-card" style="border-color:var(--adm-line)">
+              <div class="adm-card__body adm-inline" style="gap:8px;flex-wrap:wrap">
+                <span class="adm-field__label" style="margin:0">Revisión:</span>
+                @if (canApproveReview()) {
+                  <button type="button" class="adm-btn adm-btn--sm" [disabled]="reviewActionBusy()" (click)="approveReview()">
+                    <adm-icon name="check" [size]="13" /> Aprobar
+                  </button>
+                }
+                @if (canRequestChangesReview()) {
+                  <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" [disabled]="reviewActionBusy()" (click)="requestChangesReview()">
+                    <adm-icon name="refresh" [size]="13" /> Solicitar cambios
+                  </button>
+                }
+                @if (canRejectReview()) {
+                  <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" [disabled]="reviewActionBusy()" (click)="rejectReview()">
+                    <adm-icon name="x" [size]="13" /> Rechazar
+                  </button>
+                }
+                @if (canPublishReview()) {
+                  <button type="button" class="adm-btn adm-btn--sm" [disabled]="reviewActionBusy()" (click)="publishReview()">
+                    <adm-icon name="check" [size]="13" /> Publicar
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          @if ((p.status === 'CHANGES_REQUESTED' || p.status === 'REJECTED') && reviewComment(); as note) {
+            <div class="adm-card" [style.borderColor]="p.status === 'REJECTED' ? 'var(--adm-danger)' : 'var(--adm-warn)'">
+              <div class="adm-card__body adm-stack" style="gap:4px">
+                <strong style="font-size:12.5px">
+                  {{ p.status === 'REJECTED' ? 'Motivo del rechazo' : 'Cambios solicitados por revisión' }}
+                </strong>
+                <p class="adm-muted" style="margin:0;white-space:pre-line;font-size:12.5px">{{ note }}</p>
+              </div>
+            </div>
+          }
+
+          @if (showHistory()) {
+            <ul class="adm-stack" style="gap:6px;list-style:none;margin:0;padding:0">
+              @for (h of history(); track $index) {
+                <li class="adm-inline" style="gap:8px;align-items:flex-start;font-size:12px">
+                  <adm-status-badge [label]="actionLabel(h.action)" tone="neutral" />
+                  <span class="adm-muted">
+                    {{ h.fromStatus ? statusLabels[h.fromStatus] + ' → ' : '' }}{{ statusLabels[h.toStatus] }}
+                    @if (historyActorName(h); as who) { · {{ who }} }
+                    @if (h.at) { · {{ h.at | date: 'short' }} }
+                  </span>
+                  @if (h.comment) {
+                    <span style="flex-basis:100%;padding-left:2px" class="adm-muted">“{{ h.comment }}”</span>
+                  }
+                </li>
+              }
+            </ul>
           }
         </div>
       </div>
@@ -36,7 +114,16 @@
           <div class="adm-card__body adm-inline" style="gap:8px">
             <adm-icon name="lock" [size]="14" />
             <span class="adm-muted" style="font-size:12.5px">
-              Este producto no admite edición de contenido en su estado actual. Usa "Volver a borrador" para reabrir el ciclo de revisión.
+              @switch (p.status) {
+                @case ('PENDING_REVIEW') { Este producto está en revisión. Solo lectura hasta que la administración responda. }
+                @case ('APPROVED') { Este producto está aprobado, a la espera de publicación. Solo lectura. }
+                @case ('PUBLISHED') {
+                  @if (canReopen()) { Este producto está publicado. Usa "Volver a borrador" para reabrir el ciclo de revisión. }
+                  @else { Este producto está publicado. Solo lectura. }
+                }
+                @case ('ARCHIVED') { Este producto está archivado. Solo lectura. }
+                @default { Este producto no admite edición de contenido en su estado actual. }
+              }
             </span>
           </div>
         </div>
@@ -134,12 +221,46 @@
 
         <!-- Columna derecha: imágenes -->
         <div>
-          <div class="adm-inline" style="justify-content:space-between;margin-bottom:10px">
-            <span class="adm-field__label">Imágenes</span>
-            <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" [disabled]="form.disabled" (click)="addImage()">
-              <adm-icon name="plus" [size]="13" /> Añadir
-            </button>
+          <div class="adm-inline" style="justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+            <span class="adm-field__label">Imágenes ({{ images.length }}/{{ maxProductImages }})</span>
+            <span class="adm-inline" style="gap:6px">
+              <label class="adm-btn adm-btn--ghost adm-btn--sm"
+                [style.cursor]="form.disabled || !isEdit || images.length >= maxProductImages ? 'not-allowed' : 'pointer'"
+                [style.opacity]="form.disabled || !isEdit || images.length >= maxProductImages ? 0.5 : 1">
+                <adm-icon name="arrow-up" [size]="13" /> Subir archivo
+                <input type="file" accept="image/jpeg,image/png,image/webp" multiple hidden
+                  [disabled]="form.disabled || !isEdit || images.length >= maxProductImages"
+                  (change)="onFilesSelected($event)" />
+              </label>
+              <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm"
+                [disabled]="form.disabled || images.length >= maxProductImages" (click)="addImage()">
+                <adm-icon name="plus" [size]="13" /> Añadir por URL
+              </button>
+            </span>
           </div>
+
+          @if (!isEdit) {
+            <p class="adm-muted" style="font-size:12.5px;margin-bottom:10px">
+              Guarda el producto como borrador para poder subir archivos de imagen. Mientras tanto puedes añadir imágenes por URL.
+            </p>
+          }
+
+          @if (pendingUploads().length) {
+            <div class="adm-stack" style="gap:6px;margin-bottom:10px">
+              @for (u of pendingUploads(); track u.key) {
+                <div class="adm-inline" style="justify-content:space-between;gap:8px;font-size:12px;padding:6px 8px;border-radius:6px;background:var(--adm-surface-2, rgba(0,0,0,.04))">
+                  @if (u.status === 'uploading') {
+                    <span>Subiendo "{{ u.name }}"…</span>
+                  } @else {
+                    <span class="adm-field__error" style="font-size:12px">"{{ u.name }}": {{ u.message }}</span>
+                    <button type="button" class="adm-icon-btn" aria-label="Descartar aviso" (click)="dismissPendingUpload(u.key)">
+                      <adm-icon name="x" [size]="12" />
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
 
           @if (images.length === 0) {
             <p class="adm-muted" style="font-size:12.5px">
@@ -151,13 +272,28 @@
             @for (img of images.controls; track $index) {
               <div class="adm-card" [formGroupName]="$index">
                 <div class="adm-card__body adm-stack" style="gap:8px">
-                  <input class="adm-input" type="url" formControlName="url"
-                    placeholder="https://…/imagen.jpg"
-                    [attr.aria-invalid]="img.controls.url.touched && img.controls.url.invalid" />
+                  @if (img.controls.url.value) {
+                    <img [src]="img.controls.url.value" [alt]="img.controls.alt.value"
+                      style="width:100%;max-height:140px;object-fit:cover;border-radius:6px" />
+                  }
+                  <div class="adm-inline" style="justify-content:space-between">
+                    <input class="adm-input" type="url" formControlName="url"
+                      placeholder="https://…/imagen.jpg"
+                      [readonly]="!!img.controls._id.value"
+                      [attr.aria-invalid]="img.controls.url.touched && img.controls.url.invalid"
+                      style="flex:1" />
+                    @if (img.controls._id.value) {
+                      <span class="adm-muted" style="font-size:11px;white-space:nowrap;margin-left:6px">Guardada</span>
+                    } @else {
+                      <span class="adm-muted" style="font-size:11px;white-space:nowrap;margin-left:6px">Sin guardar</span>
+                    }
+                  </div>
                   @if (img.controls.url.touched && img.controls.url.invalid) {
                     <span class="adm-field__error">La URL de la imagen es obligatoria.</span>
                   }
-                  <div class="adm-inline" style="justify-content:space-between">
+                  <input class="adm-input" type="text" formControlName="alt"
+                    placeholder="Texto alternativo (accesibilidad)" maxlength="160" />
+                  <div class="adm-inline" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
                     <label class="adm-inline" style="gap:6px;cursor:pointer">
                       <input type="radio" name="mainImage"
                         [checked]="img.controls.isMain.value"
@@ -165,11 +301,33 @@
                         (change)="setMain($index)" />
                       <span style="font-size:12px">Principal</span>
                     </label>
-                    <button type="button" class="adm-icon-btn" aria-label="Quitar imagen"
-                      [disabled]="form.disabled"
-                      (click)="removeImage($index)">
-                      <adm-icon name="trash" [size]="14" />
-                    </button>
+                    @if (img.controls.isMain.value) {
+                      <span class="adm-muted" style="font-size:11.5px">Tipo: Principal (MAIN)</span>
+                    } @else {
+                      <select class="adm-select" formControlName="type" [disabled]="form.disabled">
+                        <option value="DETAIL">Detalle</option>
+                        <option value="MODEL">Con modelo</option>
+                      </select>
+                    }
+                    <span class="adm-inline" style="gap:2px">
+                      <button type="button" class="adm-icon-btn" aria-label="Subir imagen"
+                        [disabled]="form.disabled || $index === 0" (click)="moveImage($index, -1)">
+                        <adm-icon name="chevron-up" [size]="14" />
+                      </button>
+                      <button type="button" class="adm-icon-btn" aria-label="Bajar imagen"
+                        [disabled]="form.disabled || $index === images.length - 1" (click)="moveImage($index, 1)">
+                        <adm-icon name="chevron-down" [size]="14" />
+                      </button>
+                      <button type="button" class="adm-icon-btn" aria-label="Quitar imagen"
+                        [disabled]="form.disabled || deletingImageIds().has(img.controls._id.value)"
+                        (click)="removeImage($index)">
+                        @if (deletingImageIds().has(img.controls._id.value)) {
+                          …
+                        } @else {
+                          <adm-icon name="trash" [size]="14" />
+                        }
+                      </button>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -195,7 +353,13 @@
                 <div class="adm-card__body adm-grid-2" style="gap:8px">
                   <input class="adm-input adm-mono" type="text" formControlName="sku" placeholder="SKU (p. ej. DUS-CAM-ESS-NEG-S)" />
                   <input class="adm-input" type="text" formControlName="color" placeholder="Color" />
-                  <input class="adm-input" type="text" formControlName="size" placeholder="Talla (opcional)" />
+                  <div>
+                    <input class="adm-input" type="text" formControlName="size" placeholder='Talla (usa "Única" si no aplica)'
+                      [attr.aria-invalid]="v.controls.size.touched && v.controls.size.invalid" />
+                    @if (v.controls.size.touched && v.controls.size.invalid) {
+                      <span class="adm-field__error">La talla es obligatoria (usa "Única" si el producto no tiene tallaje).</span>
+                    }
+                  </div>
                   <div class="adm-inline" style="gap:8px">
                     <input class="adm-input" type="number" min="0" step="1" formControlName="stock" placeholder="Stock" />
                     <button type="button" class="adm-icon-btn" aria-label="Quitar variante"
@@ -207,6 +371,54 @@
                 </div>
               </div>
             }
+          </div>
+        </div>
+      </div>
+
+      <!-- Información editorial (F1 del backend): modelo, detalles, envíos, devoluciones -->
+      <div class="adm-card__body" style="border-top:1px solid var(--adm-line);padding-top:16px">
+        <div class="adm-grid-2" style="gap:16px" formGroupName="modelInfo">
+          <div class="adm-field">
+            <label class="adm-field__label" for="pf-model-size">Talla del modelo</label>
+            <input id="pf-model-size" class="adm-input" type="text" formControlName="size"
+              placeholder="p. ej. S / M / 32" maxlength="20" />
+            <span class="adm-field__hint">Opcional. Ficha de modelo (no todo producto lleva foto con modelo).</span>
+          </div>
+          <div class="adm-field">
+            <label class="adm-field__label" for="pf-model-h">Altura del modelo (cm)</label>
+            <input id="pf-model-h" class="adm-input" type="number" min="50" max="260" step="1"
+              formControlName="heightCm" placeholder="187" />
+            <span class="adm-field__hint">
+              En centímetros (número).
+              @if (form.controls.modelInfo.controls.heightCm.value) { ≈ {{ formatHeight(form.controls.modelInfo.controls.heightCm.value) }} }
+            </span>
+            <span class="adm-field__error">
+              @if (form.controls.modelInfo.controls.heightCm.touched && form.controls.modelInfo.controls.heightCm.invalid) {
+                Debe estar entre 50 y 260 cm.
+              }
+            </span>
+          </div>
+        </div>
+
+        <div class="adm-field">
+          <label class="adm-field__label" for="pf-details">Detalles del producto</label>
+          <textarea id="pf-details" class="adm-textarea" formControlName="details" rows="3"
+            placeholder="Composición, cuidados, características…"></textarea>
+          <span class="adm-field__hint">{{ form.controls.details.value.length }}/2000 · obligatorio para enviar a revisión</span>
+        </div>
+
+        <div class="adm-grid-2" style="gap:16px">
+          <div class="adm-field">
+            <label class="adm-field__label" for="pf-shipping">Información de envíos</label>
+            <textarea id="pf-shipping" class="adm-textarea" formControlName="shippingInfo" rows="3"
+              placeholder="Plazos, cobertura, costos…"></textarea>
+            <span class="adm-field__hint">{{ form.controls.shippingInfo.value.length }}/2000 · obligatorio para enviar a revisión</span>
+          </div>
+          <div class="adm-field">
+            <label class="adm-field__label" for="pf-returns">Cambios y devoluciones</label>
+            <textarea id="pf-returns" class="adm-textarea" formControlName="returnsInfo" rows="3"
+              placeholder="Plazo de cambio, condiciones…"></textarea>
+            <span class="adm-field__hint">{{ form.controls.returnsInfo.value.length }}/2000 · obligatorio para enviar a revisión</span>
           </div>
         </div>
       </div>
@@ -225,7 +437,7 @@
             <button type="button" class="adm-btn adm-btn--sm"
               [disabled]="form.disabled || submitting() || submittingReview() || form.invalid"
               (click)="submitForReview()">
-              @if (submittingReview()) { Enviando… } @else { Enviar a revisión }
+              @if (submittingReview()) { Enviando… } @else { {{ submitLabel() }} }
             </button>
           }
         </div>

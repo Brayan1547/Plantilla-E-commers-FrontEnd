@@ -2,6 +2,13 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpAuth } from './http-auth';
+import type { PublicProduct } from '../models/public-product.model';
+
+/** Envoltura estándar `{ msg, data }` de las respuestas del backend. */
+interface ApiEnvelope<T> {
+  msg: string;
+  data: T;
+}
 
 @Service()
 export class HttpProduct {
@@ -33,9 +40,12 @@ export class HttpProduct {
         return this.http.post<any>( `${this.BASE_URL}/product`, newProduct, { headers: this.getHeader() } );
     }
 
+    // F7 — tipado a `PublicProduct[]`: este método SOLO lo consume el
+    // storefront (sin `?all=true`), así que el backend SIEMPRE responde con
+    // la proyección pública (`PUBLIC_PRODUCT_FIELDS`), nunca con el contrato
+    // editorial completo — ver `product.services.js`/F7.AUDIT §4.
     getProduct() {
-        //http siemprem devuelve los datos dentro de un Observable
-        return this.http.get<any>( `${this.BASE_URL}/product`, { headers: this.getHeader() } );
+        return this.http.get<ApiEnvelope<PublicProduct[]>>( `${this.BASE_URL}/product`, { headers: this.getHeader() } );
     }
 
     deleteProduct( id: string | null) {
@@ -44,8 +54,7 @@ export class HttpProduct {
     }
 
     getProductById( id: string | null) {
-        //http siemprem devuelve los datos dentro de un Observable
-        return this.http.get<any>(`${this.BASE_URL}/product/${id}`,  { headers: this.getHeader() } );
+        return this.http.get<ApiEnvelope<PublicProduct>>(`${this.BASE_URL}/product/${id}`,  { headers: this.getHeader() } );
     }
 
     updateProductById( id: string | null,  updateProduct: any ) {

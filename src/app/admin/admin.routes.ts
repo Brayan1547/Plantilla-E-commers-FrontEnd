@@ -35,6 +35,12 @@ export const ADMIN_ROUTES: Routes = [
         data: { breadcrumb: 'Inicio', permissions: ['dashboard.read'] },
       },
       {
+        path: 'orders',
+        loadChildren: () => import('./features/orders/orders.routes').then((m) => m.ORDERS_ROUTES),
+        canActivate: [permissionGuard],
+        data: { breadcrumb: 'Pedidos', permissions: ['orders.read'] },
+      },
+      {
         path: 'products',
         loadChildren: () => import('./features/products/products.routes').then((m) => m.PRODUCTS_ROUTES),
         canActivate: [permissionGuard],

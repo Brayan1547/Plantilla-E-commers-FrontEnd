@@ -8,11 +8,21 @@ import { unwrap } from './api.util';
 
 /**
  * Contrato real (`category.routes.js` / `category.model.js`):
- *   GET    /category      -> { msg, data: Category[] }   (público, sin auth)
- *   GET    /category/:id  -> { msg, data: Category }
+ *   GET    /category            -> { msg, data: Category[] }  contrato público (solo isActive:true)
+ *   GET    /category?all=true   -> { msg, data: Category[] }  activas + inactivas — SOLO con rol
+ *                                  admin-capable (administrador|shop_manager|editor); si no,
+ *                                  degrada al contrato público (nunca 403). Mismo gate que
+ *                                  GET /product?all=true.
+ *   GET    /category/:id            -> { msg, data: Category } contrato público (inactiva -> 404)
+ *   GET    /category/:id?all=true   -> { msg, data: Category } permite una inactiva con rol admin-capable
  *   POST   /category      -> { msg, data: Category }      (admin | shop_manager)
  *   PATCH  /category/:id  -> { msg, data: Category }      whitelist: name,slug,description,isActive
  *   DELETE /category/:id  -> { msg, data: Category }       409 si algún producto la usa (`categories[]`)
+ *
+ * F7-CLOSURE — este servicio es el del PANEL: siempre pide `?all=true` en los
+ * GET de lectura (list/getById) para poder ver y editar también las inactivas.
+ * El token lo adjunta `authInterceptor`. El storefront usa `HttpCategory`
+ * (sin `?all=true`) y por tanto nunca recibe inactivas, aunque haya sesión.
  *
  * Modelo: name (2–50, único), slug (`^[a-z0-9-]+$`, único), description (≤250),
  * isActive (bool, default true). Sin jerarquía/subcategorías/atributos.
@@ -35,11 +45,15 @@ export class AdminCategoriesApi {
   private base = `${environment.apiUrl}/category`;
 
   list(): Observable<AdminCategory[]> {
-    return this.http.get<ApiEnvelope<AdminCategory[]>>(this.base).pipe(unwrap());
+    return this.http
+      .get<ApiEnvelope<AdminCategory[]>>(this.base, { params: { all: 'true' } })
+      .pipe(unwrap());
   }
 
   getById(id: string): Observable<AdminCategory> {
-    return this.http.get<ApiEnvelope<AdminCategory>>(`${this.base}/${id}`).pipe(unwrap());
+    return this.http
+      .get<ApiEnvelope<AdminCategory>>(`${this.base}/${id}`, { params: { all: 'true' } })
+      .pipe(unwrap());
   }
 
   create(payload: CategoryPayload): Observable<AdminCategory> {

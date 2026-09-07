@@ -22,8 +22,17 @@ export const routes: Routes = [
      },
 
      {
+          // UI-4B — checkout de compra como invitado / autenticado. SIN guard:
+          // el invitado debe poder completar la compra sin iniciar sesión.
           path: 'checkout',
           loadComponent: () => import('./features/checkout/checkout')
+     },
+
+     {
+          // UI-4B — confirmación del pedido. Recibe la respuesta 201 por el
+          // estado de navegación del router; no consulta ningún endpoint.
+          path: 'checkout/confirmacion',
+          loadComponent: () => import('./features/checkout/confirmation/checkout-confirmation')
      },
 
       {

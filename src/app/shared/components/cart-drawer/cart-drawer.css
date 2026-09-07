@@ -106,6 +106,22 @@
   gap: 12px;
 }
 
+.cart-item--out {
+  opacity: 0.6;
+}
+
+.cart-item__unavailable {
+  margin: 0;
+  font-size: 11px;
+  color: #b3261e;
+}
+
+.cart-drawer__warn {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: #b3261e;
+}
+
 .cart-item__img-wrapper {
   width: 80px;
   height: 96px;
@@ -221,4 +237,9 @@
 
 .cart-drawer__checkout-btn:hover {
   opacity: 0.85;
+}
+
+.cart-drawer__checkout-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }

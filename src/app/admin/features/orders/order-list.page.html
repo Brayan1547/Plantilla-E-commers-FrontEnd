@@ -1,0 +1,126 @@
+<adm-page-header
+  title="Pedidos"
+  subtitle="Órdenes reales del checkout. Filtrado y paginación en el servidor.">
+</adm-page-header>
+
+<div class="adm-filter-bar">
+  <label class="adm-field">
+    <span class="adm-sr-only">Filtrar por estado</span>
+    <select
+      class="adm-select"
+      [ngModel]="statusFilter()"
+      (ngModelChange)="statusFilter.set($event); reloadNow()">
+      <option value="">Todos los estados</option>
+      @for (s of statusList; track s) {
+        <option [value]="s">{{ statusLabels[s] }}</option>
+      }
+    </select>
+  </label>
+
+  <label class="adm-field">
+    <span class="adm-sr-only">Número de pedido</span>
+    <input
+      type="search"
+      class="adm-input"
+      placeholder="DUSCK-2026-000123"
+      [ngModel]="orderNumberInput()"
+      (ngModelChange)="orderNumberInput.set($event); queueReload()"
+      [attr.aria-invalid]="orderNumberInvalid() ? 'true' : null"
+      aria-label="Número de pedido" />
+  </label>
+
+  <label class="adm-field">
+    <span class="adm-sr-only">Correo del cliente</span>
+    <input
+      type="search"
+      class="adm-input"
+      placeholder="Correo del cliente"
+      [ngModel]="emailInput()"
+      (ngModelChange)="emailInput.set($event); queueReload()"
+      [attr.aria-invalid]="emailInvalid() ? 'true' : null"
+      aria-label="Correo del cliente" />
+  </label>
+
+  <label class="adm-field">
+    <span class="adm-sr-only">Desde</span>
+    <input
+      type="date"
+      class="adm-input"
+      [ngModel]="dateFrom()"
+      (ngModelChange)="dateFrom.set($event); reloadNow()"
+      aria-label="Creado desde" />
+  </label>
+
+  <label class="adm-field">
+    <span class="adm-sr-only">Hasta</span>
+    <input
+      type="date"
+      class="adm-input"
+      [ngModel]="dateTo()"
+      (ngModelChange)="dateTo.set($event); reloadNow()"
+      aria-label="Creado hasta" />
+  </label>
+
+  <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" (click)="resetFilters()">
+    Limpiar
+  </button>
+</div>
+
+@if (orderNumberInvalid()) {
+  <p class="adm-muted" style="margin:-4px 0 8px;font-size:12.5px">
+    El número de pedido debe tener el formato <strong>DUSCK-AAAA-NNNNNN</strong> para filtrar.
+  </p>
+}
+@if (emailInvalid()) {
+  <p class="adm-muted" style="margin:-4px 0 8px;font-size:12.5px">
+    Escribe un correo completo para filtrar por cliente.
+  </p>
+}
+
+<adm-data-table
+  [columns]="columns"
+  [rows]="orders()"
+  [state]="tableState()"
+  [sort]="sort()"
+  [errorMessage]="errorMsg()"
+  emptyTitle="Sin pedidos"
+  emptyMessage="No hay pedidos que coincidan con los filtros."
+  (sortChange)="onSort($event)"
+  (retry)="load()">
+  <ng-template #admRow let-order let-i="index">
+    <td class="adm-table__num">{{ rowIndex(i) }}</td>
+    <td>
+      <a class="adm-mono" [routerLink]="['/admin/orders', order.id]">
+        {{ order.orderNumber || '—' }}
+      </a>
+    </td>
+    <td>
+      <div><strong>{{ order.customer.recipientName }}</strong></div>
+      <div class="adm-muted adm-truncate" style="max-width:220px">{{ order.customer.email }}</div>
+    </td>
+    <td class="adm-muted adm-mono">{{ formatDateTime(order.createdAt) }}</td>
+    <td style="text-align:right" class="adm-mono">{{ formatCurrency(order.totals.grandTotal) }}</td>
+    <td>
+      <adm-status-badge [label]="orderStatusLabel(order.status)" [tone]="orderStatusTone(order.status)" />
+    </td>
+    <td>
+      <adm-status-badge
+        [label]="paymentStatusLabel(order.payment.status)"
+        [tone]="paymentStatusTone(order.payment.status)"
+        [dot]="false" />
+    </td>
+    <td>
+      <a class="adm-btn adm-btn--ghost adm-btn--sm" [routerLink]="['/admin/orders', order.id]">
+        Ver
+      </a>
+    </td>
+  </ng-template>
+</adm-data-table>
+
+@if (tableState() === 'ready' && pagination()) {
+  <adm-pagination
+    [page]="pagination()!.page"
+    [pageSize]="pageSize"
+    [totalItems]="pagination()!.total"
+    (pageChange)="onPage($event)" />
+}

@@ -1,0 +1,115 @@
+/* UI-4B — Confirmación de pedido. Estilos locales. */
+
+.confirm {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 20px 64px;
+  color: var(--color-primary, #0f0f10);
+}
+
+.confirm__eyebrow {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #666;
+  margin: 0 0 6px;
+}
+
+.confirm__title {
+  font-family: var(--font-heading, serif);
+  font-size: 26px;
+  margin: 0 0 12px;
+}
+
+.confirm__number {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.confirm__status {
+  margin: 0 0 20px;
+  color: #666;
+  font-size: 13px;
+}
+
+.confirm__payment {
+  border: 1px dashed var(--color-cream, #cdc7bb);
+  padding: 14px 16px;
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+
+.confirm__payment-title {
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.confirm__h2 {
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 24px 0 12px;
+}
+
+.confirm__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.confirm__item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.confirm__item-qty {
+  color: #666;
+}
+
+.confirm__totals {
+  border-top: 1px solid var(--color-cream, #e7e2d9);
+  margin-top: 14px;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.confirm__row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.confirm__row--total {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.confirm__address {
+  font-style: normal;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.confirm__notes {
+  font-size: 13px;
+  color: #666;
+}
+
+.confirm__btn {
+  display: inline-block;
+  margin-top: 28px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  padding: 13px 24px;
+  background: var(--color-primary, #0f0f10);
+  color: var(--color-white, #fff);
+  text-decoration: none;
+}

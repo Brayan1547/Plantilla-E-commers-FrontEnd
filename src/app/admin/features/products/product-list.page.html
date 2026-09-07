@@ -1,4 +1,9 @@
 <adm-page-header title="Productos" subtitle="Catálogo, workflow editorial y activación.">
+  @if (canSeeReviewShortcut() && pendingReviewCount() > 0) {
+    <button actions type="button" class="adm-btn adm-btn--ghost" (click)="goToPendingReview()">
+      <adm-icon name="alert" [size]="15" /> {{ pendingReviewCount() }} pendiente{{ pendingReviewCount() === 1 ? '' : 's' }} de revisión
+    </button>
+  }
   @if (perms.can('products.create')) {
     <button actions type="button" class="adm-btn" (click)="goNew()">
       <adm-icon name="plus" [size]="15" /> Nuevo producto
@@ -85,6 +90,9 @@
     <td>
       <strong>{{ p.name }}</strong>
       <div class="adm-mono adm-muted" style="font-size:11px">{{ p.slug }}</div>
+      @if (creatorName(p); as creator) {
+        <div class="adm-muted" style="font-size:11px">{{ creator }}</div>
+      }
     </td>
     <td class="adm-muted">{{ categoryNames(p) }}</td>
     <td class="adm-table__num adm-mono">{{ formatCurrency(p.price) }}</td>
@@ -97,9 +105,9 @@
     </td>
     <td>
       <adm-status-badge [label]="statusLabel(p)" [tone]="statusToneOf(p)" />
-      @if (p.status === 'REJECTED' && p.rejectionReason) {
-        <div class="adm-muted" style="font-size:11px;max-width:150px" [title]="p.rejectionReason">
-          {{ p.rejectionReason }}
+      @if (reviewNote(p); as note) {
+        <div class="adm-muted" style="font-size:11px;max-width:160px" [title]="note">
+          {{ p.status === 'REJECTED' ? 'Motivo: ' : 'Cambios: ' }}{{ note }}
         </div>
       }
     </td>
@@ -128,6 +136,12 @@
           <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm"
             [disabled]="busyId() === p._id" (click)="approve(p)">
             <adm-icon name="check" [size]="13" /> Aprobar
+          </button>
+        }
+        @if (canRequestChanges(p)) {
+          <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm"
+            [disabled]="busyId() === p._id" (click)="requestChanges(p)">
+            <adm-icon name="refresh" [size]="13" /> Solicitar cambios
           </button>
         }
         @if (canReject(p)) {

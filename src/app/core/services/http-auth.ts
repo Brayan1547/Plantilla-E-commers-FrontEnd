@@ -76,14 +76,14 @@ export class HttpAuth {
 
     /**
      * Destino tras un login correcto.
-     *  - administrador / shop_manager: `returnUrl` si es una ruta interna segura;
-     *    en caso contrario `/admin`.
-     *  - editor / subscriber: siempre `/home` (no tienen panel; un returnUrl a
-     *    `/admin` lo resolveria el adminGuard como "acceso restringido").
+     *  - administrador / shop_manager / editor: `returnUrl` si es una ruta
+     *    interna segura; en caso contrario `/admin`. (F3: el rol `editor` YA
+     *    tiene panel — su UI editorial de productos vive en `/admin`.)
+     *  - subscriber: siempre `/home` (no tiene panel).
      */
     private resolvePostLoginUrl(role: string | undefined, returnUrl?: string | null): string {
-        const isAdminRole = role === 'administrador' || role === 'shop_manager';
-        if (isAdminRole) {
+        const isPanelRole = role === 'administrador' || role === 'shop_manager' || role === 'editor';
+        if (isPanelRole) {
             return this.safeInternalUrl(returnUrl) ?? '/admin';
         }
         return '/home';

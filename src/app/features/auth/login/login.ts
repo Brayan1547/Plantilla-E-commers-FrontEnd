@@ -1,21 +1,27 @@
-import { Component, EventEmitter, inject, Output,  } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpAuth } from '../../../core/services/http-auth';
 import { Toast } from '../../../core/services/toast';
 
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
-  styleUrl: './login.css',
+  styleUrls: ['./login.css', '../auth-forms.css'],
+  // standalone (ruta /login): el host es la página centrada.
+  // embebido (AuthModal): sin clase -> el modal aporta el layout.
+  host: { '[class.auth-page]': '!embedded' },
 })
 export default class Login {
   httpAuth = inject(HttpAuth)
   formData!: FormGroup;
   private toast = inject(Toast)
   private route = inject(ActivatedRoute)
+
+  /** Solo presentacional. `true` cuando Login se renderiza dentro de AuthModal. */
+  @Input() embedded = false;
 
   @Output() loginSuccess = new EventEmitter<void>();   // Avisa  (auth-modal) que el login fue exitoso, para que se cierre el modal
   @Output() switchToRegister = new EventEmitter<void>();    // Avisa que el usuario quiere cambiar a la pestaña de registro

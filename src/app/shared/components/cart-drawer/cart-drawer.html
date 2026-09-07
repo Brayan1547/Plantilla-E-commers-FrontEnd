@@ -10,7 +10,7 @@
   </div>
 
   <!-- Carrito vacío -->
-  @if (items.length === 0) {
+  @if (lines().length === 0) {
     <div class="cart-drawer__empty">
       <p>Tu carrito está vacío.</p>
       <button class="cart-drawer__empty-btn" (click)="close()">Seguir comprando</button>
@@ -19,20 +19,23 @@
 
     <!-- Lista de productos, con scroll propio para que el footer quede siempre visible -->
     <div class="cart-drawer__list">
-      @for (item of items; track item.productId._id) {
-        <div class="cart-item">
+      @for (item of lines(); track item.productId) {
+        <div class="cart-item" [class.cart-item--out]="!item.available">
 
           <div class="cart-item__img-wrapper">
-            @if (getMainImage(item.productId.images)) {
-              <img class="cart-item__img" [src]="getMainImage(item.productId.images)" [alt]="item.productId.name">
+            @if (item.image) {
+              <img class="cart-item__img" [src]="item.image" [alt]="item.name">
             } @else {
               <div class="cart-item__img cart-item__img--empty"></div>
             }
           </div>
 
           <div class="cart-item__info">
-            <p class="cart-item__name">{{ item.productId.name }}</p>
-            <p class="cart-item__price">{{ item.productId.price | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
+            <p class="cart-item__name">{{ item.name }}</p>
+            <p class="cart-item__price">{{ item.price | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
+            @if (!item.available) {
+              <p class="cart-item__unavailable">Ya no está disponible</p>
+            }
 
             <div class="cart-item__actions">
               <!-- Stepper de cantidad, igual estilo al de Temu -->
@@ -52,11 +55,14 @@
 
     <!-- Footer fijo: subtotal + botón de pago -->
     <div class="cart-drawer__footer">
+      @if (hasUnavailable()) {
+        <p class="cart-drawer__warn">Quita los productos no disponibles para poder continuar.</p>
+      }
       <div class="cart-drawer__subtotal">
         <span>Subtotal</span>
-        <span class="cart-drawer__subtotal-amount">{{ subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+        <span class="cart-drawer__subtotal-amount">{{ subtotal() | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
       </div>
-      <button class="cart-drawer__checkout-btn" (click)="goToCheckout()">Ir a pagar</button>
+      <button class="cart-drawer__checkout-btn" (click)="goToCheckout()" [disabled]="hasUnavailable()">Ir a pagar</button>
     </div>
 
   }

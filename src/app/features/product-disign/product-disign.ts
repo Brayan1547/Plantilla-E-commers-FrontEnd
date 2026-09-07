@@ -1,14 +1,32 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  HostListener,
+  inject,
+  PLATFORM_ID,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { HttpProduct } from '../../core/services/http-product';
 import { HttpCart } from '../../core/services/http-cart';
+import { GuestCart } from '../../core/services/guest-cart';
 import { HttpAuth } from '../../core/services/http-auth';
 import { UiModal } from '../../core/services/ui-modal';
 import { Toast } from '../../core/services/toast';
+import type { PublicProduct, PublicProductVariant } from '../../core/models/public-product.model';
 
 type DetailState = 'loading' | 'ready' | 'not-found' | 'error';
+
+/** Imagen lista para renderizar: URL + `alt` ya resuelto (image.alt o nombre del producto). */
+interface GalleryImage {
+  url: string;
+  alt: string;
+}
 
 /**
  * Ficha pública de producto — ruta `tienda/producto/:id` (SSR).
@@ -19,14 +37,25 @@ type DetailState = 'loading' | 'ready' | 'not-found' | 'error';
  * `status:PUBLISHED` + `isActive:true` responde 404, así que "no encontrado"
  * cubre tanto "no existe" como "no está publicado", sin filtrar más en Angular.
  *
- * Renderiza los campos reales del modelo: name, price, description,
- * images[{url,isMain}], stock. El modelo ya soporta `categories[]` y
- * `variants[]` (color/talla/SKU/stock por variante), pero esta ficha compra
- * el producto de forma AGREGADA (sin selector de variante todavía) — el
- * carrito (`HttpCart`) tampoco distingue variantes hoy; es deuda conocida
- * hacia la futura fase de Orders, no algo que se resuelva aquí.
+ * F7-E — renderiza el contrato público AMPLIADO: `details`, `shippingInfo`,
+ * `returnsInfo`, `modelInfo`, `categories` (poblado a `{name,slug}`), además
+ * de lo que ya mostraba (name/price/description/images/stock agregado).
  *
- * Estados: loading · ready · not-found (data vacía / 404 / id inválido) · error.
+ * F7-F — variantes: SOLO informativas (`color`/`size`/`stock` — el backend ni
+ * siquiera manda `sku`, ver `PublicProductVariant`). NO hay selector
+ * accionable: `addToCart()` sigue mandando únicamente `{productId, quantity}`
+ * a `HttpCart`, exactamente igual que antes de F7. Conectar una variante
+ * elegida al carrito requeriría un `variantId` en `CartItem` — fuera de
+ * alcance de F7 por decisión explícita (ver F7.AUDIT §10 / deuda documentada
+ * en el reporte de implementación).
+ *
+ * UI-3B — sólo evolución VISUAL / responsive / accesibilidad de esta misma
+ * ficha (galería vertical + imagen principal + imágenes apiladas, breadcrumbs
+ * propios, pills de talla de PRESENTACIÓN, bloque informativo de pago contra
+ * entrega, acordeones nativos, visor accesible). Sin cambios de contrato: el
+ * flujo de carga, `addToCart()`, `HttpCart`, `quantity` y los servicios
+ * inyectados quedan intactos. El estado nuevo (`selectedUrl`, `zoomOpener`)
+ * es únicamente de presentación.
  */
 @Component({
   selector: 'app-product-disign',
@@ -38,33 +67,130 @@ export default class ProductDisign {
   private route = inject(ActivatedRoute);
   private httpProduct = inject(HttpProduct);
   private httpCart = inject(HttpCart);
+  private guestCart = inject(GuestCart);
   private auth = inject(HttpAuth);
   private uiModal = inject(UiModal);
   private toast = inject(Toast);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   protected readonly state = signal<DetailState>('loading');
-  protected readonly product = signal<any | null>(null);
+  protected readonly product = signal<PublicProduct | null>(null);
 
   /** Imagen ampliada en el visor modal (null = cerrado). */
   protected readonly zoomImage = signal<string | null>(null);
+  /** Elemento que abrió el visor — se le devuelve el foco al cerrar. */
+  private zoomOpener: HTMLElement | null = null;
+  private readonly closeBtn = viewChild<ElementRef<HTMLButtonElement>>('closeBtn');
 
   protected readonly quantity = signal(1);
   protected readonly adding = signal(false);
 
-  /** URLs de imágenes reales del producto; [] si no tiene. */
-  protected readonly images = computed<string[]>(() => {
-    const imgs = this.product()?.images ?? [];
-    return imgs.map((i: any) => i?.url).filter((u: any): u is string => !!u);
+  /** URL de la miniatura elegida (null = primera imagen de la galería). SOLO presentación. */
+  private readonly selectedUrl = signal<string | null>(null);
+
+  /**
+   * Imágenes reales del producto, ordenadas (principal primero, luego `order`),
+   * con `alt` resuelto: `image.alt` real y, si viene vacío, el nombre del
+   * producto como respaldo. Usa el contrato existente — sin requests extra.
+   */
+  protected readonly gallery = computed<GalleryImage[]>(() => {
+    const p = this.product();
+    const name = p?.name?.trim() || 'producto';
+    const imgs = (p?.images ?? []).filter((i) => !!i?.url);
+    const sorted = [...imgs].sort((a, b) => {
+      if (!!a.isMain !== !!b.isMain) return a.isMain ? -1 : 1;
+      return (a.order ?? 0) - (b.order ?? 0);
+    });
+    return sorted.map((i) => ({ url: i.url, alt: i.alt?.trim() || name }));
   });
 
-  /** Imagen principal (isMain) o la primera. */
-  protected readonly mainImage = computed<string | null>(() => {
-    const imgs = this.product()?.images ?? [];
-    const main = imgs.find((i: any) => i?.isMain);
-    return main?.url ?? imgs[0]?.url ?? null;
+  /** Imagen mostrada en grande: la seleccionada, o la primera de la galería. */
+  protected readonly currentImage = computed<GalleryImage | null>(() => {
+    const list = this.gallery();
+    if (!list.length) return null;
+    const sel = this.selectedUrl();
+    return list.find((i) => i.url === sel) ?? list[0];
+  });
+
+  /** Resto de imágenes, apiladas verticalmente bajo la principal. */
+  protected readonly secondaryImages = computed<GalleryImage[]>(() => {
+    const current = this.currentImage()?.url;
+    return this.gallery().filter((i) => i.url !== current);
   });
 
   protected readonly outOfStock = computed(() => (this.product()?.stock ?? 0) <= 0);
+
+  /** F7-E — nombres de categoría (ya poblados por el backend: `{_id,name,slug}`). */
+  protected readonly categoryNames = computed<string[]>(() =>
+    (this.product()?.categories ?? []).map((c) => c.name).filter(Boolean),
+  );
+
+  /** Primera categoría poblada — la usa sólo el breadcrumb (degrada limpio si no hay). */
+  protected readonly primaryCategory = computed(() => this.product()?.categories?.[0] ?? null);
+
+  /**
+   * F7-E — `modelInfo` en una sola línea legible. `heightCm` es SIEMPRE
+   * numérico en centímetros en el backend (sin cambios de F7); aquí se
+   * presenta como "187 cm" — no se convierte a metros ni se toca el modelo.
+   * `null` si no hay ningún dato de modelo que mostrar.
+   */
+  protected readonly modelInfoLabel = computed<string | null>(() => {
+    const m = this.product()?.modelInfo;
+    if (!m || (!m.size && !m.heightCm)) return null;
+    const parts: string[] = [];
+    if (m.size) parts.push(`talla ${m.size}`);
+    if (m.heightCm) parts.push(`${m.heightCm} cm de estatura`);
+    return `Modelo: ${parts.join(', ')}`;
+  });
+
+  /**
+   * F7-F — variantes disponibles, SOLO informativas (color/talla/¿hay
+   * stock?). `[]` en productos sin variantes (venta agregada, comportamiento
+   * sin cambios). Nunca conectado a `addToCart()`.
+   */
+  protected readonly variants = computed<PublicProductVariant[]>(() => this.product()?.variants ?? []);
+  protected readonly hasVariants = computed(() => this.variants().length > 0);
+
+  /** Colores distintos presentes en las variantes (texto informativo). */
+  protected readonly variantColors = computed<string[]>(() => {
+    const seen = new Set<string>();
+    for (const v of this.variants()) {
+      const c = v.color?.trim();
+      if (c) seen.add(c);
+    }
+    return [...seen];
+  });
+
+  /**
+   * UI-3B — tallas como "pills" de PRESENTACIÓN. Una entrada por talla
+   * distinta (valor tal cual `variant.size`; "Única" se muestra "Única").
+   * `available` es true si ALGUNA variante de esa talla tiene stock. NO hay
+   * estado "seleccionada": elegir una talla NO cambia lo que envía el carrito
+   * — el contrato `CartItem = {productId, quantity}` queda intacto.
+   */
+  protected readonly sizeOptions = computed<{ size: string; available: boolean }[]>(() => {
+    const map = new Map<string, boolean>();
+    for (const v of this.variants()) {
+      const s = v.size?.trim();
+      if (!s) continue;
+      map.set(s, (map.get(s) ?? false) || (v.stock ?? 0) > 0);
+    }
+    return [...map].map(([size, available]) => ({ size, available }));
+  });
+
+  constructor() {
+    // Visor de imagen: mientras está abierto se bloquea el scroll del body y se
+    // lleva el foco al botón de cierre. Reversible; también se limpia en
+    // ngOnDestroy. No usa ningún servicio global de modal.
+    effect(() => {
+      const open = this.zoomImage() !== null;
+      if (!this.isBrowser) return;
+      document.body.style.overflow = open ? 'hidden' : '';
+      if (open) {
+        queueMicrotask(() => this.closeBtn()?.nativeElement.focus());
+      }
+    });
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -92,12 +218,33 @@ export default class ProductDisign {
     });
   }
 
-  protected openZoom(url: string): void {
+  ngOnDestroy(): void {
+    if (this.isBrowser) document.body.style.overflow = '';
+  }
+
+  /** UI-3B — cambia la imagen principal. Sólo presentación (no toca Product/Variant/Cart). */
+  protected selectImage(url: string): void {
+    this.selectedUrl.set(url);
+  }
+
+  protected openZoom(url: string, ev?: Event): void {
+    this.zoomOpener = (ev?.currentTarget as HTMLElement) ?? null;
     this.zoomImage.set(url);
   }
 
   protected closeZoom(): void {
+    if (this.zoomImage() === null) return;
     this.zoomImage.set(null);
+    const opener = this.zoomOpener;
+    this.zoomOpener = null;
+    if (this.isBrowser && opener) {
+      queueMicrotask(() => opener.focus());
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    this.closeZoom();
   }
 
   protected increaseQty(): void {
@@ -112,8 +259,12 @@ export default class ProductDisign {
     const p = this.product();
     if (!p || this.outOfStock() || this.adding()) return;
 
+    // UI-4B — invitado: carrito local. NO se abre el modal de login: la compra
+    // como invitado es un flujo de primera clase. El contrato del carrito sigue
+    // siendo `{productId, quantity}` (sin variantId).
     if (!this.auth.user) {
-      this.uiModal.open('login');
+      this.guestCart.add(p._id, this.quantity());
+      this.toast.show('Producto agregado al carrito');
       return;
     }
 

@@ -9,6 +9,7 @@ import { AuthModal } from '../auth-modal/auth-modal';
 import { filter } from 'rxjs/operators';
 
 import { HttpCart } from '../../../core/services/http-cart'; // nuevo: servicio del carrito
+import { GuestCart } from '../../../core/services/guest-cart'; // UI-4B: carrito de invitado
 import { CartDrawer } from '../cart-drawer/cart-drawer'; // nuevo: panel del carrito
 
 import { UiModal } from '../../../core/services/ui-modal'; // nuevo: estado compartido del modal
@@ -29,6 +30,7 @@ export class Header implements OnDestroy {
 
   httpAuth = inject( HttpAuth );
   httpCart = inject( HttpCart ); // acceso al carrito (cart, cartCount)
+  guestCart = inject( GuestCart ); // UI-4B: carrito de invitado (badge cuando no hay sesión)
   uiModal = inject(UiModal); // para abrir/cerrar el modal desde cualquier lado
   private toast = inject(Toast)
 
@@ -135,13 +137,15 @@ logout() {
     this.drawerOpen = false;
   }
 
-   // abre el panel del carrito si hay sesión, si no pide iniciar sesión primero
+   // UI-4B — el carrito se abre siempre: el invitado tiene su propio carrito
+   // local (GuestCart) y puede comprar sin iniciar sesión.
   onCartIconClick() {
-    if (!this.httpAuth.user) {
-      this.openAuthModal('login');
-    } else {
-      this.cartDrawerOpen = true;
-    }
+    this.cartDrawerOpen = true;
+  }
+
+  /** Unidades para el badge: carrito de backend si hay sesión, carrito local si es invitado. */
+  get cartBadgeCount(): number {
+    return this.httpAuth.user ? this.httpCart.cartCount() : this.guestCart.count();
   }
 
   closeCartDrawer() {
@@ -182,5 +186,15 @@ logout() {
     if (!target.closest('.account-wrapper')) {
       this.accountMenuOpen = false;
     }
+  }
+
+  /**
+   * F3 — el usuario autenticado con rol de panel (administrador / shop_manager /
+   * editor) tiene un enlace al panel administrativo desde el menú de cuenta. El
+   * `adminGuard` sigue siendo la autoridad real del acceso.
+   */
+  get canAccessPanel(): boolean {
+    const role = this.httpAuth.user?.role;
+    return role === 'administrador' || role === 'shop_manager' || role === 'editor';
   }
 }
