@@ -7,19 +7,19 @@
   }
 </adm-page-header>
 
-<div class="adm-filter-bar">
-  <label class="adm-topbar__search adm-filter-bar__search">
-    <adm-icon name="search" [size]="16" />
+<div class="adm-filter-bar adm-filter-bar--labeled">
+  <label class="adm-field adm-field--grow">
+    <span class="adm-field__label">Buscar usuario</span>
     <input
       type="search"
-      placeholder="Buscar por nombre, nickname o correo"
+      class="adm-input"
+      placeholder="Nombre, nickname o correo"
       [ngModel]="search()"
-      (ngModelChange)="search.set($event); page.set(1)"
-      aria-label="Buscar usuarios" />
+      (ngModelChange)="search.set($event); page.set(1)" />
   </label>
 
   <label class="adm-field">
-    <span class="adm-sr-only">Filtrar por rol</span>
+    <span class="adm-field__label">Rol</span>
     <select
       class="adm-select"
       [ngModel]="roleFilter()"
@@ -32,7 +32,7 @@
   </label>
 
   <label class="adm-field">
-    <span class="adm-sr-only">Filtrar por estado</span>
+    <span class="adm-field__label">Estado</span>
     <select
       class="adm-select"
       [ngModel]="statusFilter()"
@@ -44,13 +44,12 @@
   </label>
 
   <label class="adm-field">
-    <span class="adm-sr-only">Registrados desde</span>
+    <span class="adm-field__label">Registrados desde</span>
     <input
       type="date"
       class="adm-input"
       [ngModel]="dateFrom()"
-      (ngModelChange)="dateFrom.set($event); page.set(1)"
-      aria-label="Registrados desde" />
+      (ngModelChange)="dateFrom.set($event); page.set(1)" />
   </label>
 
   <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" (click)="resetFilters()">

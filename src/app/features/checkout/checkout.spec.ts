@@ -207,6 +207,34 @@ describe('Checkout (invitado)', () => {
     http.expectNone((r) => r.url.endsWith('/orders'));
     expect(cmp.hasUnavailable()).toBe(true);
   });
+
+  it('TALLAS · una línea con talla viaja al payload como {productId, quantity, size}; una sin talla queda exacta', () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({
+        version: 1,
+        items: [
+          { productId: ID_A, quantity: 2, size: 'M' },
+          { productId: 'b'.repeat(24), quantity: 1 },
+        ],
+      }),
+    );
+    const { http, cmp } = setup();
+    http.expectOne((r) => r.url.endsWith(`/product/${ID_A}`)).flush({ msg: 'ok', data: publicProduct(ID_A) });
+    http
+      .expectOne((r) => r.url.endsWith(`/product/${'b'.repeat(24)}`))
+      .flush({ msg: 'ok', data: publicProduct('b'.repeat(24)) });
+    fillValid(cmp);
+
+    cmp.submit();
+
+    const req = http.expectOne((r) => r.url.endsWith('/orders'));
+    expect(req.request.body.items).toEqual([
+      { productId: ID_A, quantity: 2, size: 'M' },
+      { productId: 'b'.repeat(24), quantity: 1 },
+    ]);
+    req.flush({ msg: 'ok', data: ORDER_201 });
+  });
 });
 
 describe('Checkout (autenticado)', () => {

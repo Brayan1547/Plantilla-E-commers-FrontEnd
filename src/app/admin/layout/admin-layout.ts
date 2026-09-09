@@ -19,7 +19,9 @@ const COLLAPSE_KEY = 'adm.sidebar.collapsed';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterOutlet, SidebarComponent, TopbarComponent, BreadcrumbsComponent],
-  host: { class: 'adm', 'data-adm-theme': 'auto' },
+  // ETAPA A — panel LIGHT ONLY: el tema claro se fija explícitamente y ya no
+  // sigue `prefers-color-scheme` (atributo presentacional, sin lógica asociada).
+  host: { class: 'adm', 'data-adm-theme': 'light' },
   template: `
     <div
       class="adm-shell"

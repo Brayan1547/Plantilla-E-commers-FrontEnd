@@ -199,7 +199,9 @@ describe('ProductDisign (product detail)', () => {
     expect((f.nativeElement.textContent as string)).not.toContain('Disponible en:');
   });
 
-  it('F7-F · addToCart con variantes presentes sigue enviando SOLO {productId, quantity} — sin variantId/color/size/sku', () => {
+  // ---- TALLAS — selector accionable (Product → Cart) ----------------------
+
+  it('TALLAS · producto con UNA sola talla disponible -> se preselecciona; addToCart envía {productId, quantity, size}', () => {
     const f = setup(VALID_ID);
     httpMock.expectOne((r) => r.url.endsWith(`/product/${VALID_ID}`)).flush({
       msg: 'ok',
@@ -213,9 +215,158 @@ describe('ProductDisign (product detail)', () => {
       },
     });
     const cmp = f.componentInstance as any;
-    // simula sesión activa (setter público real de HttpAuth) para no desviar a la modal de login
     cmp.auth.user = { _id: 'u1', role: 'subscriber' };
+    expect(cmp.selectedSize()).toBe('M'); // única talla -> preseleccionada
 
+    cmp.addToCart();
+    const req = httpMock.expectOne((r) => r.method === 'PATCH' && r.url.endsWith('/cart'));
+    expect(req.request.body).toEqual({ productId: VALID_ID, quantity: 1, size: 'M' });
+    expect(Object.keys(req.request.body).sort()).toEqual(['productId', 'quantity', 'size']);
+    req.flush({ msg: 'ok', data: { items: [] } });
+  });
+
+  it('TALLAS · varias tallas -> ninguna preseleccionada; addToCart sin elegir NO hace PATCH y avisa', () => {
+    const f = setup(VALID_ID);
+    httpMock.expectOne((r) => r.url.endsWith(`/product/${VALID_ID}`)).flush({
+      msg: 'ok',
+      data: {
+        _id: VALID_ID,
+        name: 'X',
+        price: 1,
+        stock: 8,
+        images: [],
+        variants: [
+          { color: 'Negro', size: 'S', stock: 5 },
+          { color: 'Negro', size: 'M', stock: 3 },
+        ],
+      },
+    });
+    const cmp = f.componentInstance as any;
+    cmp.auth.user = { _id: 'u1', role: 'subscriber' };
+    expect(cmp.selectedSize()).toBeNull();
+    expect(cmp.needsSizeChoice()).toBe(true);
+
+    cmp.addToCart();
+    httpMock.expectNone((r) => r.method === 'PATCH' && r.url.endsWith('/cart'));
+    expect(cmp.showSizeHint()).toBe(true);
+    expect(cmp.toast.message()?.text).toContain('talla');
+  });
+
+  it('TALLAS · las tallas y su disponibilidad salen de variants[].size/.stock (nada hardcodeado)', () => {
+    const f = setup(VALID_ID);
+    httpMock.expectOne((r) => r.url.endsWith(`/product/${VALID_ID}`)).flush({
+      msg: 'ok',
+      data: {
+        _id: VALID_ID,
+        name: 'X',
+        price: 1,
+        stock: 8,
+        images: [],
+        variants: [
+          { color: 'Negro', size: 'XS', stock: 2 },
+          { color: 'Negro', size: 'XXL', stock: 0 },
+        ],
+      },
+    });
+    const cmp = f.componentInstance as any;
+    expect(cmp.sizeOptions()).toEqual([
+      { size: 'XS', available: true },
+      { size: 'XXL', available: false },
+    ]);
+    // una talla agotada no se puede seleccionar
+    cmp.selectSize('XXL');
+    expect(cmp.selectedSize()).toBeNull();
+    cmp.selectSize('XS');
+    expect(cmp.selectedSize()).toBe('XS');
+  });
+
+  it('TALLAS · la cantidad nunca supera el stock de la talla elegida; cambiar de talla la ajusta', () => {
+    const f = setup(VALID_ID);
+    httpMock.expectOne((r) => r.url.endsWith(`/product/${VALID_ID}`)).flush({
+      msg: 'ok',
+      data: {
+        _id: VALID_ID,
+        name: 'X',
+        price: 1,
+        stock: 12,
+        images: [],
+        variants: [
+          { color: 'Negro', size: 'M', stock: 10 },
+          { color: 'Negro', size: 'S', stock: 2 },
+        ],
+      },
+    });
+    const cmp = f.componentInstance as any;
+    cmp.selectSize('M');
+    for (let i = 0; i < 20; i++) cmp.increaseQty();
+    expect(cmp.quantity()).toBe(10); // topado al stock de M
+    cmp.selectSize('S'); // stock 2 -> la cantidad baja
+    expect(cmp.quantity()).toBe(2);
+  });
+
+  it('TALLAS · error del backend (p. ej. SIZE_AMBIGUOUS) se muestra al usuario', () => {
+    const f = setup(VALID_ID);
+    httpMock.expectOne((r) => r.url.endsWith(`/product/${VALID_ID}`)).flush({
+      msg: 'ok',
+      data: {
+        _id: VALID_ID,
+        name: 'X',
+        price: 1,
+        stock: 5,
+        images: [],
+        variants: [{ color: 'Negro', size: 'M', stock: 5 }],
+      },
+    });
+    const cmp = f.componentInstance as any;
+    cmp.auth.user = { _id: 'u1', role: 'subscriber' };
+    cmp.addToCart();
+    httpMock
+      .expectOne((r) => r.method === 'PATCH' && r.url.endsWith('/cart'))
+      .flush(
+        { msg: 'El producto "X" requiere además elegir color y no está disponible para compra en línea' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+    expect(cmp.toast.message()?.text).toContain('color');
+  });
+
+  it('TALLAS · estado visual: talla elegida marca is-selected; talla agotada queda disabled', () => {
+    const f = setup(VALID_ID);
+    httpMock.expectOne((r) => r.url.endsWith(`/product/${VALID_ID}`)).flush({
+      msg: 'ok',
+      data: {
+        _id: VALID_ID,
+        name: 'X',
+        price: 1,
+        stock: 8,
+        images: [],
+        variants: [
+          { color: 'Negro', size: 'S', stock: 5 },
+          { color: 'Negro', size: 'L', stock: 0 },
+        ],
+      },
+    });
+    f.detectChanges();
+    const btns = () => Array.from(f.nativeElement.querySelectorAll('.pd-size')) as HTMLButtonElement[];
+    const sBtn = btns().find((b) => b.textContent?.includes('S'))!;
+    const lBtn = btns().find((b) => b.textContent?.trim().startsWith('L'))!;
+
+    expect(lBtn.disabled).toBe(true); // agotada: no seleccionable
+    expect(sBtn.classList.contains('is-selected')).toBe(false);
+
+    sBtn.click();
+    f.detectChanges();
+    expect(sBtn.classList.contains('is-selected')).toBe(true);
+    expect(sBtn.getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('TALLAS · producto SIMPLE (variants: []) sigue enviando SOLO {productId, quantity}', () => {
+    const f = setup(VALID_ID);
+    httpMock.expectOne((r) => r.url.endsWith(`/product/${VALID_ID}`)).flush({
+      msg: 'ok',
+      data: { _id: VALID_ID, name: 'X', price: 1, stock: 5, images: [], variants: [] },
+    });
+    const cmp = f.componentInstance as any;
+    cmp.auth.user = { _id: 'u1', role: 'subscriber' };
     cmp.addToCart();
     const req = httpMock.expectOne((r) => r.method === 'PATCH' && r.url.endsWith('/cart'));
     expect(req.request.body).toEqual({ productId: VALID_ID, quantity: 1 });

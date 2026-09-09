@@ -19,7 +19,7 @@
 
     <!-- Lista de productos, con scroll propio para que el footer quede siempre visible -->
     <div class="cart-drawer__list">
-      @for (item of lines(); track item.productId) {
+      @for (item of lines(); track item.productId + '|' + (item.size ?? '')) {
         <div class="cart-item" [class.cart-item--out]="!item.available">
 
           <div class="cart-item__img-wrapper">
@@ -32,6 +32,9 @@
 
           <div class="cart-item__info">
             <p class="cart-item__name">{{ item.name }}</p>
+            @if (item.size) {
+              <p class="cart-item__size">Talla: {{ item.size }}</p>
+            }
             <p class="cart-item__price">{{ item.price | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
             @if (!item.available) {
               <p class="cart-item__unavailable">Ya no está disponible</p>

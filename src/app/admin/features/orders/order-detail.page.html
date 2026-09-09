@@ -24,31 +24,34 @@
   }
 
   @case ('ready') {
-    <!-- ===== Estado + acciones ===== -->
-    <section class="adm-card" style="margin-bottom:16px">
-      <div class="adm-card__header"><h2>Estado del pedido</h2></div>
+   <div class="adm-stack">
+    <!-- ===== Estado del pedido + acciones ===== -->
+    <section class="adm-card">
       <div class="adm-card__body adm-stack">
-        <div class="adm-inline" style="gap:10px;flex-wrap:wrap">
-          <adm-status-badge
-            [label]="orderStatusLabel(order()!.status)"
-            [tone]="orderStatusTone(order()!.status)" />
-          <adm-status-badge
-            [label]="paymentStatusLabel(order()!.payment.status)"
-            [tone]="paymentStatusTone(order()!.payment.status)"
-            [dot]="false" />
-          <span class="adm-muted adm-mono" style="margin-left:auto">
-            Creado {{ formatDateTime(order()!.createdAt) }}
+        <div class="adm-order-status">
+          <span class="adm-order-status__eyebrow">Estado del pedido</span>
+          <span class="adm-order-status__primary">
+            <adm-status-badge
+              [label]="orderStatusLabel(order()!.status)"
+              [tone]="orderStatusTone(order()!.status)" />
+          </span>
+          <span class="adm-order-status__meta">
+            <adm-status-badge
+              [label]="paymentStatusLabel(order()!.payment.status)"
+              [tone]="paymentStatusTone(order()!.payment.status)"
+              [dot]="false" />
+            <span class="adm-mono">Creado {{ formatDateTime(order()!.createdAt) }}</span>
           </span>
         </div>
 
         @if (statusActions().length || paymentActions().length) {
-          <div class="adm-inline" style="gap:8px;flex-wrap:wrap">
-            @for (a of statusActions(); track a.to) {
+          <div class="adm-inline" style="gap:8px">
+            @for (a of statusActions(); track a.to; let first = $first) {
               <button
                 type="button"
                 class="adm-btn adm-btn--sm"
                 [class.adm-btn--danger]="a.destructive"
-                [class.adm-btn--ghost]="!a.destructive && a.to !== 'confirmed'"
+                [class.adm-btn--ghost]="!a.destructive && !first"
                 [disabled]="busy()"
                 (click)="applyStatus(a)">
                 {{ a.label }}
@@ -66,11 +69,11 @@
             }
           </div>
         } @else if (isTerminal()) {
-          <p class="adm-muted" style="margin:0">
+          <p class="adm-note">
             Este pedido está en un estado final: no admite más transiciones desde el panel.
           </p>
         } @else {
-          <p class="adm-muted" style="margin:0">
+          <p class="adm-note">
             Tu rol no puede modificar este pedido. La visualización es de solo lectura.
           </p>
         }
@@ -82,27 +85,12 @@
       <section class="adm-card">
         <div class="adm-card__header"><h3>Cliente</h3></div>
         <div class="adm-card__body">
-          <dl class="adm-stack" style="gap:10px;margin:0">
-            <div class="adm-inline" style="justify-content:space-between">
-              <dt class="adm-muted">Recibe</dt>
-              <dd style="margin:0">{{ order()!.customer.recipientName || '—' }}</dd>
-            </div>
-            <div class="adm-inline" style="justify-content:space-between">
-              <dt class="adm-muted">Correo</dt>
-              <dd class="adm-truncate" style="margin:0;max-width:60%">{{ order()!.customer.email || '—' }}</dd>
-            </div>
-            <div class="adm-inline" style="justify-content:space-between">
-              <dt class="adm-muted">Teléfono</dt>
-              <dd class="adm-mono" style="margin:0">{{ order()!.customer.phone || '—' }}</dd>
-            </div>
-            <div class="adm-inline" style="justify-content:space-between">
-              <dt class="adm-muted">Documento</dt>
-              <dd class="adm-mono" style="margin:0">{{ order()!.customer.documentId || '—' }}</dd>
-            </div>
-            <div class="adm-inline" style="justify-content:space-between">
-              <dt class="adm-muted">Cuenta</dt>
-              <dd style="margin:0">{{ order()!.userId ? 'Usuario registrado' : 'Invitado' }}</dd>
-            </div>
+          <dl class="adm-dl">
+            <div class="adm-dl__row"><dt>Recibe</dt><dd>{{ order()!.customer.recipientName || '—' }}</dd></div>
+            <div class="adm-dl__row"><dt>Correo</dt><dd class="adm-truncate">{{ order()!.customer.email || '—' }}</dd></div>
+            <div class="adm-dl__row"><dt>Teléfono</dt><dd class="adm-mono">{{ order()!.customer.phone || '—' }}</dd></div>
+            <div class="adm-dl__row"><dt>Documento</dt><dd class="adm-mono">{{ order()!.customer.documentId || '—' }}</dd></div>
+            <div class="adm-dl__row"><dt>Cuenta</dt><dd>{{ order()!.userId ? 'Usuario registrado' : 'Invitado' }}</dd></div>
           </dl>
         </div>
       </section>
@@ -110,38 +98,20 @@
       <section class="adm-card">
         <div class="adm-card__header"><h3>Envío</h3></div>
         <div class="adm-card__body">
-          <dl class="adm-stack" style="gap:10px;margin:0">
-            <div class="adm-inline" style="justify-content:space-between">
-              <dt class="adm-muted">Departamento</dt>
-              <dd style="margin:0">{{ order()!.shippingAddress.department || '—' }}</dd>
-            </div>
-            <div class="adm-inline" style="justify-content:space-between">
-              <dt class="adm-muted">Ciudad</dt>
-              <dd style="margin:0">{{ order()!.shippingAddress.city || '—' }}</dd>
-            </div>
-            <div class="adm-inline" style="justify-content:space-between">
-              <dt class="adm-muted">Barrio</dt>
-              <dd style="margin:0">{{ order()!.shippingAddress.neighborhood || '—' }}</dd>
-            </div>
-            <div class="adm-inline" style="justify-content:space-between">
-              <dt class="adm-muted">Dirección</dt>
-              <dd style="margin:0;text-align:right;max-width:60%">{{ order()!.shippingAddress.address || '—' }}</dd>
-            </div>
+          <dl class="adm-dl">
+            <div class="adm-dl__row"><dt>Departamento</dt><dd>{{ order()!.shippingAddress.department || '—' }}</dd></div>
+            <div class="adm-dl__row"><dt>Ciudad</dt><dd>{{ order()!.shippingAddress.city || '—' }}</dd></div>
+            <div class="adm-dl__row"><dt>Barrio</dt><dd>{{ order()!.shippingAddress.neighborhood || '—' }}</dd></div>
+            <div class="adm-dl__row"><dt>Dirección</dt><dd>{{ order()!.shippingAddress.address || '—' }}</dd></div>
             @if (order()!.shippingAddress.addressComplement) {
-              <div class="adm-inline" style="justify-content:space-between">
-                <dt class="adm-muted">Complemento</dt>
-                <dd style="margin:0">{{ order()!.shippingAddress.addressComplement }}</dd>
-              </div>
+              <div class="adm-dl__row"><dt>Complemento</dt><dd>{{ order()!.shippingAddress.addressComplement }}</dd></div>
             }
             @if (order()!.shippingAddress.reference) {
-              <div class="adm-inline" style="justify-content:space-between">
-                <dt class="adm-muted">Referencia</dt>
-                <dd style="margin:0;text-align:right;max-width:60%">{{ order()!.shippingAddress.reference }}</dd>
-              </div>
+              <div class="adm-dl__row"><dt>Referencia</dt><dd>{{ order()!.shippingAddress.reference }}</dd></div>
             }
           </dl>
           @if (order()!.notes) {
-            <p class="adm-muted" style="margin-top:12px">
+            <p class="adm-note" style="margin-top:12px">
               <strong>Nota del cliente:</strong> {{ order()!.notes }}
             </p>
           }
@@ -150,7 +120,7 @@
     </div>
 
     <!-- ===== Productos ===== -->
-    <section class="adm-card" style="margin-top:16px">
+    <section class="adm-card">
       <div class="adm-card__header"><h3>Productos</h3></div>
       <div class="adm-table-wrap">
         <table class="adm-table">
@@ -169,16 +139,16 @@
                   <div><strong>{{ it.productName || '—' }}</strong></div>
                   <div class="adm-muted adm-mono">{{ it.slug || '' }}</div>
                 </td>
-                <td style="text-align:right" class="adm-mono">{{ it.quantity }}</td>
-                <td style="text-align:right" class="adm-mono">{{ formatCurrency(it.unitPrice || 0) }}</td>
-                <td style="text-align:right" class="adm-mono">{{ formatCurrency(it.subtotal || 0) }}</td>
+                <td class="adm-table__num adm-mono">{{ it.quantity }}</td>
+                <td class="adm-table__num adm-mono">{{ formatCurrency(it.unitPrice || 0) }}</td>
+                <td class="adm-table__num adm-mono">{{ formatCurrency(it.subtotal || 0) }}</td>
               </tr>
             }
           </tbody>
         </table>
       </div>
       <div class="adm-card__body">
-        <p class="adm-muted" style="margin:0;font-size:12.5px">
+        <p class="adm-note">
           Los pedidos en línea de esta fase no incluyen talla ni color: la tienda solo
           vende productos sin variantes (contrato F4). Precios y nombres son un
           snapshot congelado al momento de la compra.
@@ -187,27 +157,15 @@
     </section>
 
     <!-- ===== Totales + Pago ===== -->
-    <div class="adm-grid-2" style="margin-top:16px">
+    <div class="adm-grid-2">
       <section class="adm-card">
         <div class="adm-card__header"><h3>Totales</h3></div>
         <div class="adm-card__body">
-          <dl class="adm-stack" style="gap:10px;margin:0">
-            <div class="adm-inline" style="justify-content:space-between">
-              <dt class="adm-muted">Subtotal de productos</dt>
-              <dd class="adm-mono" style="margin:0">{{ formatCurrency(order()!.totals.itemsSubtotal) }}</dd>
-            </div>
-            <div class="adm-inline" style="justify-content:space-between">
-              <dt class="adm-muted">Envío</dt>
-              <dd class="adm-mono" style="margin:0">{{ formatCurrency(order()!.totals.shipping) }}</dd>
-            </div>
-            <div class="adm-inline" style="justify-content:space-between;border-top:1px solid var(--adm-line);padding-top:8px">
-              <dt style="font-weight:600">Total</dt>
-              <dd class="adm-mono" style="margin:0;font-weight:600">{{ formatCurrency(order()!.totals.grandTotal) }}</dd>
-            </div>
-            <div class="adm-inline" style="justify-content:space-between">
-              <dt class="adm-muted">Moneda</dt>
-              <dd class="adm-mono" style="margin:0">{{ order()!.totals.currency }}</dd>
-            </div>
+          <dl class="adm-dl">
+            <div class="adm-dl__row"><dt>Subtotal de productos</dt><dd class="adm-mono">{{ formatCurrency(order()!.totals.itemsSubtotal) }}</dd></div>
+            <div class="adm-dl__row"><dt>Envío</dt><dd class="adm-mono">{{ formatCurrency(order()!.totals.shipping) }}</dd></div>
+            <div class="adm-dl__row adm-dl__row--total"><dt>Total</dt><dd class="adm-mono">{{ formatCurrency(order()!.totals.grandTotal) }}</dd></div>
+            <div class="adm-dl__row"><dt>Moneda</dt><dd class="adm-mono">{{ order()!.totals.currency }}</dd></div>
           </dl>
         </div>
       </section>
@@ -215,14 +173,11 @@
       <section class="adm-card">
         <div class="adm-card__header"><h3>Pago</h3></div>
         <div class="adm-card__body">
-          <dl class="adm-stack" style="gap:10px;margin:0">
-            <div class="adm-inline" style="justify-content:space-between">
-              <dt class="adm-muted">Método</dt>
-              <dd style="margin:0">{{ paymentMethodLabel(order()!.payment.method) }}</dd>
-            </div>
-            <div class="adm-inline" style="justify-content:space-between">
-              <dt class="adm-muted">Estado</dt>
-              <dd style="margin:0">
+          <dl class="adm-dl">
+            <div class="adm-dl__row"><dt>Método</dt><dd>{{ paymentMethodLabel(order()!.payment.method) }}</dd></div>
+            <div class="adm-dl__row">
+              <dt>Estado</dt>
+              <dd>
                 <adm-status-badge
                   [label]="paymentStatusLabel(order()!.payment.status)"
                   [tone]="paymentStatusTone(order()!.payment.status)"
@@ -230,7 +185,7 @@
               </dd>
             </div>
           </dl>
-          <p class="adm-muted" style="margin-top:12px;font-size:12.5px">
+          <p class="adm-note" style="margin-top:12px">
             La fecha del cobro y la nota del operador se registran en el backend
             (UI-5.1); su visualización aquí llegará con la ampliación del contrato
             de detalle.
@@ -239,8 +194,8 @@
       </section>
     </div>
 
-    <!-- ===== Historial ===== -->
-    <section class="adm-card" style="margin-top:16px">
+    <!-- ===== Historial de estados ===== -->
+    <section class="adm-card">
       <div class="adm-card__header"><h3>Historial de estados</h3></div>
       <div class="adm-card__body">
         @if (order()!.statusHistory.length) {
@@ -254,7 +209,7 @@
                     [dot]="false" />
                 </span>
                 <span class="adm-stack" style="gap:2px">
-                  <span class="adm-mono adm-muted" style="font-size:12.5px">
+                  <span class="adm-note adm-mono">
                     {{ formatDateTime(h.changedAt) }} ·
                     {{ h.changedBy ? 'Operador' : 'Automático / cliente' }}
                   </span>
@@ -265,14 +220,15 @@
               </li>
             }
           </ol>
-          <p class="adm-muted" style="margin-top:12px;font-size:12.5px">
+          <p class="adm-note" style="margin-top:12px">
             El backend identifica al operador por ID; la resolución de nombres es
             una mejora pendiente del contrato.
           </p>
         } @else {
-          <p class="adm-muted" style="margin:0">Sin historial registrado.</p>
+          <p class="adm-note">Sin historial registrado.</p>
         }
       </div>
     </section>
+   </div>
   }
 }

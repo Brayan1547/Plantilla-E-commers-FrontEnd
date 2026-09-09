@@ -21,8 +21,10 @@ export interface NavSection {
  * añadirán cuando exista su contrato. Ver PENDING BACKEND en el informe.
  *
  * UI-5.2 — "Pedidos" SÍ tiene backend real (UI-5.1: GET/PATCH /api/orders).
- * El Dashboard de ventas (KPIs, gráficas, ingresos) sigue SIN backend y NO
- * aparece: es una fase posterior.
+ * UI-5.3 — el "Inicio" es ahora el Dashboard real (`GET /api/dashboard`):
+ * resumen de ventas, serie temporal, pedidos por estado, top de productos,
+ * inventario y alertas — todo agregado sobre pedidos e inventario existentes.
+ * Sigue SIN datos de tráfico/visitantes/conversión (no existen en el dominio).
  *
  * La visibilidad de cada item la decide `PermissionsService` (derivado del rol);
  * la protección REAL de cada ruta la hace `permissionGuard` + el backend.

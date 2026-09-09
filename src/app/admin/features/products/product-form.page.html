@@ -13,12 +13,10 @@
   }
   @default {
     @if (conflict()) {
-      <div class="adm-card" style="margin-bottom:16px;border-color:var(--adm-warn)">
-        <div class="adm-card__body adm-inline" style="gap:10px;justify-content:space-between;flex-wrap:wrap">
-          <span class="adm-inline" style="gap:8px">
-            <adm-icon name="alert" [size]="14" />
-            <span style="font-size:12.5px">El producto cambió en el servidor. Recarga para obtener la versión actual.</span>
-          </span>
+      <div class="adm-callout adm-callout--warn" style="margin-bottom:16px">
+        <adm-icon class="adm-callout__icon" name="alert" [size]="18" />
+        <div class="adm-inline" style="flex:1;gap:10px;justify-content:space-between;flex-wrap:wrap">
+          <span>El producto cambió en el servidor. Recarga para obtener la versión actual.</span>
           <button type="button" class="adm-btn adm-btn--sm" (click)="reloadAfterConflict()">
             <adm-icon name="refresh" [size]="13" />
             Recargar
@@ -31,7 +29,7 @@
         <div class="adm-card__body adm-stack" style="gap:12px">
           <div class="adm-inline" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
             <div class="adm-inline" style="gap:10px">
-              <span class="adm-field__label" style="margin:0">Estado del workflow:</span>
+              <span class="adm-field__label">Estado del workflow:</span>
               <adm-status-badge [label]="statusLabels[p.status]" [tone]="statusTone[p.status]" />
             </div>
             <div class="adm-inline" style="gap:8px">
@@ -51,9 +49,9 @@
           </div>
 
           @if (canApproveReview() || canRequestChangesReview() || canRejectReview() || canPublishReview()) {
-            <div class="adm-card" style="border-color:var(--adm-line)">
+            <div class="adm-card adm-card--nested">
               <div class="adm-card__body adm-inline" style="gap:8px;flex-wrap:wrap">
-                <span class="adm-field__label" style="margin:0">Revisión:</span>
+                <span class="adm-field__label">Revisión:</span>
                 @if (canApproveReview()) {
                   <button type="button" class="adm-btn adm-btn--sm" [disabled]="reviewActionBusy()" (click)="approveReview()">
                     <adm-icon name="check" [size]="13" /> Aprobar
@@ -79,20 +77,21 @@
           }
 
           @if ((p.status === 'CHANGES_REQUESTED' || p.status === 'REJECTED') && reviewComment(); as note) {
-            <div class="adm-card" [style.borderColor]="p.status === 'REJECTED' ? 'var(--adm-danger)' : 'var(--adm-warn)'">
-              <div class="adm-card__body adm-stack" style="gap:4px">
-                <strong style="font-size:12.5px">
-                  {{ p.status === 'REJECTED' ? 'Motivo del rechazo' : 'Cambios solicitados por revisión' }}
-                </strong>
-                <p class="adm-muted" style="margin:0;white-space:pre-line;font-size:12.5px">{{ note }}</p>
+            <div class="adm-callout"
+              [class.adm-callout--danger]="p.status === 'REJECTED'"
+              [class.adm-callout--warn]="p.status !== 'REJECTED'">
+              <adm-icon class="adm-callout__icon" [name]="p.status === 'REJECTED' ? 'x' : 'alert'" [size]="18" />
+              <div class="adm-stack" style="gap:4px">
+                <strong>{{ p.status === 'REJECTED' ? 'Motivo del rechazo' : 'Cambios solicitados por revisión' }}</strong>
+                <p style="white-space:pre-line">{{ note }}</p>
               </div>
             </div>
           }
 
           @if (showHistory()) {
-            <ul class="adm-stack" style="gap:6px;list-style:none;margin:0;padding:0">
+            <ul class="adm-stack adm-text-2xs" style="gap:6px;list-style:none;margin:0;padding:0">
               @for (h of history(); track $index) {
-                <li class="adm-inline" style="gap:8px;align-items:flex-start;font-size:12px">
+                <li class="adm-inline" style="gap:8px;align-items:flex-start">
                   <adm-status-badge [label]="actionLabel(h.action)" tone="neutral" />
                   <span class="adm-muted">
                     {{ h.fromStatus ? statusLabels[h.fromStatus] + ' → ' : '' }}{{ statusLabels[h.toStatus] }}
@@ -110,22 +109,20 @@
       </div>
 
       @if (contentLocked()) {
-        <div class="adm-card" style="margin-bottom:16px">
-          <div class="adm-card__body adm-inline" style="gap:8px">
-            <adm-icon name="lock" [size]="14" />
-            <span class="adm-muted" style="font-size:12.5px">
-              @switch (p.status) {
-                @case ('PENDING_REVIEW') { Este producto está en revisión. Solo lectura hasta que la administración responda. }
-                @case ('APPROVED') { Este producto está aprobado, a la espera de publicación. Solo lectura. }
-                @case ('PUBLISHED') {
-                  @if (canReopen()) { Este producto está publicado. Usa "Volver a borrador" para reabrir el ciclo de revisión. }
-                  @else { Este producto está publicado. Solo lectura. }
-                }
-                @case ('ARCHIVED') { Este producto está archivado. Solo lectura. }
-                @default { Este producto no admite edición de contenido en su estado actual. }
+        <div class="adm-callout" style="margin-bottom:16px">
+          <adm-icon class="adm-callout__icon" name="lock" [size]="18" />
+          <p>
+            @switch (p.status) {
+              @case ('PENDING_REVIEW') { Este producto está en revisión. Solo lectura hasta que la administración responda. }
+              @case ('APPROVED') { Este producto está aprobado, a la espera de publicación. Solo lectura. }
+              @case ('PUBLISHED') {
+                @if (canReopen()) { Este producto está publicado. Usa "Volver a borrador" para reabrir el ciclo de revisión. }
+                @else { Este producto está publicado. Solo lectura. }
               }
-            </span>
-          </div>
+              @case ('ARCHIVED') { Este producto está archivado. Solo lectura. }
+              @default { Este producto no admite edición de contenido en su estado actual. }
+            }
+          </p>
         </div>
       }
     }
@@ -202,7 +199,7 @@
           <div class="adm-field">
             <span class="adm-field__label">Categorías</span>
             @if (categories().length === 0) {
-              <p class="adm-muted" style="font-size:12.5px">No hay categorías. Pide a un administrador que cree una.</p>
+              <p class="adm-note">No hay categorías. Pide a un administrador que cree una.</p>
             } @else {
               <div class="adm-stack" style="gap:6px">
                 @for (c of categories(); track c._id) {
@@ -240,7 +237,7 @@
           </div>
 
           @if (!isEdit) {
-            <p class="adm-muted" style="font-size:12.5px;margin-bottom:10px">
+            <p class="adm-note" style="margin-bottom:10px">
               Guarda el producto como borrador para poder subir archivos de imagen. Mientras tanto puedes añadir imágenes por URL.
             </p>
           }
@@ -248,7 +245,7 @@
           @if (pendingUploads().length) {
             <div class="adm-stack" style="gap:6px;margin-bottom:10px">
               @for (u of pendingUploads(); track u.key) {
-                <div class="adm-inline" style="justify-content:space-between;gap:8px;font-size:12px;padding:6px 8px;border-radius:6px;background:var(--adm-surface-2, rgba(0,0,0,.04))">
+                <div class="adm-inline adm-text-2xs" style="justify-content:space-between;gap:8px;padding:6px 8px;border-radius:6px;background:var(--adm-surface-2)">
                   @if (u.status === 'uploading') {
                     <span>Subiendo "{{ u.name }}"…</span>
                   } @else {
@@ -263,14 +260,14 @@
           }
 
           @if (images.length === 0) {
-            <p class="adm-muted" style="font-size:12.5px">
+            <p class="adm-note">
               Sin imágenes. El borrador se puede guardar igual; se exige al menos una para enviar a revisión.
             </p>
           }
 
           <div class="adm-stack" formArrayName="images" style="gap:10px">
             @for (img of images.controls; track $index) {
-              <div class="adm-card" [formGroupName]="$index">
+              <div class="adm-card adm-card--nested" [formGroupName]="$index">
                 <div class="adm-card__body adm-stack" style="gap:8px">
                   @if (img.controls.url.value) {
                     <img [src]="img.controls.url.value" [alt]="img.controls.alt.value"
@@ -279,19 +276,21 @@
                   <div class="adm-inline" style="justify-content:space-between">
                     <input class="adm-input" type="url" formControlName="url"
                       placeholder="https://…/imagen.jpg"
+                      aria-label="URL de la imagen"
                       [readonly]="!!img.controls._id.value"
                       [attr.aria-invalid]="img.controls.url.touched && img.controls.url.invalid"
                       style="flex:1" />
                     @if (img.controls._id.value) {
-                      <span class="adm-muted" style="font-size:11px;white-space:nowrap;margin-left:6px">Guardada</span>
+                      <span class="adm-muted adm-text-2xs" style="white-space:nowrap;margin-left:6px">Guardada</span>
                     } @else {
-                      <span class="adm-muted" style="font-size:11px;white-space:nowrap;margin-left:6px">Sin guardar</span>
+                      <span class="adm-muted adm-text-2xs" style="white-space:nowrap;margin-left:6px">Sin guardar</span>
                     }
                   </div>
                   @if (img.controls.url.touched && img.controls.url.invalid) {
                     <span class="adm-field__error">La URL de la imagen es obligatoria.</span>
                   }
                   <input class="adm-input" type="text" formControlName="alt"
+                    aria-label="Texto alternativo de la imagen"
                     placeholder="Texto alternativo (accesibilidad)" maxlength="160" />
                   <div class="adm-inline" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
                     <label class="adm-inline" style="gap:6px;cursor:pointer">
@@ -299,12 +298,13 @@
                         [checked]="img.controls.isMain.value"
                         [disabled]="form.disabled"
                         (change)="setMain($index)" />
-                      <span style="font-size:12px">Principal</span>
+                      <span class="adm-text-2xs">Principal</span>
                     </label>
                     @if (img.controls.isMain.value) {
-                      <span class="adm-muted" style="font-size:11.5px">Tipo: Principal (MAIN)</span>
+                      <span class="adm-muted adm-text-2xs">Tipo: Principal (MAIN)</span>
                     } @else {
-                      <select class="adm-select" formControlName="type" [disabled]="form.disabled">
+                      <select class="adm-select" formControlName="type" [disabled]="form.disabled"
+                        aria-label="Tipo de imagen">
                         <option value="DETAIL">Detalle</option>
                         <option value="MODEL">Con modelo</option>
                       </select>
@@ -318,7 +318,7 @@
                         [disabled]="form.disabled || $index === images.length - 1" (click)="moveImage($index, 1)">
                         <adm-icon name="chevron-down" [size]="14" />
                       </button>
-                      <button type="button" class="adm-icon-btn" aria-label="Quitar imagen"
+                      <button type="button" class="adm-icon-btn adm-icon-btn--danger" aria-label="Quitar imagen"
                         [disabled]="form.disabled || deletingImageIds().has(img.controls._id.value)"
                         (click)="removeImage($index)">
                         @if (deletingImageIds().has(img.controls._id.value)) {
@@ -342,27 +342,28 @@
           </div>
 
           @if (variants.length === 0) {
-            <p class="adm-muted" style="font-size:12.5px">
+            <p class="adm-note">
               Sin variantes: el producto usa el stock plano de arriba (p. ej. accesorios sin talla).
             </p>
           }
 
           <div class="adm-stack" formArrayName="variants" style="gap:10px">
             @for (v of variants.controls; track $index) {
-              <div class="adm-card" [formGroupName]="$index">
+              <div class="adm-card adm-card--nested" [formGroupName]="$index">
                 <div class="adm-card__body adm-grid-2" style="gap:8px">
-                  <input class="adm-input adm-mono" type="text" formControlName="sku" placeholder="SKU (p. ej. DUS-CAM-ESS-NEG-S)" />
-                  <input class="adm-input" type="text" formControlName="color" placeholder="Color" />
+                  <input class="adm-input adm-mono" type="text" formControlName="sku" aria-label="SKU de la variante" placeholder="SKU (p. ej. DUS-CAM-ESS-NEG-S)" />
+                  <input class="adm-input" type="text" formControlName="color" aria-label="Color de la variante" placeholder="Color" />
                   <div>
-                    <input class="adm-input" type="text" formControlName="size" placeholder='Talla (usa "Única" si no aplica)'
+                    <input class="adm-input" type="text" formControlName="size" aria-label="Talla de la variante" placeholder='Talla (usa "Única" si no aplica)'
+                      list="pf-size-suggestions"
                       [attr.aria-invalid]="v.controls.size.touched && v.controls.size.invalid" />
                     @if (v.controls.size.touched && v.controls.size.invalid) {
                       <span class="adm-field__error">La talla es obligatoria (usa "Única" si el producto no tiene tallaje).</span>
                     }
                   </div>
                   <div class="adm-inline" style="gap:8px">
-                    <input class="adm-input" type="number" min="0" step="1" formControlName="stock" placeholder="Stock" />
-                    <button type="button" class="adm-icon-btn" aria-label="Quitar variante"
+                    <input class="adm-input" type="number" min="0" step="1" formControlName="stock" aria-label="Stock de la variante" placeholder="Stock" />
+                    <button type="button" class="adm-icon-btn adm-icon-btn--danger" aria-label="Quitar variante"
                       [disabled]="form.disabled"
                       (click)="removeVariant($index)">
                       <adm-icon name="trash" [size]="14" />
@@ -372,11 +373,21 @@
               </div>
             }
           </div>
+          <!-- TALLAS — sugerencias (no restringe: el campo sigue siendo texto libre;
+               el backend acepta cualquier talla, no un enum). -->
+          <datalist id="pf-size-suggestions">
+            <option value="S"></option>
+            <option value="M"></option>
+            <option value="L"></option>
+            <option value="XL"></option>
+            <option value="Única"></option>
+          </datalist>
         </div>
       </div>
 
       <!-- Información editorial (F1 del backend): modelo, detalles, envíos, devoluciones -->
       <div class="adm-card__body" style="border-top:1px solid var(--adm-line);padding-top:16px">
+        <span class="adm-field__label" style="display:block;margin-bottom:14px">Información editorial</span>
         <div class="adm-grid-2" style="gap:16px" formGroupName="modelInfo">
           <div class="adm-field">
             <label class="adm-field__label" for="pf-model-size">Talla del modelo</label>
@@ -423,13 +434,14 @@
         </div>
       </div>
 
-      <div class="adm-card__header" style="border-top:1px solid var(--adm-line);border-bottom:0">
-        <span class="adm-muted" style="font-size:12px">
+      <div class="adm-card__footer">
+        <span class="adm-note">
           @if (form.dirty && !submitting() && !submittingReview()) { Cambios sin guardar }
         </span>
         <div class="adm-inline">
           <a class="adm-btn adm-btn--ghost adm-btn--sm" routerLink="/admin/products">Cancelar</a>
-          <button type="submit" class="adm-btn adm-btn--ghost adm-btn--sm"
+          <button type="submit" class="adm-btn adm-btn--sm"
+            [class.adm-btn--secondary]="canSubmitReview()"
             [disabled]="form.disabled || submitting() || submittingReview() || form.invalid">
             @if (submitting()) { Guardando… } @else { Guardar borrador }
           </button>

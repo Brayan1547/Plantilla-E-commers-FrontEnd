@@ -14,6 +14,8 @@ import { CreateOrderItem, CreateOrderPayload } from '../../core/models/order.mod
 /** Fila unificada del resumen — sirve para carrito guest y autenticado. */
 interface CheckoutLine {
   productId: string;
+  /** TALLAS — talla de la línea (`undefined` = producto simple). Identidad = productId + size. */
+  size?: string;
   name: string;
   price: number;
   image: string;
@@ -25,11 +27,14 @@ interface CheckoutLine {
  * UI-4B — Checkout COD (invitado o autenticado).
  *
  * Fuente de ítems:
- *   - invitado       -> `GuestCart` (localStorage: solo `{productId, quantity}`).
- *   - autenticado    -> `HttpCart` (carrito de backend, sin cambios).
+ *   - invitado       -> `GuestCart` (localStorage: `{productId, quantity, size?}`).
+ *   - autenticado    -> `HttpCart` (carrito de backend).
  *
- * El precio y el subtotal que se muestran son SOLO informativos: la autoridad de
- * precios y totales es el backend al crear la orden (`POST /api/orders`).
+ * TALLAS — cada línea se identifica por (productId + size); `size` es opcional
+ * (producto simple no la lleva) y viaja al pedido como `{productId, quantity,
+ * size}`. El precio y el subtotal que se muestran son SOLO informativos: la
+ * autoridad de precios, totales y stock es el backend al crear la orden
+ * (`POST /api/orders`).
  *
  * NO hace merge guest -> autenticado. NO modifica `HttpCart`. NO envía
  * price/totals/status/payment/userId. Pago EXCLUSIVO: contra entrega.
@@ -85,6 +90,7 @@ export default class Checkout {
     if (this.isGuest()) {
       return this.guestCart.hydrated().map((l) => ({
         productId: l.productId,
+        size: l.size,
         name: l.product?.name ?? 'Producto no disponible',
         price: l.product?.price ?? 0,
         image: this.mainImage(l.product?.images),
@@ -95,6 +101,7 @@ export default class Checkout {
     const items = this.httpCart.cart()?.items ?? [];
     return items.map((it: any) => ({
       productId: it.productId?._id ?? it.productId,
+      size: it.size ?? undefined,
       name: it.productId?.name ?? 'Producto',
       price: it.productId?.price ?? 0,
       image: this.mainImage(it.productId?.images),
@@ -127,12 +134,12 @@ export default class Checkout {
 
   // --- Edición del resumen -------------------------------------------
 
-  protected removeLine(productId: string): void {
+  protected removeLine(productId: string, size?: string): void {
     if (this.isGuest()) {
-      this.guestCart.remove(productId);
+      this.guestCart.remove(productId, size);
       return;
     }
-    this.httpCart.removeItem(productId).subscribe({
+    this.httpCart.removeItem(productId, size).subscribe({
       error: () => this.toast.show('No se pudo actualizar el carrito', 'error'),
     });
   }
@@ -192,7 +199,7 @@ export default class Checkout {
   protected continuarComoInvitado(): void {
     const current = this.lines();
     for (const l of current) {
-      this.guestCart.add(l.productId, l.quantity);
+      this.guestCart.add(l.productId, l.quantity, l.size);
     }
     this.isGuest.set(true);
     this.sessionExpired.set(false);
@@ -216,10 +223,11 @@ export default class Checkout {
       return t.length ? t : undefined;
     };
 
-    const items: CreateOrderItem[] = this.lines().map((l) => ({
-      productId: l.productId,
-      quantity: l.quantity,
-    }));
+    const items: CreateOrderItem[] = this.lines().map((l) =>
+      // TALLAS — `size` solo para líneas con talla; producto simple envía
+      // exactamente `{ productId, quantity }`.
+      l.size ? { productId: l.productId, quantity: l.quantity, size: l.size } : { productId: l.productId, quantity: l.quantity },
+    );
 
     const documentId = opt(v.documentId);
     const addressComplement = opt(v.addressComplement);

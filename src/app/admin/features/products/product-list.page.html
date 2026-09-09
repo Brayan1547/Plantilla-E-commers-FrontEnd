@@ -11,16 +11,15 @@
   }
 </adm-page-header>
 
-<div class="adm-filter-bar">
-  <label class="adm-topbar__search adm-filter-bar__search">
-    <adm-icon name="search" [size]="16" />
-    <input type="search" placeholder="Buscar por nombre, slug o descripción"
-      [ngModel]="search()" (ngModelChange)="search.set($event); page.set(1)"
-      aria-label="Buscar productos" />
+<div class="adm-filter-bar adm-filter-bar--labeled">
+  <label class="adm-field adm-field--grow">
+    <span class="adm-field__label">Buscar producto</span>
+    <input type="search" class="adm-input" placeholder="Nombre, slug o descripción"
+      [ngModel]="search()" (ngModelChange)="search.set($event); page.set(1)" />
   </label>
 
   <label class="adm-field">
-    <span class="adm-sr-only">Filtrar por categoría</span>
+    <span class="adm-field__label">Categoría</span>
     <select class="adm-select" [ngModel]="categoryFilter()"
       (ngModelChange)="categoryFilter.set($event); page.set(1)">
       <option value="">Todas las categorías</option>
@@ -31,7 +30,7 @@
   </label>
 
   <label class="adm-field">
-    <span class="adm-sr-only">Filtrar por estado del workflow</span>
+    <span class="adm-field__label">Workflow</span>
     <select class="adm-select" [ngModel]="statusFilter()"
       (ngModelChange)="statusFilter.set($event); page.set(1)">
       <option value="">Todo el workflow</option>
@@ -42,7 +41,7 @@
   </label>
 
   <label class="adm-field">
-    <span class="adm-sr-only">Filtrar por stock</span>
+    <span class="adm-field__label">Stock</span>
     <select class="adm-select" [ngModel]="stockFilter()"
       (ngModelChange)="stockFilter.set($event); page.set(1)">
       <option value="">Todo el stock</option>
@@ -53,7 +52,7 @@
   </label>
 
   <label class="adm-field">
-    <span class="adm-sr-only">Filtrar por activación</span>
+    <span class="adm-field__label">Activación</span>
     <select class="adm-select" [ngModel]="activeFilter()"
       (ngModelChange)="activeFilter.set($event); page.set(1)">
       <option value="">Activos e inactivos</option>
@@ -79,7 +78,7 @@
   (retry)="load()">
   <ng-template #admRow let-p>
     <td>
-      <span class="adm-avatar" style="border-radius:6px;background:var(--adm-surface-2)">
+      <span class="adm-avatar adm-avatar--square">
         @if (mainImage(p.images)) {
           <img [src]="mainImage(p.images)" alt="" />
         } @else {
@@ -89,33 +88,33 @@
     </td>
     <td>
       <strong>{{ p.name }}</strong>
-      <div class="adm-mono adm-muted" style="font-size:11px">{{ p.slug }}</div>
+      <div class="adm-mono adm-muted adm-text-2xs">{{ p.slug }}</div>
       @if (creatorName(p); as creator) {
-        <div class="adm-muted" style="font-size:11px">{{ creator }}</div>
+        <div class="adm-muted adm-text-2xs">{{ creator }}</div>
       }
     </td>
     <td class="adm-muted">{{ categoryNames(p) }}</td>
     <td class="adm-table__num adm-mono">{{ formatCurrency(p.price) }}</td>
-    <td>
+    <td class="adm-table__num">
+      <span class="adm-mono">{{ p.stock }}</span>
       @switch (stockLevel(p.stock)) {
-        @case ('out') { <adm-status-badge [label]="'Agotado'" tone="danger" /> }
-        @case ('low') { <adm-status-badge [label]="p.stock + ' uds'" tone="warn" /> }
-        @default { <adm-status-badge [label]="p.stock + ' uds'" tone="ok" /> }
+        @case ('out') { <span class="adm-text-2xs" style="display:block;color:var(--adm-danger)">Agotado</span> }
+        @case ('low') { <span class="adm-text-2xs" style="display:block;color:var(--adm-warn)">Stock bajo</span> }
       }
     </td>
     <td>
       <adm-status-badge [label]="statusLabel(p)" [tone]="statusToneOf(p)" />
       @if (reviewNote(p); as note) {
-        <div class="adm-muted" style="font-size:11px;max-width:160px" [title]="note">
+        <div class="adm-muted adm-text-2xs adm-truncate" style="max-width:160px" [title]="note">
           {{ p.status === 'REJECTED' ? 'Motivo: ' : 'Cambios: ' }}{{ note }}
         </div>
       }
     </td>
     <td>
       @if (p.isActive) {
-        <adm-status-badge label="Sí" tone="ok" />
+        <adm-status-badge label="Sí" tone="ok" [dot]="false" />
       } @else {
-        <adm-status-badge label="No" tone="neutral" />
+        <adm-status-badge label="No" tone="neutral" [dot]="false" />
       }
     </td>
     <td>
@@ -127,13 +126,13 @@
           </a>
         }
         @if (canSubmitReview(p)) {
-          <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm"
+          <button type="button" class="adm-btn adm-btn--sm"
             [disabled]="busyId() === p._id" (click)="submitReview(p)">
             Enviar a revisión
           </button>
         }
         @if (canApprove(p)) {
-          <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm"
+          <button type="button" class="adm-btn adm-btn--sm"
             [disabled]="busyId() === p._id" (click)="approve(p)">
             <adm-icon name="check" [size]="13" /> Aprobar
           </button>
@@ -163,7 +162,7 @@
           </button>
         }
         @if (perms.can('products.delete')) {
-          <button type="button" class="adm-icon-btn" aria-label="Eliminar producto"
+          <button type="button" class="adm-icon-btn adm-icon-btn--danger" aria-label="Eliminar producto"
             (click)="remove(p)">
             <adm-icon name="trash" [size]="15" />
           </button>

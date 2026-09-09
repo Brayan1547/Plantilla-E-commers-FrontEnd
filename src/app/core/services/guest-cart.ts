@@ -11,12 +11,15 @@ import type { PublicProduct } from '../models/public-product.model';
  * UI-4B — Carrito de INVITADO (usuario no autenticado).
  *
  * Reglas críticas (UI-4B §3 / §4):
- *  - El contrato del carrito NO cambia: cada línea es EXCLUSIVAMENTE
- *    `{ productId: string, quantity: number }`. Sin variantId/colorId/sizeId,
- *    sin `Product.stock`, sin `stockOps`, sin campos nuevos.
- *  - En `localStorage` se persiste ÚNICAMENTE `{ productId, quantity }`. NUNCA
- *    precio, nombre, imagen, stock, producto completo, usuario, PII, token,
- *    order ni pago.
+ *  - Cada línea es `{ productId: string, quantity: number, size?: string }`.
+ *    `size` es OPCIONAL: solo lo llevan los productos con variantes (es el
+ *    texto de `variant.size`, nunca un `variantId`). La identidad de una línea
+ *    es (productId + size): dos tallas del mismo producto son dos líneas.
+ *    Sin `Product.stock`, sin `stockOps`, sin más campos. El backend sigue
+ *    siendo la autoridad de stock y de la validez de la talla.
+ *  - En `localStorage` se persiste ÚNICAMENTE eso (`{ productId, quantity }` o
+ *    `{ productId, quantity, size }`). NUNCA precio, nombre, imagen, stock,
+ *    producto completo, usuario, PII, token, order ni pago.
  *  - Los datos de producto para pintar la UI se hidratan bajo demanda con el
  *    servicio PÚBLICO de productos existente (`GET /api/product/:id`) y viven
  *    solo en memoria.
@@ -28,24 +31,46 @@ import type { PublicProduct } from '../models/public-product.model';
  * automático con el carrito autenticado.
  */
 
-/** Línea cruda persistida (lo único que va a `localStorage`). */
+/**
+ * Línea cruda persistida (lo único que va a `localStorage`).
+ * `size` OPCIONAL: solo productos con variantes lo llevan. La identidad de una
+ * línea es (productId + size): dos tallas del mismo producto son dos líneas y
+ * NO se fusionan. Las líneas antiguas del `v1` (sin `size`) siguen siendo
+ * válidas — se interpretan como producto simple (`size` ausente).
+ */
 export interface GuestCartLine {
   productId: string;
   quantity: number;
+  size?: string;
 }
 
 /** Línea con datos públicos de producto hidratados para la UI (solo memoria). */
 export interface GuestCartHydratedLine {
   productId: string;
   quantity: number;
+  size?: string;
   /** Producto público, o `null` si aún no se ha hidratado / no se pudo. */
   product: PublicProduct | null;
   /** true si el backend indicó que el producto ya no está disponible (404/400). */
   unavailable: boolean;
 }
 
+// Mismo `v1`: NO se versiona la clave. El formato es backward-compatible —
+// solo se AÑADE un campo opcional `size`. Los items sin `size` (todo el
+// contenido `v1` existente en navegadores reales) se leen igual que siempre.
 const STORAGE_KEY = 'dusck.guestCart.v1';
 const OBJECT_ID_RE = /^[a-f\d]{24}$/i;
+const MAX_SIZE_LEN = 20; // = maxlength de `CartItemSchema.size` en el backend
+
+/** Talla saneada: string no vacío ≤20 chars tras trim, o `undefined`. */
+const cleanSize = (s: unknown): string | undefined => {
+  if (typeof s !== 'string') return undefined;
+  const t = s.trim();
+  return t.length > 0 && t.length <= MAX_SIZE_LEN ? t : undefined;
+};
+
+/** Clave de identidad de línea: productId + talla (o su ausencia). */
+const lineKey = (productId: string, size?: string): string => `${productId}::${size ?? ''}`;
 
 const clampQty = (q: number): number => {
   if (!Number.isFinite(q)) return MIN_ORDER_ITEM_QTY;
@@ -83,6 +108,7 @@ export class GuestCart {
       return {
         productId: l.productId,
         quantity: l.quantity,
+        ...(l.size ? { size: l.size } : {}),
         product: cached,
         unavailable: cache.has(l.productId) && cached === null,
       };
@@ -97,54 +123,66 @@ export class GuestCart {
 
   // --- Mutaciones -------------------------------------------------------
 
-  /** Añade `qty` unidades del producto (o crea la línea). Dedupe por productId. */
-  add(productId: string, qty = 1): void {
+  /**
+   * Añade `qty` unidades de una línea (o la crea). Identidad = productId + size:
+   * dos tallas del mismo producto son líneas distintas y NO se fusionan.
+   * `size` OPCIONAL — un producto simple lo omite y la línea persiste como
+   * `{ productId, quantity }`, idéntico a antes.
+   */
+  add(productId: string, qty = 1, size?: string): void {
     if (!OBJECT_ID_RE.test(productId)) return;
+    const s = cleanSize(size);
     const delta = clampQty(qty);
     this._lines.update((lines) => {
-      const existing = lines.find((l) => l.productId === productId);
+      const existing = lines.find((l) => l.productId === productId && (l.size ?? '') === (s ?? ''));
       if (existing) {
         return lines.map((l) =>
-          l.productId === productId ? { ...l, quantity: clampQty(l.quantity + delta) } : l,
+          l === existing ? { ...l, quantity: clampQty(l.quantity + delta) } : l,
         );
       }
-      return [...lines, { productId, quantity: delta }];
+      return [...lines, { productId, quantity: delta, ...(s ? { size: s } : {}) }];
     });
     this.persist();
     this.refreshHydration();
   }
 
-  /** +1 unidad. */
-  increment(productId: string): void {
-    this.setQuantity(productId, (this.quantityOf(productId) ?? 0) + 1);
+  /** +1 unidad de la línea (productId + size). */
+  increment(productId: string, size?: string): void {
+    this.setQuantity(productId, (this.quantityOf(productId, size) ?? 0) + 1, size);
   }
 
-  /** -1 unidad; si llega a 0, elimina la línea (nunca se persiste quantity <= 0). */
-  decrement(productId: string): void {
-    const next = (this.quantityOf(productId) ?? 0) - 1;
+  /** -1 unidad; si llega a 0, elimina esa línea (nunca se persiste quantity <= 0). */
+  decrement(productId: string, size?: string): void {
+    const next = (this.quantityOf(productId, size) ?? 0) - 1;
     if (next < MIN_ORDER_ITEM_QTY) {
-      this.remove(productId);
+      this.remove(productId, size);
       return;
     }
-    this.setQuantity(productId, next);
+    this.setQuantity(productId, next, size);
   }
 
-  /** Fija la cantidad exacta (entero 1..50). <=0 elimina la línea. */
-  setQuantity(productId: string, qty: number): void {
+  /** Fija la cantidad exacta (entero 1..50) de la línea (productId + size). <=0 la elimina. */
+  setQuantity(productId: string, qty: number, size?: string): void {
     if (!Number.isFinite(qty) || Math.trunc(qty) < MIN_ORDER_ITEM_QTY) {
-      this.remove(productId);
+      this.remove(productId, size);
       return;
     }
+    const s = size === undefined ? undefined : cleanSize(size);
     const value = clampQty(qty);
     this._lines.update((lines) =>
-      lines.map((l) => (l.productId === productId ? { ...l, quantity: value } : l)),
+      lines.map((l) =>
+        l.productId === productId && (l.size ?? '') === (s ?? '') ? { ...l, quantity: value } : l,
+      ),
     );
     this.persist();
   }
 
-  /** Elimina una línea. */
-  remove(productId: string): void {
-    this._lines.update((lines) => lines.filter((l) => l.productId !== productId));
+  /** Elimina una línea (productId + size). */
+  remove(productId: string, size?: string): void {
+    const s = size === undefined ? undefined : cleanSize(size);
+    this._lines.update((lines) =>
+      lines.filter((l) => !(l.productId === productId && (l.size ?? '') === (s ?? ''))),
+    );
     this.persist();
   }
 
@@ -171,8 +209,9 @@ export class GuestCart {
   refreshHydration(): void {
     if (!this.isBrowser) return;
     const cache = this._productCache();
-    const missing = this._lines()
-      .map((l) => l.productId)
+    // Dedupe por productId: dos líneas del mismo producto en tallas distintas
+    // comparten los MISMOS datos públicos -> una sola petición de hidratación.
+    const missing = [...new Set(this._lines().map((l) => l.productId))]
       .filter((id) => !cache.has(id) && !this._inFlight.has(id));
     if (missing.length === 0) return;
     missing.forEach((id) => this._inFlight.add(id));
@@ -199,8 +238,9 @@ export class GuestCart {
 
   // --- Helpers privados ------------------------------------------------
 
-  private quantityOf(productId: string): number | undefined {
-    return this._lines().find((l) => l.productId === productId)?.quantity;
+  private quantityOf(productId: string, size?: string): number | undefined {
+    const s = size === undefined ? undefined : cleanSize(size);
+    return this._lines().find((l) => l.productId === productId && (l.size ?? '') === (s ?? ''))?.quantity;
   }
 
   private persist(): void {
@@ -243,17 +283,27 @@ export class GuestCart {
 
     if (!Array.isArray(rawItems)) return [];
 
-    const byId = new Map<string, number>();
+    // Dedupe por (productId + size): dos entradas con la misma talla se suman;
+    // tallas distintas del mismo producto se conservan como líneas separadas.
+    const byKey = new Map<string, GuestCartLine>();
     for (const entry of rawItems) {
       if (!entry || typeof entry !== 'object') continue;
       const productId = (entry as { productId?: unknown }).productId;
       const quantity = (entry as { quantity?: unknown }).quantity;
       if (typeof productId !== 'string' || !OBJECT_ID_RE.test(productId)) continue;
       if (typeof quantity !== 'number' || !Number.isFinite(quantity)) continue;
+      // `size` OPCIONAL — una entrada `v1` antigua sin este campo se lee igual.
+      const size = cleanSize((entry as { size?: unknown }).size);
+      const key = lineKey(productId, size);
       const q = clampQty(quantity);
-      byId.set(productId, clampQty((byId.get(productId) ?? 0) + q));
+      const prev = byKey.get(key);
+      byKey.set(key, {
+        productId,
+        quantity: clampQty((prev?.quantity ?? 0) + q),
+        ...(size ? { size } : {}),
+      });
     }
 
-    return [...byId.entries()].map(([productId, quantity]) => ({ productId, quantity }));
+    return [...byKey.values()];
   }
 }

@@ -20,10 +20,16 @@ export const MIN_ORDER_ITEM_QTY = 1;
 // REQUEST — lo que el checkout envía. Shape EXACTO del contrato, nada más.
 // ---------------------------------------------------------------------------
 
-/** Línea del pedido: el contrato acepta únicamente `{ productId, quantity }`. */
+/**
+ * Línea del pedido. `size` OPCIONAL: solo productos con variantes lo llevan
+ * (talla de `product_b.variants[].size` — S/M/L/XL/"Única"/…). Un producto
+ * simple (variants: []) envía únicamente `{ productId, quantity }`, igual que
+ * siempre. NUNCA se añade `variantId`/`color`/`sku` (el backend los ignora).
+ */
 export interface CreateOrderItem {
   productId: string;
   quantity: number;
+  size?: string;
 }
 
 /** Datos del comprador aceptados por el contrato (`CUSTOMER_FIELDS`). */
@@ -61,6 +67,8 @@ export interface OrderItemView {
   productName: string;
   slug: string;
   image: string | null;
+  /** Talla comprada (`toPublicOrder` la manda como `null` para productos simples). */
+  size?: string | null;
   unitPrice: number;
   quantity: number;
   subtotal: number;

@@ -65,4 +65,18 @@ describe('CheckoutConfirmation', () => {
     expect(text).toContain('Gracias por tu compra');
     expect(text).not.toContain('Ana Gómez');
   });
+
+  it('TALLAS · un ítem con talla muestra "Talla M"; uno sin talla no muestra etiqueta vacía', () => {
+    const fixture = setup({
+      ...ORDER,
+      items: [
+        { ...ORDER.items[0], size: 'M' },
+        { ...ORDER.items[0], productId: 'b'.repeat(24), size: null },
+      ],
+    });
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('Talla M');
+    expect(text).not.toContain('Talla:  ');
+    expect(text).not.toContain('Talla null');
+  });
 });

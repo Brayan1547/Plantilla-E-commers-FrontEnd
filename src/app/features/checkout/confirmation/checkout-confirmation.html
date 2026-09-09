@@ -15,9 +15,9 @@
 
     <h2 class="confirm__h2">Productos</h2>
     <ul class="confirm__items">
-      @for (it of o.items; track it.productId) {
+      @for (it of o.items; track it.productId + '|' + (it.size ?? '')) {
         <li class="confirm__item">
-          <span class="confirm__item-name">{{ it.productName }}</span>
+          <span class="confirm__item-name">{{ it.productName }}@if (it.size) { <span class="confirm__item-size">· Talla {{ it.size }}</span> }</span>
           <span class="confirm__item-qty">x{{ it.quantity }}</span>
           <span class="confirm__item-sub">{{ it.subtotal | currency:o.totals.currency:'symbol-narrow':'1.0-0' }}</span>
         </li>

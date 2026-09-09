@@ -127,7 +127,7 @@
         }
 
         <ul class="checkout-summary__list">
-          @for (line of lines(); track line.productId) {
+          @for (line of lines(); track line.productId + '|' + (line.size ?? '')) {
             <li class="checkout-summary__item" [class.checkout-summary__item--out]="!line.available">
               <div class="checkout-summary__thumb">
                 @if (line.image) {
@@ -138,11 +138,14 @@
               </div>
               <div class="checkout-summary__info">
                 <p class="checkout-summary__name">{{ line.name }}</p>
+                @if (line.size) {
+                  <p class="checkout-summary__size">Talla: {{ line.size }}</p>
+                }
                 <p class="checkout-summary__qty">Cantidad: {{ line.quantity }}</p>
                 @if (!line.available) {
                   <p class="checkout-summary__unavailable">No disponible</p>
                 }
-                <button type="button" class="checkout-summary__remove" (click)="removeLine(line.productId)">Quitar</button>
+                <button type="button" class="checkout-summary__remove" (click)="removeLine(line.productId, line.size)">Quitar</button>
               </div>
               <p class="checkout-summary__price">
                 {{ (line.price * line.quantity) | currency:'COP':'symbol-narrow':'1.0-0' }}

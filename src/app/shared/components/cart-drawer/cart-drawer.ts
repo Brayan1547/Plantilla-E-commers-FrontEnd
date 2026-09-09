@@ -9,6 +9,8 @@ import { HttpAuth } from '../../../core/services/http-auth';
 /** Fila unificada del drawer — funciona para carrito guest y autenticado. */
 interface DrawerLine {
   productId: string;
+  /** TALLAS — talla de la línea (`undefined` = producto simple). Identidad = productId + size. */
+  size?: string;
   name: string;
   price: number;
   image: string;
@@ -19,11 +21,13 @@ interface DrawerLine {
 /**
  * Panel lateral del carrito. UI-4B: soporta DOS orígenes sin duplicar el
  * componente:
- *   - invitado     -> `GuestCart` (localStorage: solo `{productId, quantity}`).
- *   - autenticado  -> `HttpCart`  (carrito de backend, comportamiento sin cambios).
+ *   - invitado     -> `GuestCart` (localStorage: `{productId, quantity, size?}`).
+ *   - autenticado  -> `HttpCart`  (carrito de backend).
  *
- * El precio mostrado es informativo; el total real lo calcula el backend al
- * crear la orden.
+ * TALLAS — una línea se identifica por (productId + size); dos tallas del mismo
+ * producto son dos filas distintas. `size` es opcional (producto simple no la
+ * lleva). El precio mostrado es informativo; el total real lo calcula el
+ * backend al crear la orden.
  */
 @Component({
   selector: 'app-cart-drawer',
@@ -49,6 +53,7 @@ export class CartDrawer implements OnChanges {
     if (this.isGuest()) {
       return this.guestCart.hydrated().map((l) => ({
         productId: l.productId,
+        size: l.size,
         name: l.product?.name ?? 'Producto no disponible',
         price: l.product?.price ?? 0,
         image: this.getMainImage(l.product?.images ?? []),
@@ -59,6 +64,7 @@ export class CartDrawer implements OnChanges {
     const items = this.httpCart.cart()?.items ?? [];
     return items.map((it: any) => ({
       productId: it.productId?._id ?? it.productId,
+      size: it.size ?? undefined,
       name: it.productId?.name ?? 'Producto',
       price: it.productId?.price ?? 0,
       image: this.getMainImage(it.productId?.images ?? []),
@@ -86,30 +92,30 @@ export class CartDrawer implements OnChanges {
 
   increase(line: DrawerLine) {
     if (this.isGuest()) {
-      this.guestCart.increment(line.productId);
+      this.guestCart.increment(line.productId, line.size);
       return;
     }
-    this.httpCart.updateCart(line.productId, 1).subscribe({
+    this.httpCart.updateCart(line.productId, 1, line.size).subscribe({
       error: (err) => console.error('Error al aumentar cantidad', err),
     });
   }
 
   decrease(line: DrawerLine) {
     if (this.isGuest()) {
-      this.guestCart.decrement(line.productId);
+      this.guestCart.decrement(line.productId, line.size);
       return;
     }
-    this.httpCart.updateCart(line.productId, -1).subscribe({
+    this.httpCart.updateCart(line.productId, -1, line.size).subscribe({
       error: (err) => console.error('Error al disminuir cantidad', err),
     });
   }
 
   remove(line: DrawerLine) {
     if (this.isGuest()) {
-      this.guestCart.remove(line.productId);
+      this.guestCart.remove(line.productId, line.size);
       return;
     }
-    this.httpCart.removeItem(line.productId).subscribe({
+    this.httpCart.removeItem(line.productId, line.size).subscribe({
       error: (err) => console.error('Error al eliminar producto', err),
     });
   }

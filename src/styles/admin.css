@@ -24,9 +24,22 @@
   --adm-cream: #f6f2ea;
   --adm-cream-soft: #efe9de;
   --adm-surface: #fffdf8;
-  --adm-surface-2: #faf6ee;
-  --adm-line: rgba(20, 18, 15, 0.12);
-  --adm-line-strong: rgba(20, 18, 15, 0.24);
+  /* ETAPA A — superficie secundaria (zebra / thead / hover de fila / disabled):
+     un punto mas fria, algo mas separada del blanco calido de las cards. */
+  --adm-surface-2: #f8f5ef;
+  /* ETAPA A — bordes SOLIDOS (antes translucidos rgba .12 / .24: se lavaban
+     sobre cualquier fondo que no fuese el crema). Reforzados ligeramente.
+       --adm-line        = hairline de cards, tablas, contenedores, paginacion
+       --adm-line-strong = perimetro de controles (inputs, topbar, ghost, switch)
+     Nota de diseno: la separacion cards/fondo la dan superficie + este borde +
+     spacing + jerarquia, NO sombras fuertes (--adm-shadow queda discreta). */
+  --adm-line: #d9d4ca;
+  --adm-line-strong: #b8b1a1;
+  /* ETAPA C — borde de botones OUTLINE (secondary / ghost / paginación). Más
+     firme que `--adm-line-strong` para superar 3:1 (WCAG 1.4.11) en superficie,
+     crema y superficie-2 — la identidad de un botón sin relleno se apoya en su
+     contorno. No se usa en inputs/topbar (allí `--adm-line-strong` se mantiene). */
+  --adm-btn-line: #948b79;
 
   /* --- Sidebar (tinta profunda, contraste premium) --- */
   --adm-nav-bg: #14120f;
@@ -36,11 +49,23 @@
      por un color legible (~6:1 sobre --adm-nav-bg). */
   --adm-nav-fg-dim: #9b9488;
   --adm-nav-line: rgba(246, 242, 234, 0.1);
+  /* ETAPA B — hover y activo dejan de ser casi idénticos (0.12 vs 0.14):
+     hover apenas insinuado, activo con presencia + barra de acento + peso. */
+  --adm-nav-hover: rgba(246, 242, 234, 0.055);
   --adm-nav-active: rgba(246, 242, 234, 0.12);
 
-  /* --- Acento unico --- */
-  --adm-accent: #a67c52;
-  --adm-accent-soft: rgba(166, 124, 82, 0.12);
+  /* --- Acento unico (SOLO admin) ---
+     Verde bosque sobrio y editorial, DESACOPLADO del acento de la tienda publica
+     (`--color-accent #A67C52` en header.css / footer.css — intacto). HSL ~152/28/30:
+     ligeramente frio para contrastar con elegancia sobre el crema calido del panel
+     en lugar de enturbiarse contra el. Contraste verificado (ver informe UI):
+       · blanco sobre el acento .......... 6.95:1  (boton PRIMARY, AA / casi AAA)
+       · acento como texto/icono sobre --adm-surface  6.84:1  (AA)
+       · acento como texto/icono sobre --adm-cream ... 6.23:1  (AA, hover de breadcrumb)
+       · barra activa de nav sobre --adm-nav-bg ...... 2.69:1  (elemento 3px, decorativo;
+         el estado activo ya se comunica por fondo + peso + color de texto) */
+  --adm-accent: #37624e;
+  --adm-accent-soft: rgba(55, 98, 78, 0.12);
   --adm-accent-contrast: #ffffff;
 
   /* --- Foco (UI-2): anillo propio, no depende solo del color y con contraste
@@ -58,10 +83,16 @@
   --adm-fs-xl: 20px;    /* h2 */
   --adm-fs-2xl: 26px;   /* h1 */
 
-  /* --- Semantica de estado (derivada de styles.css legacy + dusk) --- */
-  --adm-ok: #3f7d58;
+  /* --- Semantica de estado (derivada de styles.css legacy + dusk) ---
+     ETAPA C — `--adm-ok` y `--adm-warn` se oscurecen (solo el texto/color; los
+     fondos NO cambian) para alcanzar AA en badge sobre su fondo tintado:
+       ok   #3f7d58 -> #356d47 : 5.19:1 sobre --adm-ok-bg   (antes 4.15)
+       warn #9a6b2f -> #855c26 : 5.04:1 sobre --adm-warn-bg  (antes 3.97)
+     Mejora además todos sus otros usos (KPI, switch, delta) sobre superficie
+     clara. Siguen siendo colores sobrios y desaturados, no vivos. */
+  --adm-ok: #356d47;
   --adm-ok-bg: #e4efe7;
-  --adm-warn: #9a6b2f;
+  --adm-warn: #855c26;
   --adm-warn-bg: #f6ecda;
   --adm-danger: #a23b3b;
   --adm-danger-bg: #f4e2e0;
@@ -94,28 +125,12 @@
   line-height: 1.55;
 }
 
-@media (prefers-color-scheme: dark) {
-  .adm[data-adm-theme="auto"] {
-    --adm-ink: #ece7dd;
-    --adm-ink-soft: #b7b1a5;
-    /* UI-2: #837d72 daba ~4:1 sobre superficie oscura -> ~5.9:1 (AA). */
-    --adm-ink-faint: #9a9488;
-    --adm-cream: #16140f;
-    --adm-cream-soft: #1d1a14;
-    --adm-surface: #1b1813;
-    --adm-surface-2: #211d16;
-    --adm-line: rgba(246, 242, 234, 0.12);
-    --adm-line-strong: rgba(246, 242, 234, 0.24);
-    --adm-ok-bg: #1e2b22;
-    --adm-warn-bg: #2c2413;
-    --adm-danger-bg: #2e1b19;
-    --adm-info-bg: #211d2c;
-    --adm-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
-    /* UI-2: foco claro sobre fondos oscuros (~8.9:1). */
-    --adm-focus: #a9b8e0;
-    --adm-focus-soft: rgba(169, 184, 224, 0.32);
-  }
-}
+/* ETAPA A — El panel es LIGHT ONLY. Se retiro el bloque
+   `@media (prefers-color-scheme: dark)` que reconvertia el administrador en una
+   interfaz casi negra (fondo #16140f, cards #1b1813 — separacion casi nula)
+   siguiendo el tema del sistema operativo. Ya NO hay tema oscuro ni toggle.
+   El host fija `data-adm-theme="light"` (admin-layout.ts). El sidebar conserva
+   su tinta profunda propia via --adm-nav-* (decision de diseno, no es "dark mode"). */
 
 /* ---------------------------------------------------------------- reset scope */
 .adm *,
@@ -179,7 +194,11 @@ adm-layout {
 
 .adm-shell__content {
   flex: 1;
-  padding: 28px;
+  /* ETAPA B — más aire arriba y, sobre todo, abajo (la última tabla / paginación
+     ya no queda pegada al borde del viewport). max-width 1280 se MANTIENE: es un
+     techo de densidad deliberado — la tabla más ancha (Productos, 8 col.) entra
+     sin scroll y el texto largo no supera una medida legible. */
+  padding: 30px 32px 48px;
   width: 100%;
   max-width: var(--adm-content-max);
   margin: 0 auto;
@@ -190,7 +209,7 @@ adm-layout {
   .adm-shell[data-collapsed="true"] {
     grid-template-columns: 1fr;
   }
-  .adm-shell__content { padding: 20px 16px; }
+  .adm-shell__content { padding: 22px 16px 40px; }
 }
 
 /* -------------------------------------------------------------------- sidebar */
@@ -238,6 +257,7 @@ adm-layout {
   padding: 18px 12px 6px;
 }
 .adm-nav-item {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 11px;
@@ -252,14 +272,26 @@ adm-layout {
   white-space: nowrap;
 }
 .adm-nav-item:hover {
-  background: var(--adm-nav-active);
+  background: var(--adm-nav-hover);
   color: var(--adm-nav-fg-strong);
 }
 .adm-nav-item.is-active {
-  background: rgba(246, 242, 234, 0.14);
+  background: var(--adm-nav-active);
   color: var(--adm-nav-fg-strong);
   font-weight: 600;
-  box-shadow: inset 3px 0 0 var(--adm-accent);
+}
+/* ETAPA B — indicador lateral como pseudo-elemento: barra nítida de acento, sin
+   recorte por el border-radius (antes `inset box-shadow` se redondeaba). El
+   estado activo NO depende solo del color: fondo + peso 600 + color fuerte + barra. */
+.adm-nav-item.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--adm-accent);
 }
 .adm-nav-item__icon {
   width: 18px;
@@ -270,21 +302,56 @@ adm-layout {
   justify-content: center;
 }
 .adm-nav-item__icon svg { width: 100%; height: 100%; }
-.adm-sidebar[data-collapsed="true"] .adm-nav-item__label,
-.adm-sidebar[data-collapsed="true"] .adm-sidebar__section,
-.adm-sidebar[data-collapsed="true"] .adm-sidebar__brand small { display: none; }
+
+/* ETAPA B — el estado "colapsado" es SOLO de escritorio. En <=1024px el sidebar
+   es un drawer de ancho completo (256px): si `data-collapsed` quedó activo desde
+   el escritorio, sus reglas (labels ocultos, iconos centrados) romperían el
+   drawer. Todo el modo colapsado se limita a `min-width: 1025px`. */
+@media (min-width: 1025px) {
+  .adm-sidebar[data-collapsed="true"] .adm-nav-item__label,
+  .adm-sidebar[data-collapsed="true"] .adm-sidebar__brand small { display: none; }
+
+  /* Sidebar colapsado (68px): iconos centrados en el raíl (antes quedaban
+     descentrados por el padding lateral del item y el gap del label). */
+  .adm-sidebar[data-collapsed="true"] .adm-sidebar__brand {
+    justify-content: center;
+    padding: 0;
+    letter-spacing: 2px;
+  }
+  .adm-sidebar[data-collapsed="true"] .adm-nav-item {
+    justify-content: center;
+    gap: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  /* Las etiquetas de sección desaparecen al colapsar; se conservan como hairline
+     para no perder la agrupación visual entre bloques de navegación. */
+  .adm-sidebar[data-collapsed="true"] .adm-sidebar__section {
+    padding: 10px 0 0;
+    margin: 8px 14px 0;
+    border-top: 1px solid var(--adm-nav-line);
+    font-size: 0;
+    line-height: 0;
+    overflow: hidden;
+  }
+  .adm-sidebar[data-collapsed="true"] .adm-sidebar__nav > .adm-sidebar__section:first-child {
+    border-top: 0;
+    margin-top: 0;
+    padding-top: 0;
+  }
+}
 
 /* --------------------------------------------------------------------- topbar */
 .adm-topbar {
   height: var(--adm-topbar-h);
   background: var(--adm-surface);
-  /* UI-2: separación visible del contenido (antes casi imperceptible). Borde
-     más marcado + sombra de una sola capa, muy discreta. */
+  /* ETAPA B — el topbar debe sentirse ligero y no competir con el contenido.
+     El borde sólido `--adm-line-strong` (#b8b1a1, ~2.1:1) YA separa lo suficiente;
+     se retira la sombra (la separación viene del borde, no de la elevación). */
   border-bottom: 1px solid var(--adm-line-strong);
-  box-shadow: 0 1px 3px rgba(20, 18, 15, 0.06);
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   padding: 0 20px;
   position: sticky;
   top: 0;
@@ -293,13 +360,19 @@ adm-layout {
 .adm-topbar__spacer { flex: 1; }
 
 /* UI-2: identidad del panel en la zona izquierda (marca + contexto).
-   Texto estático, sin datos derivados ni APIs nuevas. */
+   Texto estático, sin datos derivados ni APIs nuevas.
+   ETAPA B — en escritorio el sidebar YA muestra la marca DUSCK (incluso
+   colapsado); repetirla en el topbar es ruido. Solo se muestra <=1024px,
+   donde el sidebar es un drawer oculto. */
 .adm-topbar__brand {
   display: inline-flex;
   align-items: baseline;
   gap: 8px;
   flex-shrink: 0;
   user-select: none;
+}
+@media (min-width: 1025px) {
+  .adm-topbar__brand { display: none; }
 }
 .adm-topbar__brand-name {
   font-family: var(--adm-font-head);
@@ -326,10 +399,30 @@ adm-layout {
   background: transparent;
   color: var(--adm-ink-soft);
   cursor: pointer;
-  transition: background var(--adm-transition), border-color var(--adm-transition);
+  transition: background var(--adm-transition), border-color var(--adm-transition),
+    color var(--adm-transition), box-shadow var(--adm-transition);
 }
-.adm-icon-btn:hover { background: var(--adm-surface-2); border-color: var(--adm-line); }
+.adm-icon-btn:hover:not(:disabled) { background: var(--adm-surface-2); border-color: var(--adm-line); }
+.adm-icon-btn:active:not(:disabled) {
+  background: var(--adm-cream-soft);
+  border-color: var(--adm-line-strong);
+}
+.adm-icon-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .adm-icon-btn svg { width: 18px; height: 18px; }
+
+/* ETAPA C — ICON tier, variante destructiva. En reposo es NEUTRAL (idéntico al
+   icon-btn normal): la señal de peligro aparece solo al interactuar, no es un
+   botón permanentemente rojo. Se cablea a los botones de "Eliminar" en su etapa
+   de página; aquí solo se define. */
+.adm-icon-btn--danger:hover:not(:disabled) {
+  background: var(--adm-danger-bg);
+  border-color: transparent;
+  color: var(--adm-danger);
+}
+.adm-icon-btn--danger:active:not(:disabled) {
+  background: #efd6d3;
+  color: #862f2f;
+}
 
 /* UI-2: la búsqueda global no tiene backend. Deja de ser un <input disabled>
    (control roto anunciado por el lector de pantalla) y pasa a ser un
@@ -338,14 +431,16 @@ adm-layout {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 38px;
+  height: 36px;
   padding: 0 12px;
-  border: 1px solid var(--adm-line);
+  /* ETAPA B — sin borde: es un indicador de función pendiente, no un campo.
+     Retrocede visualmente para aligerar el topbar. */
+  border: 0;
   border-radius: var(--adm-radius);
   background: var(--adm-surface-2);
   color: var(--adm-ink-faint);
   min-width: 200px;
-  max-width: 360px;
+  max-width: 320px;
   flex: 1;
   cursor: default;
   user-select: none;
@@ -428,19 +523,30 @@ adm-layout {
 .adm-popover__empty { padding: 20px 12px; text-align: center; color: var(--adm-ink-faint); font-size: var(--adm-fs-xs); }
 
 /* --------------------------------------------------------------- breadcrumbs */
+/* ETAPA B — jerarquía: metadato de ubicación, claramente por debajo del H1.
+   Más cerca del título que describe (14px de aire, no 18) y con el segmento
+   actual marcado. El acento SOLO aparece al interactuar (hover de enlace). */
 .adm-breadcrumbs {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 7px;
   font-size: var(--adm-fs-xs);
   color: var(--adm-ink-faint);
   letter-spacing: 0.2px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
-.adm-breadcrumbs a:hover { color: var(--adm-accent); }
-.adm-breadcrumbs__sep { opacity: 0.6; }
-.adm-breadcrumbs__current { color: var(--adm-ink-soft); }
+.adm-breadcrumbs a {
+  color: var(--adm-ink-faint);
+  transition: color var(--adm-transition);
+}
+.adm-breadcrumbs a:hover {
+  color: var(--adm-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.adm-breadcrumbs__sep { color: var(--adm-line-strong); opacity: 1; }
+.adm-breadcrumbs__current { color: var(--adm-ink-soft); font-weight: 600; }
 
 /* --------------------------------------------------------------- page header */
 .adm-page-header {
@@ -449,14 +555,19 @@ adm-layout {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 22px;
+  /* ETAPA B — más separación entre el bloque de título y el contenido; el rastro
+     [breadcrumb + H1 + subtítulo] se lee como una unidad y luego respira. */
+  margin-bottom: 28px;
 }
 .adm-page-header__titles { min-width: 0; }
 .adm-page-header__subtitle {
   color: var(--adm-ink-faint);
   font-size: var(--adm-fs-sm);
   line-height: 1.5;
-  margin-top: 5px;
+  margin-top: 6px;
+  /* ETAPA B — un subtítulo largo se corta a una medida legible en vez de
+     estirarse a todo el ancho del contenido. */
+  max-width: 68ch;
 }
 .adm-page-header__actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
@@ -476,7 +587,28 @@ adm-layout {
   justify-content: space-between;
   gap: 12px;
 }
+/* ETAPA F — pie de card / formulario. Mismo layout que `__header` pero con el
+   borde arriba. Retira el patrón repetido
+   `class="adm-card__header" style="border-top:…;border-bottom:0"`. */
+.adm-card__footer {
+  padding: 14px 18px;
+  border-top: 1px solid var(--adm-line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 
+/* =============================================================================
+   ETAPA C — jerarquía de botones. Una sola clase base `.adm-btn` + modificadores:
+     (sin modificador) = PRIMARY   -> acento #37624e, texto blanco (6.95:1)
+     .adm-btn--secondary          -> superficie clara + borde visible, texto tinta
+     .adm-btn--ghost              -> sin relleno, borde, para acción secundaria
+     .adm-btn--danger             -> rojo sobrio, texto blanco (6.51:1)
+   `.adm-icon-btn` es el tier ICON (más abajo).
+   Estados hover/active guardados con `:not(:disabled)` para que un botón
+   deshabilitado no dé feedback. NINGÚN binding, evento ni handler cambia. */
 .adm-btn {
   display: inline-flex;
   align-items: center;
@@ -485,29 +617,75 @@ adm-layout {
   height: 40px;
   padding: 0 18px;
   border-radius: var(--adm-radius);
-  border: 1px solid var(--adm-ink);
-  background: var(--adm-ink);
-  color: var(--adm-cream);
+  border: 1px solid var(--adm-accent);
+  background: var(--adm-accent);
+  color: var(--adm-accent-contrast);
   font: inherit;
-  /* UI-2: sin uppercase (etiquetas largas como "Volver a borrador para editar")
-     ni tracking excesivo; el peso 600 mantiene la presencia del botón. */
+  /* sin uppercase (etiquetas largas como "Volver a borrador para editar") ni
+     tracking excesivo; el peso 600 mantiene la presencia del botón. */
   font-size: var(--adm-fs-sm);
   font-weight: 600;
   letter-spacing: 0.2px;
   cursor: pointer;
   transition: background var(--adm-transition), color var(--adm-transition),
-    border-color var(--adm-transition), opacity var(--adm-transition);
+    border-color var(--adm-transition), box-shadow var(--adm-transition),
+    opacity var(--adm-transition);
 }
-.adm-btn:hover { background: #2c2822; border-color: #2c2822; }
-.adm-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+/* PRIMARY — hover ligeramente más profundo, active claramente perceptible
+   (color + hundido sutil, sin transform). Derivados de #37624e. */
+.adm-btn:hover:not(:disabled) { background: #2e5341; border-color: #2e5341; }
+.adm-btn:active:not(:disabled) {
+  background: #284838;
+  border-color: #284838;
+  box-shadow: inset 0 1px 2px rgba(20, 18, 15, 0.25);
+}
+.adm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* SECONDARY — superficie clara, borde visible, texto oscuro. No compite con
+   PRIMARY (sin relleno de color). */
+.adm-btn--secondary {
+  background: var(--adm-surface);
+  color: var(--adm-ink);
+  border-color: var(--adm-btn-line);
+}
+.adm-btn--secondary:hover:not(:disabled) {
+  background: var(--adm-surface-2);
+  border-color: var(--adm-ink-faint);
+}
+.adm-btn--secondary:active:not(:disabled) {
+  background: var(--adm-cream-soft);
+  box-shadow: inset 0 1px 2px rgba(20, 18, 15, 0.1);
+}
+
+/* GHOST — sin relleno en reposo; hover visible (no se confunde con disabled,
+   que va con opacidad + cursor not-allowed). */
 .adm-btn--ghost {
   background: transparent;
   color: var(--adm-ink);
-  border-color: var(--adm-line-strong);
+  border-color: var(--adm-btn-line);
 }
-.adm-btn--ghost:hover { background: var(--adm-surface-2); border-color: var(--adm-ink); }
-.adm-btn--danger { background: var(--adm-danger); border-color: var(--adm-danger); color: #fff; }
-.adm-btn--danger:hover { background: #862f2f; border-color: #862f2f; }
+.adm-btn--ghost:hover:not(:disabled) {
+  background: var(--adm-surface-2);
+  border-color: var(--adm-ink-faint);
+}
+.adm-btn--ghost:active:not(:disabled) {
+  background: var(--adm-cream-soft);
+  box-shadow: inset 0 1px 2px rgba(20, 18, 15, 0.1);
+}
+
+/* DANGER — rojo sobrio (#a23b3b), solo acciones destructivas. */
+.adm-btn--danger {
+  background: var(--adm-danger);
+  border-color: var(--adm-danger);
+  color: #fff;
+}
+.adm-btn--danger:hover:not(:disabled) { background: #862f2f; border-color: #862f2f; }
+.adm-btn--danger:active:not(:disabled) {
+  background: #742929;
+  border-color: #742929;
+  box-shadow: inset 0 1px 2px rgba(20, 18, 15, 0.25);
+}
+
 .adm-btn--sm { height: 34px; padding: 0 12px; font-size: var(--adm-fs-xs); }
 .adm-btn--block { width: 100%; }
 
@@ -551,6 +729,16 @@ adm-layout {
 .adm-textarea:disabled { background: var(--adm-surface-2); color: var(--adm-ink-faint); cursor: not-allowed; }
 .adm-textarea { min-height: 90px; resize: vertical; }
 
+/* ETAPA A — contraste explicito de placeholders. Antes heredaban el color del
+   navegador (gris medio, ~3:1 en varios UA) y Firefox ademas les aplica
+   opacity: 0.54. Se fija a --adm-ink-faint (6.2:1 sobre --adm-surface, AA) y
+   opacity: 1. Namespaced en `.adm`: no toca la tienda publica. */
+.adm-input::placeholder,
+.adm-textarea::placeholder {
+  color: var(--adm-ink-faint);
+  opacity: 1;
+}
+
 /* switch */
 .adm-switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; }
 .adm-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
@@ -579,24 +767,28 @@ adm-layout {
 .adm-switch input:checked + .adm-switch__track::after { transform: translateX(18px); }
 .adm-switch input:focus-visible + .adm-switch__track { box-shadow: 0 0 0 3px var(--adm-focus-soft); }
 
-/* badges */
+/* badges — ETAPA C: cápsula más ligera («● Etiqueta», no bloque de color).
+   Padding e interletrado reducidos; el punto lleva el peso visual del estado.
+   El color NUNCA es el único indicador: el texto (Activo / Agotado / Pendiente…)
+   siempre acompaña, y `--neutral` además se distingue por su borde. */
 .adm-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
+  gap: 5px;
+  padding: 2px 9px;
   border-radius: 999px;
   font-size: var(--adm-fs-2xs);
   font-weight: 600;
-  letter-spacing: 0.3px;
+  line-height: 1.4;
+  letter-spacing: 0.2px;
   border: 1px solid transparent;
 }
 .adm-badge--ok { background: var(--adm-ok-bg); color: var(--adm-ok); }
 .adm-badge--warn { background: var(--adm-warn-bg); color: var(--adm-warn); }
 .adm-badge--danger { background: var(--adm-danger-bg); color: var(--adm-danger); }
 .adm-badge--info { background: var(--adm-info-bg); color: var(--adm-info); }
-.adm-badge--neutral { background: var(--adm-surface-2); color: var(--adm-ink-soft); border-color: var(--adm-line); }
-.adm-badge__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.adm-badge--neutral { background: var(--adm-surface-2); color: var(--adm-ink-soft); border-color: var(--adm-line-strong); }
+.adm-badge__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 
 /* ------------------------------------------------------------------- tables */
 .adm-table-wrap {
@@ -606,7 +798,17 @@ adm-layout {
   border-radius: var(--adm-radius-lg);
   background: var(--adm-surface);
 }
-.adm-table { width: 100%; border-collapse: collapse; font-size: var(--adm-fs-sm); min-width: 0; }
+/* ETAPA H — piso de ancho. La etapa A fijó `min-width: 0` para neutralizar el
+   skin legacy de styles.css (`@media(max-width:768px){table{min-width:900px}}`),
+   pero eso también anuló cualquier scroll horizontal: en tablet/móvil las tablas
+   densas (Productos/Inventario/Pedidos/Usuarios, 8–9 col.) aplastaban la columna
+   de nombre a 3–4 líneas en lugar de desplazarse. Se restablece ese piso de
+   900px — ahora sí como valor del DS, dentro de `.adm-table-wrap` (scroll
+   contenido, sin desbordar el viewport). En escritorio (contenido ≥ ~940px)
+   manda `100%` y nada cambia. Tablas simples (Categorías, detalle de pedido)
+   desplazan algo antes de lo estrictamente necesario: es un compromiso
+   deliberado por coherencia (sección 8: "scroll horizontal controlado"). */
+.adm-table { width: 100%; border-collapse: collapse; font-size: var(--adm-fs-sm); min-width: 900px; }
 /* Defensa contra el skin de tabla legacy de styles.css (`td,th{border}`,
    `tr:nth-child(even){background:#ddd}`, `@media table{min-width:900px}`). */
 .adm-table th,
@@ -666,17 +868,27 @@ adm-layout {
   min-width: 36px;
   height: 36px;
   padding: 0 8px;
-  border: 1px solid var(--adm-line);
+  border: 1px solid var(--adm-btn-line);
   border-radius: var(--adm-radius);
   background: var(--adm-surface);
   color: var(--adm-ink-soft);
   cursor: pointer;
   font: inherit;
   font-size: var(--adm-fs-xs);
+  transition: background var(--adm-transition), color var(--adm-transition),
+    border-color var(--adm-transition), box-shadow var(--adm-transition);
 }
 .adm-pagination__btn:hover:not(:disabled) { border-color: var(--adm-ink); color: var(--adm-ink); }
-.adm-pagination__btn.is-active { background: var(--adm-ink); color: var(--adm-cream); border-color: var(--adm-ink); }
-.adm-pagination__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.adm-pagination__btn:active:not(:disabled) { background: var(--adm-surface-2); }
+/* ETAPA C — la página activa usa el mismo lenguaje de "seleccionado" que el
+   ítem de nav activo: acento #37624e + texto blanco (6.95:1), no negro. */
+.adm-pagination__btn.is-active {
+  background: var(--adm-accent);
+  color: var(--adm-accent-contrast);
+  border-color: var(--adm-accent);
+  font-weight: 600;
+}
+.adm-pagination__btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* ------------------------------------------------------------------- states */
 .adm-state {
@@ -721,7 +933,11 @@ adm-layout {
 /* ------------------------------------------------------------------ kpi grid */
 .adm-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  /* ETAPA H — `min(200px, 100%)`: cuando el contenedor es más estrecho que la
+     pista mínima (p. ej. dentro de una card con padding en móvil ≤360), la pista
+     colapsa a 100% en lugar de desbordar el contenedor y arrastrar scroll
+     horizontal a toda la página. Sin cambio visible ≥ 360 fuera de ese caso. */
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
   gap: var(--adm-gap);
 }
 .adm-kpi {
@@ -755,7 +971,11 @@ adm-layout {
 .adm-kpi__compare { color: var(--adm-ink-faint); }
 
 /* --------------------------------------------------------------------- misc */
-.adm-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--adm-gap); }
+/* ETAPA H — `min(320px, 100%)` (ver nota en `.adm-kpi-grid`): evita que la pista
+   de 320px desborde cuando el grid vive dentro de un `.adm-card__body` /
+   `.adm-card--nested` con padding en viewports ≤360 (product-form). Arriba de ese
+   umbral el comportamiento de 1 → 2 columnas no cambia. */
+.adm-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: var(--adm-gap); }
 .adm-stack { display: flex; flex-direction: column; gap: var(--adm-gap); }
 .adm-inline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .adm-muted { color: var(--adm-ink-faint); }
@@ -766,17 +986,203 @@ adm-layout {
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
+/* =============================================================================
+   ETAPA D — utilidades introducidas para Pedidos (genéricas, reutilizables en
+   las siguientes etapas). No sustituyen nada; solo retiran estilos inline
+   repetidos y dan a los enlaces de texto y a las fichas de datos un tratamiento
+   consistente con el Design System.
+   ========================================================================== */
+
+/* Enlace de texto en línea (p. ej. el número de pedido en la tabla). Tinta en
+   reposo con subrayado tenue → acento al interactuar. */
+.adm-link {
+  color: var(--adm-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--adm-line-strong);
+  text-underline-offset: 3px;
+  transition: color var(--adm-transition), text-decoration-color var(--adm-transition);
+}
+.adm-link:hover { color: var(--adm-accent); text-decoration-color: currentColor; }
+
+/* Ficha de datos clave/valor (reemplaza `.adm-inline` + `style="justify-content:space-between"`
+   repetido en el detalle del pedido). */
+.adm-dl { display: flex; flex-direction: column; gap: 10px; margin: 0; }
+.adm-dl__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+}
+.adm-dl__row > dt { color: var(--adm-ink-faint); flex-shrink: 0; }
+.adm-dl__row > dd { margin: 0; text-align: right; min-width: 0; }
+.adm-dl__row--total {
+  margin-top: 2px;
+  padding-top: 10px;
+  border-top: 1px solid var(--adm-line);
+}
+.adm-dl__row--total > dt { color: var(--adm-ink); font-weight: 600; }
+.adm-dl__row--total > dd { font-weight: 600; font-size: var(--adm-fs-lg); }
+
+/* Micro-texto documental (avisos "esta fase no incluye…"). Reemplaza
+   `class="adm-muted" style="font-size:12.5px"`. */
+.adm-note { margin: 0; font-size: var(--adm-fs-xs); line-height: 1.55; color: var(--adm-ink-faint); }
+
+/* Barra de filtros con etiquetas visibles: los `.adm-field` apilan label + control
+   y se alinean por abajo, de modo que "Limpiar" queda a ras de los controles.
+   Herramienta de operaciones, no controles amontonados. */
+.adm-filter-bar--labeled { align-items: flex-end; row-gap: 14px; }
+.adm-filter-bar--labeled .adm-field { min-width: 150px; }
+.adm-filter-bar--labeled .adm-field--grow { flex: 1 1 200px; }
+
+/* Banner de estado del pedido (order-detail): responde de un vistazo "¿qué pasa
+   con este pedido?". Protagonismo por aislamiento + un punto de tamaño, NO por
+   una cápsula gigante. Pago y fecha quedan como metadato secundario a la derecha. */
+.adm-order-status { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
+.adm-order-status__eyebrow {
+  flex-basis: 100%;
+  font-size: var(--adm-fs-2xs);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--adm-ink-faint);
+}
+.adm-order-status__primary .adm-badge { font-size: var(--adm-fs-xs); padding: 4px 12px; }
+.adm-order-status__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-left: auto;
+  font-size: var(--adm-fs-xs);
+  color: var(--adm-ink-faint);
+}
+/* en móvil el metadato deja de empujarse a la derecha y sigue el flujo. */
+@media (max-width: 560px) {
+  .adm-order-status__meta { margin-left: 0; }
+}
+
+/* =============================================================================
+   ETAPA E — utilidades introducidas para Inventario (genéricas, reutilizables).
+   ========================================================================== */
+
+/* Panel de aviso contextual: información operacional que acompaña a una pantalla,
+   NO un error (sin rojo). Barra izquierda de acento `--adm-info` + icono; el
+   cuerpo va en `--adm-ink-soft` (más legible que `--adm-muted` para un párrafo). */
+.adm-callout {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--adm-line);
+  border-left: 3px solid var(--adm-info);
+  border-radius: var(--adm-radius);
+  background: var(--adm-surface-2);
+  color: var(--adm-ink-soft);
+  font-size: var(--adm-fs-sm);
+  line-height: 1.55;
+}
+.adm-callout__icon { flex-shrink: 0; color: var(--adm-info); margin-top: 1px; }
+.adm-callout p { margin: 0; }
+.adm-callout code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--adm-cream-soft);
+  color: var(--adm-ink);
+}
+
+/* Indicador semántico opcional en el label de un KPI: un punto pequeño, NUNCA
+   un color de fondo ni el número coloreado. El número sigue siendo el
+   protagonista (--adm-ink); el punto es el matiz de estado. */
+.adm-kpi__ind { display: inline-flex; align-items: center; gap: 7px; }
+.adm-kpi__ind::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--adm-ink-faint);
+}
+.adm-kpi__ind--ok::before { background: var(--adm-ok); }
+.adm-kpi__ind--warn::before { background: var(--adm-warn); }
+.adm-kpi__ind--danger::before { background: var(--adm-danger); }
+
+/* Rejilla de KPI compacta para filas de indicadores numéricos (4+ tarjetas
+   pequeñas): en móvil caben 2 por fila en vez de 1. */
+.adm-kpi-grid--compact { grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); }
+
+/* Miniatura cuadrada (producto) — variante de `.adm-avatar` (que es circular).
+   Retira el `style="border-radius:6px;background:…"` repetido en las tablas. */
+.adm-avatar--square { border-radius: 6px; background: var(--adm-surface-2); }
+
+/* Texto micro (sub-líneas tipo slug bajo un nombre). */
+.adm-text-2xs { font-size: var(--adm-fs-2xs); }
+
+/* =============================================================================
+   ETAPA G — utilidades introducidas para Productos (genéricas, reutilizables).
+   ========================================================================== */
+
+/* Variantes de tono del callout. El `.adm-callout` base es info (índigo); estas
+   cubren mensajes de severidad distinta — un conflicto de guardado (warn), un
+   motivo de rechazo (danger). NO se usa danger para info. */
+.adm-callout--warn {
+  border-left-color: var(--adm-warn);
+  background: var(--adm-warn-bg);
+}
+.adm-callout--warn .adm-callout__icon { color: var(--adm-warn); }
+.adm-callout--danger {
+  border-left-color: var(--adm-danger);
+  background: var(--adm-danger-bg);
+}
+.adm-callout--danger .adm-callout__icon { color: var(--adm-danger); }
+
+/* Card anidada: una `.adm-card` dentro de otra (grupo de imágenes, variante,
+   grupo de acciones de revisión). Se subordina visualmente al contenedor —
+   superficie secundaria, radio pequeño, sin sombra — para que no compita ni
+   parezca "una tarjeta flotante más". */
+.adm-card--nested {
+  background: var(--adm-surface-2);
+  border-radius: var(--adm-radius);
+  box-shadow: none;
+}
+
 /* UI-2: foco propio (--adm-focus), consistente, visible en claro y oscuro y
    con contraste >=3:1 (el acento daba ~2.3:1). El anillo aparece como forma,
-   no solo como cambio de color. */
+   no solo como cambio de color. `--adm-focus` (índigo #4b3f72) se MANTIENE: no
+   se sustituye por el verde de acento (Etapa C). */
 .adm :focus-visible {
   outline: 2px solid var(--adm-focus);
   outline-offset: 2px;
   border-radius: 2px;
 }
+/* ETAPA C — refuerzo de foco para los controles interactivos compartidos:
+   al anillo se le suma un halo suave (mismo tratamiento que ya tienen los
+   inputs en `:focus`), para que el foco por teclado sea inequívoco también
+   sobre botones y icon-buttons. Sigue siendo `--adm-focus`, no el acento. */
+.adm-btn:focus-visible,
+.adm-btn--secondary:focus-visible,
+.adm-btn--ghost:focus-visible,
+.adm-btn--danger:focus-visible,
+.adm-icon-btn:focus-visible,
+.adm-pagination__btn:focus-visible {
+  box-shadow: 0 0 0 3px var(--adm-focus-soft);
+}
 
 /* mobile sidebar drawer */
-.adm-sidebar__scrim { display: none; }
+/* ETAPA B — transición coherente drawer + scrim: el panel entra deslizando y el
+   velo hace fundido (antes aparecía de golpe con `display`). `visibility` evita
+   que el velo capture clics cuando está oculto. */
+.adm-sidebar__scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 18, 15, 0.5);
+  z-index: 70;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--adm-transition), visibility var(--adm-transition);
+}
+@media (min-width: 1025px) {
+  .adm-sidebar__scrim { display: none; }
+}
 @media (max-width: 1024px) {
   .adm-sidebar {
     position: fixed;
@@ -789,15 +1195,16 @@ adm-layout {
   }
   .adm-shell[data-mobile-open="true"] .adm-sidebar { transform: translateX(0); }
   .adm-shell[data-mobile-open="true"] .adm-sidebar__scrim {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(20, 18, 15, 0.5);
-    z-index: 70;
+    opacity: 1;
+    visibility: visible;
   }
 }
 .adm-topbar__burger { display: none; }
 @media (max-width: 1024px) { .adm-topbar__burger { display: inline-flex; } }
+/* ETAPA B — el botón "colapsar menú" no hace nada <=1024px (el shell ya es de
+   una columna y el sidebar es drawer); se oculta para no dejar un control inerte
+   junto al hamburger. */
+@media (max-width: 1024px) { .adm-topbar__collapse { display: none; } }
 
 /* =============================================================================
    UI-2 — objetivos táctiles en móvil (40px) sin comprometer la densidad en
@@ -818,7 +1225,8 @@ adm-layout {
   --sw-surface: #fffdf8;
   --sw-ink: #14120f;
   --sw-ink-soft: #4a4640;
-  --sw-line: rgba(20, 18, 15, 0.24);
+  /* ETAPA A — borde solido, espejo de --adm-line-strong (panel light-only). */
+  --sw-line: #b8b1a1;
   --sw-focus: #4b3f72;
   background: var(--sw-surface);
   color: var(--sw-ink);
@@ -863,17 +1271,8 @@ adm-layout {
 .adm-swal .swal2-confirm:focus-visible,
 .adm-swal .swal2-cancel:focus-visible { outline: 2px solid var(--sw-focus); outline-offset: 2px; }
 
-@media (prefers-color-scheme: dark) {
-  .adm-swal.swal2-popup {
-    --sw-surface: #1b1813;
-    --sw-ink: #ece7dd;
-    --sw-ink-soft: #b7b1a5;
-    --sw-line: rgba(246, 242, 234, 0.24);
-    --sw-focus: #a9b8e0;
-  }
-  .adm-swal .swal2-input:focus,
-  .adm-swal .swal2-textarea:focus { box-shadow: 0 0 0 3px rgba(169, 184, 224, 0.32); }
-}
+/* ETAPA A — retirado el override oscuro de SweetAlert: el panel es light-only,
+   asi que el popup permanece claro aunque el SO este en modo oscuro. */
 
 @media (prefers-reduced-motion: reduce) {
   .adm-swal .swal2-confirm,

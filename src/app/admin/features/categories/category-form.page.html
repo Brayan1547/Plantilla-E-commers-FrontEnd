@@ -1,6 +1,6 @@
-<adm-page-header [title]="title()" subtitle="Campos soportados por la API: nombre, slug, descripción y estado.">
+<adm-page-header [title]="title()" subtitle="Nombre, slug, descripción y estado de publicación.">
   <a actions class="adm-btn adm-btn--ghost adm-btn--sm" routerLink="/admin/categories">
-    <adm-icon name="chevron-left" [size]="14" /> Cancelar
+    <adm-icon name="chevron-left" [size]="14" /> Volver
   </a>
 </adm-page-header>
 
@@ -12,8 +12,8 @@
     <div class="adm-card"><adm-error-state [message]="errorMsg()" (retry)="retry()" /></div>
   }
   @default {
-    <form class="adm-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <div class="adm-card__body" style="max-width:560px">
+    <form class="adm-card" style="max-width:600px" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="adm-card__body">
         <div class="adm-field">
           <label class="adm-field__label" for="cf-name">Nombre</label>
           <input id="cf-name" class="adm-input" type="text" formControlName="name"
@@ -64,8 +64,8 @@
         </div>
       </div>
 
-      <div class="adm-card__header" style="border-top:1px solid var(--adm-line);border-bottom:0">
-        <span class="adm-muted" style="font-size:12px">
+      <div class="adm-card__footer">
+        <span class="adm-note">
           @if (form.dirty && !submitting()) { Cambios sin guardar }
         </span>
         <div class="adm-inline">

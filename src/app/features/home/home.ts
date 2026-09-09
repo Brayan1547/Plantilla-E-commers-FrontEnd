@@ -4,7 +4,8 @@ import { RouterLink } from '@angular/router';
 import { HttpProduct } from '../../core/services/http-product';
 import { HttpCart } from '../../core/services/http-cart';
 
-import { UiModal } from '../../core/services/ui-modal'; // nuevo: para pedir login si no hay sesión
+import { GuestCart } from '../../core/services/guest-cart'; // UI-4B: carrito de invitado (sin login)
+import { Toast } from '../../core/services/toast'; // feedback al agregar al carrito
 import { HttpAuth } from '../../core/services/http-auth'; // nuevo: saber si hay usuario logueado
 import type { PublicProduct, PublicProductImage } from '../../core/models/public-product.model';
 
@@ -28,7 +29,8 @@ export class Home {
   private httpProduct = inject(HttpProduct);
   private httpCart = inject(HttpCart); //  para agregar productos al carrito
 
-  private uiModal = inject(UiModal);
+  private guestCart = inject(GuestCart);
+  private toast = inject(Toast);
   httpAuth = inject(HttpAuth); // público: el html necesita leer el rol directo
 
   protected readonly state = signal<HomeState>('loading');
@@ -97,14 +99,19 @@ export class Home {
     event.preventDefault();   // evita que el clic dispare el routerLink de la card
     event.stopPropagation();
 
-      if (!this.httpAuth.user) {
-      this.uiModal.open('login'); // nuevo: pide iniciar sesión antes de comprar
+    // UI-4B — invitado: carrito local (GuestCart), NUNCA se fuerza login. Es el
+    // mismo flujo de primera clase que la ficha de producto
+    // (`product-disign.ts#addToCart`), el drawer y el checkout. El contrato del
+    // carrito sigue siendo `{ productId, quantity }`.
+    if (!this.httpAuth.user) {
+      this.guestCart.add(productId, 1);
+      this.toast.show('Producto agregado al carrito');
       return;
     }
 
     this.httpCart.updateCart(productId, 1).subscribe({
-      next: () => console.log('Producto agregado al carrito'),
-      error: (err) => console.error('Error al agregar al carrito', err)
+      next: () => this.toast.show('Producto agregado al carrito'),
+      error: () => this.toast.show('No se pudo agregar al carrito', 'error'),
     });
   }
 

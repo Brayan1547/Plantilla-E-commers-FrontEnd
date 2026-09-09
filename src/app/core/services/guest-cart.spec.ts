@@ -167,4 +167,86 @@ describe('GuestCart', () => {
     expect(svc.count()).toBe(2); // estado en memoria
     expect(localStorage.getItem(KEY)).toBeNull(); // no se persistió
   });
+
+  // ---- TALLAS — identidad (productId + size) ------------------------------
+
+  it('TALLAS · add con size persiste {productId, quantity, size}', () => {
+    const { svc, http } = make();
+    svc.add(ID_A, 2, 'M');
+    hydrate(http, { [ID_A]: publicProduct(ID_A) });
+    expect(svc.lines()).toEqual([{ productId: ID_A, quantity: 2, size: 'M' }]);
+    expect(JSON.parse(localStorage.getItem(KEY)!).items).toEqual([{ productId: ID_A, quantity: 2, size: 'M' }]);
+  });
+
+  it('TALLAS · M y L del mismo producto son DOS líneas separadas (no se fusionan)', () => {
+    const { svc, http } = make();
+    svc.add(ID_A, 2, 'M');
+    svc.add(ID_A, 1, 'L');
+    hydrate(http, { [ID_A]: publicProduct(ID_A) }); // una sola hidratación (dedupe por productId)
+    expect(svc.lines()).toEqual([
+      { productId: ID_A, quantity: 2, size: 'M' },
+      { productId: ID_A, quantity: 1, size: 'L' },
+    ]);
+    expect(svc.count()).toBe(3);
+  });
+
+  it('TALLAS · incrementar M no toca L; eliminar M no elimina L', () => {
+    const { svc, http } = make();
+    svc.add(ID_A, 1, 'M');
+    svc.add(ID_A, 1, 'L');
+    hydrate(http, { [ID_A]: publicProduct(ID_A) });
+
+    svc.increment(ID_A, 'M');
+    expect(svc.lines()).toEqual([
+      { productId: ID_A, quantity: 2, size: 'M' },
+      { productId: ID_A, quantity: 1, size: 'L' },
+    ]);
+
+    svc.remove(ID_A, 'M');
+    expect(svc.lines()).toEqual([{ productId: ID_A, quantity: 1, size: 'L' }]);
+  });
+
+  it('TALLAS · decrement de M a 0 elimina solo esa línea', () => {
+    const { svc, http } = make();
+    svc.add(ID_A, 1, 'M');
+    svc.add(ID_A, 2, 'L');
+    hydrate(http, { [ID_A]: publicProduct(ID_A) });
+    svc.decrement(ID_A, 'M');
+    expect(svc.lines()).toEqual([{ productId: ID_A, quantity: 2, size: 'L' }]);
+  });
+
+  it('TALLAS · misma talla se acumula (dedupe por productId+size)', () => {
+    const { svc, http } = make();
+    svc.add(ID_A, 2, 'M');
+    svc.add(ID_A, 3, 'M');
+    hydrate(http, { [ID_A]: publicProduct(ID_A) });
+    expect(svc.lines()).toEqual([{ productId: ID_A, quantity: 5, size: 'M' }]);
+  });
+
+  it('TALLAS · v1 antiguo mezclado (con y sin size) se lee sin romperse', () => {
+    localStorage.setItem(
+      KEY,
+      JSON.stringify({
+        version: 1,
+        items: [
+          { productId: ID_A, quantity: 2 }, // línea v1 antigua, sin size
+          { productId: ID_A, quantity: 1, size: 'M' }, // línea nueva con size
+          { productId: ID_B, quantity: 4, size: 'L' },
+        ],
+      }),
+    );
+    const { svc } = make();
+    expect(svc.lines()).toEqual([
+      { productId: ID_A, quantity: 2 },
+      { productId: ID_A, quantity: 1, size: 'M' },
+      { productId: ID_B, quantity: 4, size: 'L' },
+    ]);
+  });
+
+  it('TALLAS · hydrated propaga size a la UI', () => {
+    const { svc, http } = make();
+    svc.add(ID_A, 1, 'M');
+    hydrate(http, { [ID_A]: publicProduct(ID_A) });
+    expect(svc.hydrated()[0].size).toBe('M');
+  });
 });

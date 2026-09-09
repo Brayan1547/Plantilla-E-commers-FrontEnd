@@ -41,21 +41,18 @@ interface GalleryImage {
  * `returnsInfo`, `modelInfo`, `categories` (poblado a `{name,slug}`), además
  * de lo que ya mostraba (name/price/description/images/stock agregado).
  *
- * F7-F — variantes: SOLO informativas (`color`/`size`/`stock` — el backend ni
- * siquiera manda `sku`, ver `PublicProductVariant`). NO hay selector
- * accionable: `addToCart()` sigue mandando únicamente `{productId, quantity}`
- * a `HttpCart`, exactamente igual que antes de F7. Conectar una variante
- * elegida al carrito requeriría un `variantId` en `CartItem` — fuera de
- * alcance de F7 por decisión explícita (ver F7.AUDIT §10 / deuda documentada
- * en el reporte de implementación).
+ * F7-F / TALLAS — variantes públicas: `color`/`size`/`stock` (el backend no
+ * manda `sku`, ver `PublicProductVariant`). La talla SÍ es un selector
+ * accionable: si el producto tiene variantes, elegir una talla es obligatorio
+ * y `addToCart()` envía `{productId, quantity, size}`. Un producto simple
+ * (variants: []) sigue enviando `{productId, quantity}`. NO se usa `variantId`:
+ * `size` es el mismo texto de `variant.size`. El backend es la autoridad final
+ * de stock y validación de la talla.
  *
- * UI-3B — sólo evolución VISUAL / responsive / accesibilidad de esta misma
- * ficha (galería vertical + imagen principal + imágenes apiladas, breadcrumbs
- * propios, pills de talla de PRESENTACIÓN, bloque informativo de pago contra
- * entrega, acordeones nativos, visor accesible). Sin cambios de contrato: el
- * flujo de carga, `addToCart()`, `HttpCart`, `quantity` y los servicios
- * inyectados quedan intactos. El estado nuevo (`selectedUrl`, `zoomOpener`)
- * es únicamente de presentación.
+ * UI-3B — la ficha mantiene su diseño (galería vertical, breadcrumbs propios,
+ * bloque informativo de pago contra entrega, acordeones nativos, visor
+ * accesible). El estado de presentación (`selectedUrl`, `zoomOpener`) no toca
+ * el carrito; el estado de compra (`selectedSize`, `quantity`) sí.
  */
 @Component({
   selector: 'app-product-disign',
@@ -84,6 +81,15 @@ export default class ProductDisign {
 
   protected readonly quantity = signal(1);
   protected readonly adding = signal(false);
+
+  /**
+   * TALLAS — talla elegida por el usuario (`null` = ninguna). Solo aplica a
+   * productos con variantes. NO es un `variantId`: es el valor de texto de
+   * `product.variants[].size` (S/M/L/XL/"Única"/…), el mismo que exige el backend.
+   */
+  protected readonly selectedSize = signal<string | null>(null);
+  /** Se enciende tras intentar "Añadir" sin talla, para mostrar el aviso inline. */
+  protected readonly showSizeHint = signal(false);
 
   /** URL de la miniatura elegida (null = primera imagen de la galería). SOLO presentación. */
   private readonly selectedUrl = signal<string | null>(null);
@@ -144,9 +150,9 @@ export default class ProductDisign {
   });
 
   /**
-   * F7-F — variantes disponibles, SOLO informativas (color/talla/¿hay
-   * stock?). `[]` en productos sin variantes (venta agregada, comportamiento
-   * sin cambios). Nunca conectado a `addToCart()`.
+   * Variantes del producto (color/talla/stock). `[]` en productos sin variantes
+   * (venta por stock agregado, sin talla). Cuando hay variantes, alimentan el
+   * selector de talla y la validación de `addToCart()`.
    */
   protected readonly variants = computed<PublicProductVariant[]>(() => this.product()?.variants ?? []);
   protected readonly hasVariants = computed(() => this.variants().length > 0);
@@ -162,11 +168,11 @@ export default class ProductDisign {
   });
 
   /**
-   * UI-3B — tallas como "pills" de PRESENTACIÓN. Una entrada por talla
-   * distinta (valor tal cual `variant.size`; "Única" se muestra "Única").
-   * `available` es true si ALGUNA variante de esa talla tiene stock. NO hay
-   * estado "seleccionada": elegir una talla NO cambia lo que envía el carrito
-   * — el contrato `CartItem = {productId, quantity}` queda intacto.
+   * TALLAS — opciones del selector, una por talla distinta (valor tal cual
+   * `variant.size`; "Única" se muestra "Única"). `available` es true si ALGUNA
+   * variante de esa talla tiene stock. La talla elegida (`selectedSize`) viaja
+   * al carrito como `{productId, quantity, size}`; la identidad de una línea del
+   * carrito es (productId + size).
    */
   protected readonly sizeOptions = computed<{ size: string; available: boolean }[]>(() => {
     const map = new Map<string, boolean>();
@@ -177,6 +183,36 @@ export default class ProductDisign {
     }
     return [...map].map(([size, available]) => ({ size, available }));
   });
+
+  /**
+   * TALLAS — máximo de unidades que la UI permite pedir:
+   *   · producto CON variantes  -> stock de la talla seleccionada (suma de las
+   *     variantes de esa talla; 0 si aún no hay talla elegida). El backend sigue
+   *     siendo la autoridad real (§8).
+   *   · producto SIMPLE         -> `Infinity` (sin cambios: no había tope en la
+   *     UI y el backend valida al agregar).
+   */
+  protected readonly maxQty = computed<number>(() => {
+    if (!this.hasVariants()) return Number.POSITIVE_INFINITY;
+    const s = this.selectedSize();
+    if (!s) return 0;
+    return this.variants()
+      .filter((v) => (v.size ?? '').trim() === s)
+      .reduce((sum, v) => sum + (v.stock ?? 0), 0);
+  });
+
+  /** Producto con tallas y sin talla elegida todavía: aún no se puede agregar. */
+  protected readonly needsSizeChoice = computed(() => this.hasVariants() && this.selectedSize() === null);
+
+  /** TALLAS — elige una talla. Ignora las agotadas; ajusta la cantidad al nuevo tope. */
+  protected selectSize(size: string): void {
+    const opt = this.sizeOptions().find((o) => o.size === size);
+    if (!opt || !opt.available) return; // una talla agotada no se puede seleccionar
+    this.selectedSize.set(size);
+    this.showSizeHint.set(false);
+    const max = this.maxQty();
+    if (this.quantity() > max) this.quantity.set(Math.max(1, max));
+  }
 
   constructor() {
     // Visor de imagen: mientras está abierto se bloquea el scroll del body y se
@@ -210,6 +246,11 @@ export default class ProductDisign {
         }
         this.product.set(data);
         this.state.set('ready');
+        // TALLAS — si el producto tiene UNA sola talla disponible (p. ej. un
+        // accesorio "Única"), se preselecciona para ahorrar un clic. Con varias
+        // tallas NO se preselecciona ninguna (§4: "Sin selección").
+        const opts = this.sizeOptions();
+        if (opts.length === 1 && opts[0].available) this.selectedSize.set(opts[0].size);
       },
       error: (err) => {
         // El backend responde 400 (id inválido) y 404 (no existe) -> "not-found".
@@ -248,7 +289,9 @@ export default class ProductDisign {
   }
 
   protected increaseQty(): void {
-    this.quantity.update((q) => q + 1);
+    // TALLAS — nunca por encima del stock de la talla elegida. Producto simple:
+    // `maxQty()` es Infinity -> comportamiento sin cambios.
+    this.quantity.update((q) => (q < this.maxQty() ? q + 1 : q));
   }
 
   protected decreaseQty(): void {
@@ -259,25 +302,43 @@ export default class ProductDisign {
     const p = this.product();
     if (!p || this.outOfStock() || this.adding()) return;
 
+    // TALLAS — producto con variantes: la talla es OBLIGATORIA (igual que exige
+    // el backend). Sin talla elegida -> aviso UX y se corta (no `alert()`).
+    const size = this.selectedSize() ?? undefined;
+    if (this.hasVariants() && !size) {
+      this.showSizeHint.set(true);
+      this.toast.show('Selecciona una talla', 'error');
+      return;
+    }
+
     // UI-4B — invitado: carrito local. NO se abre el modal de login: la compra
-    // como invitado es un flujo de primera clase. El contrato del carrito sigue
-    // siendo `{productId, quantity}` (sin variantId).
+    // como invitado es un flujo de primera clase. Payload: `{productId, quantity}`
+    // para productos simples; `{productId, quantity, size}` con talla. Nunca
+    // `variantId`/`color`/`sku`.
     if (!this.auth.user) {
-      this.guestCart.add(p._id, this.quantity());
+      this.guestCart.add(p._id, this.quantity(), size);
       this.toast.show('Producto agregado al carrito');
       return;
     }
 
     this.adding.set(true);
-    this.httpCart.updateCart(p._id, this.quantity()).subscribe({
+    this.httpCart.updateCart(p._id, this.quantity(), size).subscribe({
       next: () => {
         this.toast.show('Producto agregado al carrito');
         this.adding.set(false);
       },
-      error: () => {
-        this.toast.show('No se pudo agregar al carrito', 'error');
+      error: (err) => {
+        // §8 — el backend es la autoridad: talla inexistente / ambigua / sin
+        // stock / producto cambiado. Se muestra su mensaje si lo trae.
+        this.toast.show(this.cartErrorMessage(err), 'error');
         this.adding.set(false);
       },
     });
+  }
+
+  /** Mensaje del backend (`{ msg }`) si lo hay; si no, uno genérico. */
+  private cartErrorMessage(err: unknown): string {
+    const msg = (err as { error?: { msg?: unknown } })?.error?.msg;
+    return typeof msg === 'string' && msg.trim() ? msg : 'No se pudo agregar al carrito';
   }
 }

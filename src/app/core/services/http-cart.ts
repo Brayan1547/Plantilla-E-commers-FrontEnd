@@ -46,9 +46,11 @@ export class HttpCart {
         );
     }
 
-    // Suma o resta cantidad de un producto (quantity puede ser negativo para restar)
-    updateCart(productId: string, quantity: number) {
-        const body = { productId, quantity };
+    // Suma o resta cantidad de un producto (quantity puede ser negativo para restar).
+    // TALLAS — `size` OPCIONAL: solo se envía para productos con variantes. Un
+    // producto simple sigue mandando exactamente `{ productId, quantity }`.
+    updateCart(productId: string, quantity: number, size?: string) {
+        const body = size ? { productId, quantity, size } : { productId, quantity };
         return this.http.patch<any>(this.BASE_URL, body, { headers: this.getHeader() }).pipe(
             tap((res) => {
                 this.cart.set(res.data);
@@ -57,9 +59,14 @@ export class HttpCart {
         );
     }
 
-    // Elimina un producto del carrito por completo, sin importar la cantidad
-    removeItem(productId: string) {
-        return this.http.delete<any>(`${this.BASE_URL}/items/${productId}`, { headers: this.getHeader() }).pipe(
+    // Elimina una línea del carrito por completo, sin importar la cantidad.
+    // TALLAS — con `size` se quita solo esa talla (`?size=`); sin `size` se
+    // conserva el comportamiento previo (quita todas las líneas del producto).
+    removeItem(productId: string, size?: string) {
+        const url = size
+            ? `${this.BASE_URL}/items/${productId}?size=${encodeURIComponent(size)}`
+            : `${this.BASE_URL}/items/${productId}`;
+        return this.http.delete<any>(url, { headers: this.getHeader() }).pipe(
             tap((res) => {
                 this.cart.set(res.data);
                 this.recalculateCount(res.data);

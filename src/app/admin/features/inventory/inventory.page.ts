@@ -30,7 +30,10 @@ const COLUMNS: TableColumn[] = [
   { label: 'Categoría', width: '150px' },
   { key: 'price', label: 'Precio', width: '120px', align: 'right' },
   { key: 'stock', label: 'Stock', width: '90px', align: 'right' },
-  { key: 'isActive', label: 'Producto', width: '110px' },
+  // ETAPA E — corrección de copy: era 'Producto' (duplicado con la col. `name`,
+  // además colisión de `track col.label` en el data-table). Solo el texto; `key`,
+  // orden y filtrado intactos.
+  { key: 'isActive', label: 'Estado', width: '110px' },
   { label: 'Nivel', width: '130px' },
   { label: '', width: '90px' },
 ];

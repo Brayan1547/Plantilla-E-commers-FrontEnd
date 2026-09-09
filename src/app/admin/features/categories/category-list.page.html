@@ -6,16 +6,15 @@
   }
 </adm-page-header>
 
-<div class="adm-filter-bar">
-  <label class="adm-topbar__search adm-filter-bar__search">
-    <adm-icon name="search" [size]="16" />
-    <input type="search" placeholder="Buscar por nombre, slug o descripción"
-      [ngModel]="search()" (ngModelChange)="search.set($event); page.set(1)"
-      aria-label="Buscar categorías" />
+<div class="adm-filter-bar adm-filter-bar--labeled">
+  <label class="adm-field adm-field--grow">
+    <span class="adm-field__label">Buscar categoría</span>
+    <input type="search" class="adm-input" placeholder="Nombre, slug o descripción"
+      [ngModel]="search()" (ngModelChange)="search.set($event); page.set(1)" />
   </label>
 
   <label class="adm-field">
-    <span class="adm-sr-only">Filtrar por estado</span>
+    <span class="adm-field__label">Estado</span>
     <select class="adm-select" [ngModel]="statusFilter()"
       (ngModelChange)="statusFilter.set($event); page.set(1)">
       <option value="">Todos los estados</option>
@@ -65,7 +64,7 @@
           </a>
         }
         @if (perms.can('categories.delete')) {
-          <button type="button" class="adm-icon-btn" aria-label="Eliminar categoría"
+          <button type="button" class="adm-icon-btn adm-icon-btn--danger" aria-label="Eliminar categoría"
             (click)="remove(cat)">
             <adm-icon name="trash" [size]="15" />
           </button>

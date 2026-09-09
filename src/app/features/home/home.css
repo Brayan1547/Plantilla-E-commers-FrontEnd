@@ -236,15 +236,14 @@
 }
 .cat-card .bg{
   position:absolute; inset:0;
-  transition:transform .7s cubic-bezier(.2,.8,.2,1);
-}
-.cat-card img{
-  position:absolute; inset:0;
-  width:100%; height:100%; object-fit:cover;
-  transition:transform .7s cubic-bezier(.2,.8,.2,1);
+  width:100%; height:100%;
+  object-fit:cover;
+  object-position:center;
+  background:var(--cream-soft);
+  transition:transform .6s cubic-bezier(.2,.8,.2,1);
 }
 .cat-card:hover .bg,
-.cat-card:hover img{ transform:scale(1.06); }
+.cat-card:focus-visible .bg{ transform:scale(1.035); }
 .cat-card::before{
   content:"";
   position:absolute; inset:0;
@@ -268,27 +267,50 @@
  }
 
 .cat-btn{
-  border:1px solid rgba(255,255,255,.7);
+  display:inline-flex;
+  align-items:center;
   padding:9px 18px;
   font-size:11px;
   letter-spacing:1.5px;
   text-transform:uppercase;
-  color: #fff;
-  transition:background .3s ease;
+  color:var(--ink);
+  background:rgba(255,255,255,.82);
+  border:1px solid rgba(20,18,15,.14);
+  border-radius:3px;
+  -webkit-backdrop-filter:blur(2px);
+  backdrop-filter:blur(2px);
+  box-shadow:none;
+  transition:
+    background .3s ease,
+    color .3s ease,
+    border-color .3s ease,
+    box-shadow .3s ease,
+    transform .3s cubic-bezier(.2,.8,.2,1);
 }
-.cat-card:hover .cat-btn{ background:#fff; color:var(--ink); }  
+/* El cambio se dispara al pasar el cursor SOBRE EL BOTÓN (no sobre la card),
+   y también cuando la card recibe foco por teclado. */
+.cat-btn:hover,
+.cat-card:focus-visible .cat-btn{
+  background:#ffffff;
+  color:#000000;
+  border-color:#ffffff;
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(0,0,0,.28);
+}
 
-/* Colores placeholder -- reemplaza el div .bg por <img> cuando tengas la foto */
-.cat-hombre .bg{
-  background:
-    linear-gradient(0deg, rgba(20,18,15,.65) 0%, rgba(20,18,15,0) 55%),
-    var(--cream);
+/* Foco visible por teclado sobre la card (enlace) */
+.cat-card:focus-visible{
+  outline:2px solid #ffffff;
+  outline-offset:3px;
 }
-.cat-mujer .bg{
-  background:linear-gradient(160deg, #E8D5D0 0%, #D4A5A5 55%, #B47B84 100%);
-}
-.cat-colecciones .bg{
-  background:linear-gradient(150deg, #E7DACB, #C7AE95);
+
+@media (prefers-reduced-motion: reduce){
+  .cat-card .bg,
+  .cat-btn{ transition-duration:.01ms; }
+  .cat-card:hover .bg,
+  .cat-card:focus-visible .bg{ transform:none; }
+  .cat-btn:hover,
+  .cat-card:focus-visible .cat-btn{ transform:none; }
 }
 
 /* ================= EDITORIAL / STORY ================= */

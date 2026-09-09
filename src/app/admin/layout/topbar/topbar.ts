@@ -19,7 +19,7 @@ import { ROLE_LABELS } from '../../core/models/permission.model';
         <adm-icon name="menu" [size]="20" />
       </button>
 
-      <button type="button" class="adm-icon-btn" aria-label="Colapsar menú"
+      <button type="button" class="adm-icon-btn adm-topbar__collapse" aria-label="Colapsar menú"
         (click)="toggleCollapse.emit()">
         <adm-icon name="chevron-left" [size]="18" />
       </button>

@@ -107,23 +107,36 @@
             @if (outOfStock()) { Agotado } @else { Disponible }
           </p>
 
-          <!-- F7-F / UI-3B — Tallas: SOLO presentación (pills). NO es un
-               selector accionable: elegir una talla no cambia `quantity()` ni
-               lo que manda `addToCart()` — el carrito sigue recibiendo
-               únicamente {productId, quantity} (ver product-disign.ts). -->
+          <!-- TALLAS — selector accionable. Ubicado igual que antes (bajo
+               DISPONIBLE, sobre CANTIDAD). Las tallas y su disponibilidad salen
+               de `product.variants[].size` / `.stock` (ver product-disign.ts):
+               nada hardcodeado, funciona con XS/XXL/Única/… Una talla agotada
+               queda visible pero deshabilitada. -->
           @if (hasVariants()) {
             <div class="pd-sizes">
               <p class="pd-sizes__label" id="pd-sizes-label">Talla</p>
               <ul class="pd-sizes__list" aria-labelledby="pd-sizes-label">
                 @for (opt of sizeOptions(); track opt.size) {
-                  <li class="pd-size" [class.pd-size--out]="!opt.available">
-                    <span aria-hidden="true">{{ opt.size }}</span>
-                    <span class="sr-only">Talla {{ opt.size }}: {{ opt.available ? 'Disponible' : 'Agotado' }}</span>
+                  <li>
+                    <button
+                      type="button"
+                      class="pd-size"
+                      [class.pd-size--out]="!opt.available"
+                      [class.is-selected]="selectedSize() === opt.size"
+                      [disabled]="!opt.available"
+                      [attr.aria-pressed]="selectedSize() === opt.size"
+                      (click)="selectSize(opt.size)">
+                      <span aria-hidden="true">{{ opt.size }}</span>
+                      <span class="sr-only">Talla {{ opt.size }}: {{ opt.available ? 'Disponible' : 'Agotado' }}</span>
+                    </button>
                   </li>
                 }
               </ul>
               @if (variantColors().length) {
                 <p class="pd-sizes__colors">Color: {{ variantColors().join(', ') }}</p>
+              }
+              @if (showSizeHint()) {
+                <p class="pd-sizes__hint" role="status">Selecciona una talla para continuar.</p>
               }
             </div>
           }
@@ -134,7 +147,7 @@
             <div class="pd-qty" [class.pd-qty--disabled]="outOfStock()" role="group" aria-labelledby="pd-qty-label">
               <button type="button" (click)="decreaseQty()" [disabled]="outOfStock()" aria-label="Restar una unidad">−</button>
               <span class="pd-qty__value" aria-live="polite">{{ quantity() }}</span>
-              <button type="button" (click)="increaseQty()" [disabled]="outOfStock()" aria-label="Sumar una unidad">+</button>
+              <button type="button" (click)="increaseQty()" [disabled]="outOfStock() || quantity() >= maxQty()" aria-label="Sumar una unidad">+</button>
             </div>
 
             <button

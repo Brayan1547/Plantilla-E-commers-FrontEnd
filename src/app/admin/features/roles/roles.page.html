@@ -59,8 +59,10 @@
                     <td style="text-align:center">
                       @if (row.granted.has(perm)) {
                         <adm-icon name="check" [size]="15" />
+                        <span class="adm-sr-only">Concedido</span>
                       } @else {
-                        <span class="adm-muted">—</span>
+                        <span class="adm-muted" aria-hidden="true">—</span>
+                        <span class="adm-sr-only">No concedido</span>
                       }
                     </td>
                   }

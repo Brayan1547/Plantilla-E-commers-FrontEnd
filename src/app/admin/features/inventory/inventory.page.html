@@ -2,9 +2,10 @@
   title="Inventario"
   subtitle="Vista de stock basada en productos." />
 
-<div class="adm-card" style="margin-bottom:16px">
-  <div class="adm-card__body">
-    <p class="adm-muted">
+<div class="adm-stack" style="margin-bottom:16px">
+  <div class="adm-callout">
+    <adm-icon class="adm-callout__icon" name="info" [size]="18" />
+    <p>
       Esta pantalla <strong>no es un sistema de gestión de inventario</strong>. Es
       una vista de solo lectura derivada de <code>GET /product</code>: el único
       dato de existencias disponible hoy es el campo <code>stock</code> de cada
@@ -14,39 +15,38 @@
       requieren un módulo de inventario en el backend (ver BACKEND TODO).
     </p>
   </div>
+
+  @if (state() === 'ready') {
+    <div class="adm-kpi-grid adm-kpi-grid--compact">
+      <div class="adm-kpi">
+        <span class="adm-kpi__label">Productos</span>
+        <span class="adm-kpi__value">{{ summary().total }}</span>
+      </div>
+      <div class="adm-kpi">
+        <span class="adm-kpi__label adm-kpi__ind adm-kpi__ind--ok">Disponibles</span>
+        <span class="adm-kpi__value">{{ summary().ok }}</span>
+      </div>
+      <div class="adm-kpi">
+        <span class="adm-kpi__label adm-kpi__ind adm-kpi__ind--warn">Stock bajo (≤ {{ lowThreshold }})</span>
+        <span class="adm-kpi__value">{{ summary().low }}</span>
+      </div>
+      <div class="adm-kpi">
+        <span class="adm-kpi__label adm-kpi__ind adm-kpi__ind--danger">Agotados</span>
+        <span class="adm-kpi__value">{{ summary().out }}</span>
+      </div>
+    </div>
+  }
 </div>
 
-@if (state() === 'ready') {
-  <div class="adm-kpi-grid" style="margin-bottom:16px">
-    <div class="adm-kpi">
-      <span class="adm-kpi__label">Productos</span>
-      <span class="adm-kpi__value">{{ summary().total }}</span>
-    </div>
-    <div class="adm-kpi">
-      <span class="adm-kpi__label">Disponibles</span>
-      <span class="adm-kpi__value" style="color:var(--adm-ok)">{{ summary().ok }}</span>
-    </div>
-    <div class="adm-kpi">
-      <span class="adm-kpi__label">Stock bajo (≤ {{ lowThreshold }})</span>
-      <span class="adm-kpi__value" style="color:var(--adm-warn)">{{ summary().low }}</span>
-    </div>
-    <div class="adm-kpi">
-      <span class="adm-kpi__label">Agotados</span>
-      <span class="adm-kpi__value" style="color:var(--adm-danger)">{{ summary().out }}</span>
-    </div>
-  </div>
-}
-
-<div class="adm-filter-bar">
-  <label class="adm-topbar__search adm-filter-bar__search">
-    <adm-icon name="search" [size]="16" />
-    <input type="search" placeholder="Buscar por nombre o slug"
-      [ngModel]="search()" (ngModelChange)="search.set($event); page.set(1)"
-      aria-label="Buscar en inventario" />
+<div class="adm-filter-bar adm-filter-bar--labeled">
+  <label class="adm-field adm-field--grow">
+    <span class="adm-field__label">Buscar producto</span>
+    <input type="search" class="adm-input" placeholder="Nombre o slug"
+      [ngModel]="search()" (ngModelChange)="search.set($event); page.set(1)" />
   </label>
 
   <label class="adm-field">
-    <span class="adm-sr-only">Filtrar por categoría</span>
+    <span class="adm-field__label">Categoría</span>
     <select class="adm-select" [ngModel]="categoryFilter()"
       (ngModelChange)="categoryFilter.set($event); page.set(1)">
       <option value="">Todas las categorías</option>
@@ -57,7 +57,7 @@
   </label>
 
   <label class="adm-field">
-    <span class="adm-sr-only">Filtrar por nivel de stock</span>
+    <span class="adm-field__label">Nivel de stock</span>
     <select class="adm-select" [ngModel]="levelFilter()"
       (ngModelChange)="levelFilter.set($event); page.set(1)">
       <option value="">Todos los niveles</option>
@@ -68,7 +68,7 @@
   </label>
 
   <label class="adm-field">
-    <span class="adm-sr-only">Filtrar por estado del producto</span>
+    <span class="adm-field__label">Estado del producto</span>
     <select class="adm-select" [ngModel]="statusFilter()"
       (ngModelChange)="statusFilter.set($event); page.set(1)">
       <option value="">Producto: todos</option>
@@ -94,7 +94,7 @@
   (retry)="load()">
   <ng-template #admRow let-p>
     <td>
-      <span class="adm-avatar" style="border-radius:6px;background:var(--adm-surface-2)">
+      <span class="adm-avatar adm-avatar--square">
         @if (mainImage(p.images)) {
           <img [src]="mainImage(p.images)" alt="" />
         } @else {
@@ -104,7 +104,7 @@
     </td>
     <td>
       <strong>{{ p.name }}</strong>
-      <div class="adm-mono adm-muted" style="font-size:11px">{{ p.slug }}</div>
+      <div class="adm-mono adm-muted adm-text-2xs">{{ p.slug }}</div>
     </td>
     <td class="adm-muted">{{ categoryName(p) }}</td>
     <td class="adm-table__num adm-mono">{{ formatCurrency(p.price) }}</td>

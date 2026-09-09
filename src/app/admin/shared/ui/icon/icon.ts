@@ -41,6 +41,7 @@ export type IconName =
   | 'refresh'
   | 'external'
   | 'lock'
+  | 'calendar'
   | 'sort';
 
 const P: Record<IconName, string> = {
@@ -81,6 +82,7 @@ const P: Record<IconName, string> = {
   external:
     '<path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
   lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  calendar: '<rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
   sort: '<path d="M8 3v18M8 3 4 7M8 3l4 4M16 21V3M16 21l4-4M16 21l-4-4"/>',
 };
 

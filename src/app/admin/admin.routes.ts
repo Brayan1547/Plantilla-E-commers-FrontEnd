@@ -29,8 +29,12 @@ export const ADMIN_ROUTES: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'overview' },
       {
+        // UI-5.3 — el "Inicio" del panel es ahora el Dashboard principal
+        // (`GET /api/dashboard`). Se conserva el path `overview` (destino del
+        // redirect por defecto y de la navegación de vuelta) y el permiso
+        // `dashboard.read`; solo cambia el componente que se carga.
         path: 'overview',
-        loadComponent: () => import('./pages/overview/overview'),
+        loadComponent: () => import('./features/dashboard/dashboard.page'),
         canActivate: [permissionGuard],
         data: { breadcrumb: 'Inicio', permissions: ['dashboard.read'] },
       },
