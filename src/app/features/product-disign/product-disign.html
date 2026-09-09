@@ -159,6 +159,18 @@
               @else if (adding()) { Agregando… }
               @else { Añadir al carrito }
             </button>
+
+            <!-- AJUSTE UX — "Comprar ahora": mismas validaciones y mismo
+                 servicio de carrito; salta el carrito y va al formulario. -->
+            <button
+              type="button"
+              class="pd-btn pd-btn--buy pd-btn--full"
+              [disabled]="outOfStock() || adding()"
+              (click)="buyNow()">
+              @if (outOfStock()) { Sin existencias }
+              @else if (adding()) { Procesando… }
+              @else { Comprar ahora }
+            </button>
           </div>
 
           <!-- Pago contra entrega — bloque INFORMATIVO. Sin pasarela, sin
@@ -219,6 +231,47 @@
           aria-label="Cerrar imagen ampliada"
           (click)="closeZoom(); $event.stopPropagation()">✕</button>
         <img [src]="z" [alt]="'Imagen ampliada de ' + p.name" (click)="$event.stopPropagation()">
+      </div>
+    }
+
+    <!-- AJUSTE UX — modal de compra. Se abre SOLO tras añadir al carrito con
+         éxito. Escape / backdrop / ✕ cierran; foco atrapado en el CTA. -->
+    @if (buyModalOpen()) {
+      <div
+        class="pd-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pd-modal-title"
+        (click)="closeBuyModal()"
+        (keydown.tab)="$event.preventDefault()"
+        (keydown.shift.tab)="$event.preventDefault()">
+        <div class="pd-modal__card" (click)="$event.stopPropagation()">
+          <button
+            type="button"
+            class="pd-modal__close"
+            aria-label="Cerrar"
+            (click)="closeBuyModal()">✕</button>
+          <p class="pd-availability pd-modal__eyebrow">Añadido al carrito</p>
+          <p id="pd-modal-title" class="pd-modal__title serif">{{ p.name }}</p>
+          <p class="pd-modal__meta">
+            @if (selectedSize()) { Talla {{ selectedSize() }} · }Cantidad {{ quantity() }}
+          </p>
+          <div class="pd-modal__actions">
+            <button
+              #buyModalBtn
+              type="button"
+              class="pd-btn pd-btn--solid pd-btn--full"
+              (click)="goToCheckout()">
+              Finalizar compra
+            </button>
+            <button
+              type="button"
+              class="pd-btn pd-btn--ghost pd-btn--full"
+              (click)="closeBuyModal()">
+              Seguir viendo
+            </button>
+          </div>
+        </div>
       </div>
     }
     }

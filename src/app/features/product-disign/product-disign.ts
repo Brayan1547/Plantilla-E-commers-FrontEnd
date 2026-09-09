@@ -10,7 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { HttpProduct } from '../../core/services/http-product';
 import { HttpCart } from '../../core/services/http-cart';
@@ -62,6 +62,7 @@ interface GalleryImage {
 })
 export default class ProductDisign {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private httpProduct = inject(HttpProduct);
   private httpCart = inject(HttpCart);
   private guestCart = inject(GuestCart);
@@ -78,6 +79,15 @@ export default class ProductDisign {
   /** Elemento que abrió el visor — se le devuelve el foco al cerrar. */
   private zoomOpener: HTMLElement | null = null;
   private readonly closeBtn = viewChild<ElementRef<HTMLButtonElement>>('closeBtn');
+
+  /**
+   * AJUSTE UX — modal de compra. Se abre SOLO cuando "Añadir al carrito"
+   * termina con éxito (nunca si falla una validación o la petición). No usa
+   * `UiModal` (ese servicio es exclusivo del modal de auth); vive en el
+   * componente igual que el visor de imagen.
+   */
+  protected readonly buyModalOpen = signal(false);
+  private readonly buyModalBtn = viewChild<ElementRef<HTMLButtonElement>>('buyModalBtn');
 
   protected readonly quantity = signal(1);
   protected readonly adding = signal(false);
@@ -219,11 +229,14 @@ export default class ProductDisign {
     // lleva el foco al botón de cierre. Reversible; también se limpia en
     // ngOnDestroy. No usa ningún servicio global de modal.
     effect(() => {
-      const open = this.zoomImage() !== null;
+      const zoomOpen = this.zoomImage() !== null;
+      const buyOpen = this.buyModalOpen();
       if (!this.isBrowser) return;
-      document.body.style.overflow = open ? 'hidden' : '';
-      if (open) {
+      document.body.style.overflow = zoomOpen || buyOpen ? 'hidden' : '';
+      if (zoomOpen) {
         queueMicrotask(() => this.closeBtn()?.nativeElement.focus());
+      } else if (buyOpen) {
+        queueMicrotask(() => this.buyModalBtn()?.nativeElement.focus());
       }
     });
   }
@@ -285,6 +298,10 @@ export default class ProductDisign {
 
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
+    if (this.buyModalOpen()) {
+      this.closeBuyModal();
+      return;
+    }
     this.closeZoom();
   }
 
@@ -298,7 +315,41 @@ export default class ProductDisign {
     this.quantity.update((q) => (q > 1 ? q - 1 : 1));
   }
 
+  /**
+   * "Añadir al carrito" — comportamiento existente SIN cambios (validación de
+   * talla, invitado vs. autenticado, servicio de carrito, toasts). ÚNICO
+   * añadido: al terminar con éxito se abre el modal de compra.
+   */
   protected addToCart(): void {
+    this.addToCartInternal(() => this.buyModalOpen.set(true));
+  }
+
+  /**
+   * "Comprar ahora" — MISMAS validaciones y MISMO servicio de carrito que
+   * "Añadir al carrito"; al terminar con éxito lleva directo al formulario de
+   * compra. El checkout lee la línea recién agregada del carrito (invitado o
+   * backend), así que talla y cantidad se conservan sin estado ni ruta paralela.
+   */
+  protected buyNow(): void {
+    this.addToCartInternal(() => this.router.navigateByUrl('/checkout'));
+  }
+
+  /** Modal de compra -> continuar al formulario. */
+  protected goToCheckout(): void {
+    this.buyModalOpen.set(false);
+    this.router.navigateByUrl('/checkout');
+  }
+
+  protected closeBuyModal(): void {
+    this.buyModalOpen.set(false);
+  }
+
+  /**
+   * Lógica compartida de "añadir al carrito". `onSuccess` se ejecuta SOLO en el
+   * camino exitoso (carrito de invitado actualizado, o 2xx del backend); nunca
+   * si una validación corta el flujo ni si la petición falla.
+   */
+  private addToCartInternal(onSuccess: () => void): void {
     const p = this.product();
     if (!p || this.outOfStock() || this.adding()) return;
 
@@ -318,6 +369,7 @@ export default class ProductDisign {
     if (!this.auth.user) {
       this.guestCart.add(p._id, this.quantity(), size);
       this.toast.show('Producto agregado al carrito');
+      onSuccess();
       return;
     }
 
@@ -326,6 +378,7 @@ export default class ProductDisign {
       next: () => {
         this.toast.show('Producto agregado al carrito');
         this.adding.set(false);
+        onSuccess();
       },
       error: (err) => {
         // §8 — el backend es la autoridad: talla inexistente / ambigua / sin

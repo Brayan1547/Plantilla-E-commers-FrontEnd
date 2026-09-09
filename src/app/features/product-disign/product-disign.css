@@ -9,6 +9,8 @@
   --line: rgba(20, 18, 15, 0.14);
   --ok: #3f7d52;
   --out: #b0433a;
+  --accent: #37624e;
+  --accent-strong: #2c4f3e;
 
   display: block;
   background: var(--cream);
@@ -235,6 +237,21 @@
 .pd-btn--full { width: 100%; margin: 12px 0 0; }
 .pd-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
+/* AJUSTE UX — "Comprar ahora": llamativo pero sobrio. Salto vertical leve y
+   rápido en hover; sin desplazar el layout ni dejar salto permanente. */
+.pd-btn--buy {
+  margin-top: 10px;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--cream);
+  transition: background .25s ease, transform .18s ease;
+}
+.pd-btn--buy:hover:not(:disabled) {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  transform: translateY(-3px);
+}
+
 /* ---------- pago contra entrega (informativo) ---------- */
 .pd-cod {
   margin: 22px 0 0;
@@ -279,31 +296,43 @@
 .pd-acc__body { padding: 0 0 16px; }
 .pd-acc__body p { margin: 0; color: var(--ink-soft); font-size: 14px; line-height: 1.7; }
 
-/* ---------- visor ---------- */
-.pd-viewer {
+/* ---------- visor / modal de compra ---------- */
+.pd-viewer,
+.pd-modal {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(20, 18, 15, 0.93);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5vw;
-  cursor: zoom-out;
 }
+.pd-viewer { background: rgba(20, 18, 15, 0.93); padding: 5vw; cursor: zoom-out; }
+.pd-modal { background: rgba(20, 18, 15, 0.55); padding: 6vw; }
 .pd-viewer img { max-width: 100%; max-height: 90vh; object-fit: contain; cursor: default; }
-.pd-viewer__close {
+.pd-viewer__close,
+.pd-modal__close {
   position: absolute;
-  top: 18px;
-  right: 22px;
-  width: 44px;
-  height: 44px;
   background: none;
   border: none;
-  color: #fff;
-  font-size: 24px;
   cursor: pointer;
 }
+.pd-viewer__close { top: 18px; right: 22px; width: 44px; height: 44px; color: #fff; font-size: 24px; }
+.pd-modal__close { top: 8px; right: 10px; width: 38px; height: 38px; color: var(--ink-soft); font-size: 17px; }
+
+.pd-modal__card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: var(--cream);
+  border: 1px solid var(--line);
+  padding: 32px 28px 26px;
+  text-align: center;
+}
+.pd-modal__eyebrow { margin: 0 0 10px; }
+.pd-modal__title { margin: 0; font-size: 20px; line-height: 1.2; }
+.pd-modal__meta { margin: 8px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+.pd-modal__actions { margin: 22px 0 0; display: flex; flex-direction: column; gap: 10px; }
+.pd-modal__actions .pd-btn--full { margin: 0; }
 
 /* ---------- foco visible ---------- */
 .pd-btn:focus-visible,
@@ -313,7 +342,8 @@
 .pd-gallery__extra:focus-visible,
 .pd-qty button:focus-visible,
 .pd-crumbs a:focus-visible,
-.pd-acc > summary:focus-visible {
+.pd-acc > summary:focus-visible,
+.pd-modal__close:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
@@ -342,4 +372,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .pd-btn { transition: none; }
+  .pd-btn--buy:hover:not(:disabled) { transform: none; }
 }
