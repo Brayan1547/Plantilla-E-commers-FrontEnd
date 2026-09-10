@@ -21,7 +21,9 @@
   -webkit-font-smoothing:antialiased;
 }
 
-.serif{ font-family:'Playfair Display', serif; }
+.serif{ font-family:'Playfair Display', serif; 
+    font-size: 53px;
+}
 
 .eyebrow{
   font-size:12px;
