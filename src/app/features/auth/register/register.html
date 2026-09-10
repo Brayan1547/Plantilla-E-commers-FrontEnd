@@ -1,9 +1,16 @@
 <div class="auth-card" [class.auth-card--bare]="embedded">
 
-  <div class="auth-brand">
-    <span class="auth-brand__name">DUSCK</span>
-    <span class="auth-brand__sub">MODEL</span>
-  </div>
+  @if (embedded) {
+    <div class="auth-brand">
+      <span class="auth-brand__name">DUSCK</span>
+      <span class="auth-brand__sub">MODEL</span>
+    </div>
+  } @else {
+    <a class="auth-brand auth-brand-link" routerLink="/home">
+      <span class="auth-brand__name">DUSCK</span>
+      <span class="auth-brand__sub">MODEL</span>
+    </a>
+  }
 
   <h1 class="auth-title">Crear cuenta</h1>
 
@@ -77,6 +84,12 @@
         <a routerLink="/login">Inicia sesión</a>
       }
     </p>
+
+      @if (!embedded) {
+        <p class="auth-back-link">
+          <a routerLink="/home">← Volver al inicio</a>
+        </p>
+    }
 
   </form>
 </div>

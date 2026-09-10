@@ -222,3 +222,28 @@
   .auth-input,
   .auth-submit { transition: none; }
 }
+
+
+.auth-back-link {
+  margin-top: 0.75rem;
+}
+.auth-back-link a {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--auth-ink);
+  background: none;
+  border: 1px solid var(--auth-line-strong);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 150ms ease;
+}
+.auth-back-link a:hover {
+    background: rgba(31, 28, 23, 0.12);
+}

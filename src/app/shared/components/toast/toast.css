@@ -3,8 +3,8 @@
   top: 90px; /* debajo del header, ajusta si tu header es más alto/bajo */
   left: 50%;
   transform: translateX(-50%);
-  background: var(--color-black);
-  color: var(--color-white);
+  background: #ffffff;
+  color: #000000;
   padding: 14px 28px;
   font-size: 13px;
   letter-spacing: 0.5px;
