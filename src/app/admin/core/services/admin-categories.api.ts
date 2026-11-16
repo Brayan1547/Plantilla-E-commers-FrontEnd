@@ -64,6 +64,18 @@ export class AdminCategoriesApi {
     return this.http.patch<ApiEnvelope<AdminCategory>>(`${this.base}/${id}`, payload).pipe(unwrap());
   }
 
+    /** POST /category/:id/image (multipart, campo `image`) — sube/reemplaza la portada. */
+  uploadImage(id: string, file: File): Observable<AdminCategory> {
+    const form = new FormData();
+    form.append('image', file, file.name);
+    return this.http.post<ApiEnvelope<AdminCategory>>(`${this.base}/${id}/image`, form).pipe(unwrap());
+  }
+
+  /** DELETE /category/:id/image — quita la portada. */
+  deleteImage(id: string): Observable<AdminCategory> {
+    return this.http.delete<ApiEnvelope<AdminCategory>>(`${this.base}/${id}/image`).pipe(unwrap());
+  }
+
   remove(id: string): Observable<AdminCategory> {
     return this.http.delete<ApiEnvelope<AdminCategory>>(`${this.base}/${id}`).pipe(unwrap());
   }

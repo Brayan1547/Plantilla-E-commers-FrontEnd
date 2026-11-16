@@ -385,31 +385,8 @@
         </div>
       </div>
 
-      <!-- Información editorial (F1 del backend): modelo, detalles, envíos, devoluciones -->
-      <div class="adm-card__body" style="border-top:1px solid var(--adm-line);padding-top:16px">
+<div class="adm-card__body" style="border-top:1px solid var(--adm-line);padding-top:16px">
         <span class="adm-field__label" style="display:block;margin-bottom:14px">Información editorial</span>
-        <div class="adm-grid-2" style="gap:16px" formGroupName="modelInfo">
-          <div class="adm-field">
-            <label class="adm-field__label" for="pf-model-size">Talla del modelo</label>
-            <input id="pf-model-size" class="adm-input" type="text" formControlName="size"
-              placeholder="p. ej. S / M / 32" maxlength="20" />
-            <span class="adm-field__hint">Opcional. Ficha de modelo (no todo producto lleva foto con modelo).</span>
-          </div>
-          <div class="adm-field">
-            <label class="adm-field__label" for="pf-model-h">Altura del modelo (cm)</label>
-            <input id="pf-model-h" class="adm-input" type="number" min="50" max="260" step="1"
-              formControlName="heightCm" placeholder="187" />
-            <span class="adm-field__hint">
-              En centímetros (número).
-              @if (form.controls.modelInfo.controls.heightCm.value) { ≈ {{ formatHeight(form.controls.modelInfo.controls.heightCm.value) }} }
-            </span>
-            <span class="adm-field__error">
-              @if (form.controls.modelInfo.controls.heightCm.touched && form.controls.modelInfo.controls.heightCm.invalid) {
-                Debe estar entre 50 y 260 cm.
-              }
-            </span>
-          </div>
-        </div>
 
         <div class="adm-field">
           <label class="adm-field__label" for="pf-details">Detalles del producto</label>

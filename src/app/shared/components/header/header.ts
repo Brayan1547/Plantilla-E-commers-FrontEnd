@@ -35,8 +35,8 @@ export class Header implements OnDestroy {
   private toast = inject(Toast)
 
   messages = [
-    "Nueva Colección Disponible - DUSCK",
-    "Envío estándar gratuito > $75"
+    "Nueva Colección 2026: Belleza que resalta tu esencia ✨",
+    "10% OFF en tu primera compra con el código: VALERY10"
   ];
 
   constructor(private cdr: ChangeDetectorRef, private router: Router) {

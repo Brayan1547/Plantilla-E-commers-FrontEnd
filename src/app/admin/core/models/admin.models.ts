@@ -20,6 +20,7 @@ export interface AdminCategory {
   slug: string;
   description?: string;
   isActive: boolean;
+  image?: { url: string; publicId?: string };
   createdAt?: string;
   updatedAt?: string;
 }
@@ -292,3 +293,4 @@ export function categoryNames(
     .map((id) => nameById.get(id))
     .filter((n): n is string => !!n);
 }
+http:/localhost:4200/

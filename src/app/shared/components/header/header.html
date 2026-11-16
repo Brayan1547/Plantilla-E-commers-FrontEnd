@@ -14,43 +14,11 @@
      <!-- ============================================
            ICONO: Lupa / Buscador
       ============================================ -->
-      <div class="search-box">
+      <!-- <div class="search-box">
         <input type="text" placeholder="Buscar...">
         <span class="search-icon icon-mask icon-mask--lupa"></span>
-      </div>
+      </div> -->
 
-      <!-- <button (click)= "logout()">logout</button> -->
-
-      <!-- @if( httpAuth.isLogged() && httpAuth.user; as user){
-        <li><button (click)="logout()">logout</button></li>
-      }@else {
-        <li><a routerLink="/login" routerLinkActive="active">login</a></li>
-        <li><a routerLink="/register" routerLink="active">register</a></li>
-      } -->
-
-      <!-- <ul>
-        @if ( httpAuth.user$ |async; as user) {
-        {{ user.name }}
-        {{ user.role }}
-        <li><button (click)="logout()">logout</button></li>
-        }
-        @else {
-        <li><a routerLink="/login" routerLinkActive="active">login</a></li>
-        <li><a routerLink="/register" routerLinkActive="active">register</a></li>
-        }
-      </ul> -->
-
-       <!-- <ul>
-        @if ( httpAuth.user$ |async; as user) {
-        {{ user.name }}
-        {{ user.role }}
-        <li><button (click)="logout()">logout</button></li>
-        }
-        @else {
-        <li><button type="button" class="auth-link" (click)="openAuthModal('login')">login</button></li>
-        <li><button type="button" class="auth-link" (click)="openAuthModal('register')">register</button></li>
-        }
-      </ul> -->
 
     </div>
 
@@ -59,7 +27,7 @@
     </div> -->
 
     <div class="logo-container" [routerLink]="['/']">
-      <span class="brand-logo" role="img" aria-label="Dusck Model Logo"></span>
+      <img src="/assets/imagenes/img-logo-valery-removebg-preview.png" alt="Valery Logo" class="brand-logo">
     </div>
 
     <div class="nav-right">
@@ -109,7 +77,7 @@
 <!-- Panel lateral de navegación (reemplaza al mega-menú) -->
 <aside class="side-drawer" [class.open]="drawerOpen">
   <div class="side-drawer__header">
-    <span class="side-drawer__logo">DUSCK</span>
+    <span class="side-drawer__logo">VALERY</span>
     <button class="side-drawer__close" (click)="closeDrawer()">
       CERRAR <span class="close-x">✕</span>
     </button>
@@ -117,10 +85,11 @@
 
   <ul class="side-drawer__list">
     <li><button routerLink="/home" (click)="closeDrawer()">TIENDA</button></li>
-    <li><a routerLink="/basicos" [queryParams]="{ categoria: 'hombre' }" routerLinkActive="active" (click)="closeDrawer()">HOMBRE</a></li>
-    <li><a routerLink="/basicos" [queryParams]="{ categoria: 'mujer' }" routerLinkActive="active" (click)="closeDrawer()">MUJER</a></li>
+    <li><a routerLink="/basicos" [queryParams]="{ categoria: 'rostro' }" (click)="closeDrawer()">ROSTRO</a></li>
+    <li><a routerLink="/basicos" [queryParams]="{ categoria: 'labios' }" (click)="closeDrawer()">LABIOS</a></li>
+    <li><a routerLink="/basicos" [queryParams]="{ categoria: 'ojos-y-cejas' }" (click)="closeDrawer()">OJOS Y CEJAS</a></li>
     <li><a routerLink="/colecciones" routerLinkActive="active" (click)="closeDrawer()">COLECCIONES</a></li>
-    <li><a routerLink="/basicos" routerLinkActive="active" (click)="closeDrawer()">BÁSICOS</a></li>
+    <li><a routerLink="/basicos" routerLinkActive="active" (click)="closeDrawer()">CATÁLOGO</a></li>
   </ul>
 </aside>
 

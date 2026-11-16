@@ -26,7 +26,7 @@ import { ROLE_LABELS } from '../../core/models/permission.model';
 
       <!-- Identidad del panel (texto estático, sin datos derivados). -->
       <span class="adm-topbar__brand">
-        <span class="adm-topbar__brand-name">DUSCK</span>
+        <span class="adm-topbar__brand-name">VALERY</span>
         <span class="adm-topbar__brand-tag">Panel</span>
       </span>
 

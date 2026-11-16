@@ -68,10 +68,19 @@ export interface PublicProduct {
 }
 
 /** Categoría tal como la devuelve `GET /api/category` público (F7-C: solo activas fuera de sesión admin-capable). */
+// export interface PublicCategory {
+//   _id: string;
+//   name: string;
+//   slug: string;
+//   description?: string;
+//   isActive: boolean;
+// }
+
 export interface PublicCategory {
   _id: string;
   name: string;
   slug: string;
   description?: string;
   isActive: boolean;
+  image?: { url: string };
 }

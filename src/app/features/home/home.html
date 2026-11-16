@@ -2,15 +2,7 @@
 
   <!-- ============ HERO VIDEO ============ -->
   <section class="hero-video">
-    <video
-      class="hero-video-bg"
-      autoplay
-      muted
-      loop
-      playsinline
-      poster="/assets/img/hero-poster.jpg">
-      <source src="assets/video/video_dusk.mp4" type="video/mp4">
-    </video>
+    <img class="hero-video-bg" src="/assets/imagenes/logo-grande-v.png">
 
     <!-- Si tu archivo es un .gif real (no video), usa esto en vez del <video> de arriba:
     <img class="hero-video-bg" src="/assets/img/hero.gif" alt="DUSCK colección"> -->
@@ -19,7 +11,7 @@
 
     <div class="hero-video-content">
       <p class="eyebrow eyebrow--light">Colección 2026</p>
-      <h1 class="hero-video-title serif">Línea de <em>básicos</em><br>esenciales</h1>
+      <h1 class="hero-video-title serif">Belleza que <em>resalta tu </em><br>esencia</h1>
       <!-- <a routerLink="/tienda" class="btn-outline-light">Ver colección</a> -->
     </div>
   </section>
@@ -35,47 +27,48 @@
 
     <div class="product-grid">
 
-       @for (product of newArrivals(); track product._id) {
-        <a [routerLink]="['/tienda/producto', product._id]" class="product-card">
-          <div class="product-media">
-            @if (isNew(product)) {
-              <span class="tag-new">Nuevo</span>
-            }
-            @if (product.stock === 0) {
-              <span class="tag-new" style="background:#999;">Agotado</span>
-            }
-            <button class="wishlist-btn" (click)="onWishlist($event, product._id)" aria-label="Agregar a favoritos">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M12 21s-6.7-4.35-9.3-8.1C.8 10 1.4 6.3 4.6 4.9c2-.9 4.3-.3 5.6 1.5.4.5.7 1 .9 1.6.2-.6.5-1.1.9-1.6 1.3-1.8 3.6-2.4 5.6-1.5 3.2 1.4 3.8 5.1 1.9 8-2.6 3.75-9.3 8.1-9.3 8.1z"/>
-              </svg>
-            </button>
-            @if (hasImages(product.images)) {
-              <img class="product-img product-img--main" [src]="getMainImage(product.images)" [alt]="product.name">
-            } @else {
-              <div class="product-img product-img--main" style="background:#f0f0f0;"></div>
-            }
-            <button type="button" class="quick-buy" (click)="onAddToCart($event, product._id)">Comprar</button>
-          </div>
-          <p class="product-name">{{ product.name }}</p>
-          <p class="product-price">{{ product.price | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
-        </a>
+      @for (product of newArrivals(); track product._id) {
+      <a [routerLink]="['/tienda/producto', product._id]" class="product-card">
+        <div class="product-media">
+          @if (isNew(product)) {
+          <span class="tag-new">Nuevo</span>
+          }
+          @if (product.stock === 0) {
+          <span class="tag-new" style="background:#999;">Agotado</span>
+          }
+          <button class="wishlist-btn" (click)="onWishlist($event, product._id)" aria-label="Agregar a favoritos">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path
+                d="M12 21s-6.7-4.35-9.3-8.1C.8 10 1.4 6.3 4.6 4.9c2-.9 4.3-.3 5.6 1.5.4.5.7 1 .9 1.6.2-.6.5-1.1.9-1.6 1.3-1.8 3.6-2.4 5.6-1.5 3.2 1.4 3.8 5.1 1.9 8-2.6 3.75-9.3 8.1-9.3 8.1z" />
+            </svg>
+          </button>
+          @if (hasImages(product.images)) {
+          <img class="product-img product-img--main" [src]="getMainImage(product.images)" [alt]="product.name">
+          } @else {
+          <div class="product-img product-img--main" style="background:#f0f0f0;"></div>
+          }
+          <button type="button" class="quick-buy" (click)="onAddToCart($event, product._id)">Comprar</button>
+        </div>
+        <p class="product-name">{{ product.name }}</p>
+        <p class="product-price">{{ product.price | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
+      </a>
       }
 
       @if (state() === 'empty') {
-        <p class="arrivals-empty">Todavía no hay productos publicados.</p>
+      <p class="arrivals-empty">Todavía no hay productos publicados.</p>
       }
       @if (state() === 'error') {
-        <p class="arrivals-empty">No pudimos cargar los productos. Intenta de nuevo más tarde.</p>
+      <p class="arrivals-empty">No pudimos cargar los productos. Intenta de nuevo más tarde.</p>
       }
 
-            <!-- Card especial: solo visible para administrador o shop_manager -->
+      <!-- Card especial: solo visible para administrador o shop_manager -->
       @if (canManageProducts) {
-        <a routerLink="/admin/products/new" class="product-card product-card--add">
-          <div class="product-media product-media--add">
-            <span class="add-icon">+</span>
-          </div>
-          <p class="product-name">Agregar producto</p>
-        </a>
+      <a routerLink="/admin/products/new" class="product-card product-card--add">
+        <div class="product-media product-media--add">
+          <span class="add-icon">+</span>
+        </div>
+        <p class="product-name">Agregar producto</p>
+      </a>
       }
 
     </div>
@@ -87,59 +80,38 @@
   <section class="section">
     <div class="cat-header">
       <h2 class="serif">Compra por categoría</h2>
-      <p>Tres formas de encontrar tu próxima pieza favorita, curadas para cada estilo.</p>
+      <p>Encuentra tu próxima pieza favorita, curada para cada estilo.</p>
     </div>
 
     <div class="cat-grid">
-      <a routerLink="/basicos" [queryParams]="{ categoria: 'hombre' }" class="cat-card cat-hombre">
-        <img class="bg" src="/assets/imagenes/Modelo%20Hombre.jpg" alt="Categoría Hombre" loading="lazy" decoding="async">
-        <div class="label">
-          <span class="serif">Hombre</span>
-          <span class="cat-btn">Comprar</span>
-        </div>
-      </a>
-
-      <a routerLink="/basicos" [queryParams]="{ categoria: 'mujer' }" class="cat-card cat-mujer">
-        <img class="bg" src="/assets/imagenes/Modelo%20Mujer.jpg" alt="Categoría Mujer" loading="lazy" decoding="async">
-        <div class="label">
-          <span class="serif">Mujer</span>
-          <span class="cat-btn">Comprar</span>
-        </div>
-      </a>
-
-      <a routerLink="/colecciones" class="cat-card cat-colecciones">
-        <img class="bg" src="/assets/imagenes/Modelo%20colecciones.jpg" alt="Categoría Colecciones" loading="lazy" decoding="async">
-        <div class="label">
-          <span class="serif">Colecciones</span>
-          <span class="cat-btn">Comprar</span>
-        </div>
-      </a>
+      @for (c of categories(); track c._id) {
+        <a routerLink="/basicos" [queryParams]="{ categoria: c.slug }" class="cat-card">
+          <img class="bg" [src]="categoryImage(c)" [alt]="c.name" loading="lazy" decoding="async">
+          <div class="label">
+            <span class="serif">{{ c.name }}</span>
+            <span class="cat-btn">Comprar</span>
+          </div>
+        </a>
+      }
     </div>
   </section>
 
   <!-- ============ EDITORIAL / STORY ============ -->
   <section class="section story">
     <div class="story-visual">
-      <img src="assets/imagenes/Escaparate DUSCK al atardecer.png" alt="DUSCK detrás de escena">
+      <img src="/assets/imagenes/fondo-v.png" alt="DUSCK detrás de escena">
     </div>
     <div>
-      <p class="story-quote serif">"No diseñamos tendencias, diseñamos actitud."</p>
+      <p class="story-quote serif">"No transformamos tu rostro, realzamos tu luz propia."</p>
       <p class="story-body">
-        Cada prenda DUSCK nace de la idea de que el estilo no debería cambiar según
-        la hora del día. Trabajamos con telas nobles y cortes limpios para piezas
-        que se llevan del escritorio a la calle, sin esfuerzo.
+        En Valery, creemos que el maquillaje debe ser una extensión de tu bienestar. Diseñamos fórmulas ligeras,
+        pigmentos de alta fidelidad e ingredientes que cuidan tu piel, logrando un acabado natural y luminoso del día a
+        la noche, sin esfuerzo.
       </p>
-      <p class="story-sign">— Equipo de diseño DUSCK</p>
+      <p class="story-sign">— VALERY</p>
     </div>
   </section>
 
   <div class="dusk-divider"></div>
-
-  <!-- ============ CIERRE / WHATSAPP ============ -->
-  <section class="closing">
-    <h3 class="serif">¿Tienes dudas sobre una talla o un pedido?</h3>
-    <p>Escríbenos directo, te respondemos rápido.</p>
-    <a href="https://wa.me/TUNUMERO" class="btn-primary" target="_blank">Escríbenos por WhatsApp</a>
-  </section>
 
 </div>

@@ -21,7 +21,7 @@ import { PermissionsService } from '../../core/services/permissions';
             @if (canAccessAdmin()) {
               Tu rol ({{ roleLabel() }}) no tiene permiso para ver esta sección del panel.
             } @else {
-              Tu cuenta ({{ roleLabel() }}) no tiene acceso al panel administrativo de DUSCK.
+              Tu cuenta ({{ roleLabel() }}) no tiene acceso al panel administrativo de VALERY.
             }
           </p>
           <div class="adm-inline" style="justify-content:center">

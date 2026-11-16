@@ -13,7 +13,7 @@ import { ADMIN_NAV, type NavSection } from '../admin-nav';
   template: `
     <aside class="adm-sidebar" [attr.data-collapsed]="collapsed() ? 'true' : null">
       <div class="adm-sidebar__brand">
-        DUSCK
+        VALERY
         <small>Admin</small>
       </div>
 

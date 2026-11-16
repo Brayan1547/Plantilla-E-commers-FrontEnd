@@ -89,7 +89,7 @@ export default class Basicos {
 
   /** Preselecciona una categoría si la URL trae `?categoria=<slug>`. */
   private applyCategoryFromUrl(categories: any[]): void {
-    const slug = this.route.snapshot.queryParamMap.get('categoria');
+    const slug = this.route.snapshot.queryParamMap.get('categoria')?.toLowerCase();
     if (!slug) return;
     const match = categories.find((c) => c.slug === slug);
     if (match) {

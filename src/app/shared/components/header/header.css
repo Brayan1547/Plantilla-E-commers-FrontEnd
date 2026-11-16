@@ -2,16 +2,15 @@
    VARIABLES DEL DESIGN SYSTEM
 ======================================== */
 :host {
-  --color-primary: #0F0F10;
-  --color-white: #F8F7F4;
-  --color-cream: #EFE9E1;
-  --color-gray: #B8B2AA;
-  --color-navy: #1B2430;
-  --color-accent: #A67C52;
-  
+  --color-primary: #1C1917;    /* Café espresso cálido en lugar de negro puro */
+  --color-white: #FAF8F5;      /* Blanco suave / perla */
+  --color-cream: #F5EFEB;      /* Crema claro */
+  --color-rose: #C48B8B;       /* Rosa empolvado (extraído de la flor del logo) */
+  --color-accent: #B8926A;     /* Oro satinado para detalles y hovers */
+  --color-gray: #A8A29E;       /* Gris cálido */
+
   --font-heading: 'Playfair Display', serif;
   --font-body: 'Inter', sans-serif;
-  
   --transition-smooth: 250ms ease;
 }
 
@@ -20,8 +19,8 @@
 ======================================== */
 .announcement-bar {
   /* CAMBIO: Se cambió el negro puro por un gris cálido/crema oscuro muy elegante que combina mejor */
-  background: #14120F; 
-  color: var(--color-white);
+  background: #1C1917; 
+  color: #FAF8F5  ;
   padding: 8px 16px;
   text-align: center;
   font-family: var(--font-body);
@@ -152,7 +151,7 @@ header.scrolled .navbar {
 .icon-btn:hover .hamburger-icon {
   color: var(--color-accent);
 }
-
+j
 /* ========================================
    LOGOTIPO GRANDE SIN FONDO Y CENTRADO
 ======================================== */
@@ -166,30 +165,21 @@ header.scrolled .navbar {
 
 .brand-logo {
   display: block;
-  height: 55px;
-  width: 180px;
-  background-color: var(--color-primary);
-  -webkit-mask-image: url('/assets/imagenes/Dusck_model_logo-removebg-preview.png');
-  mask-image: url('/assets/imagenes/Dusck_model_logo-removebg-preview.png');
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
+  height: 90px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
   cursor: pointer;
-  transition: background-color var(--transition-smooth), opacity var(--transition-smooth), height 300ms ease;
+filter: brightness(0) drop-shadow(0 1px 3px rgba(255, 255, 255, 0.4));
+  transition: opacity var(--transition-smooth), height 300ms ease;
 }
+
 header.scrolled .brand-logo {
   font-size: 20px; /* logo más chico al bajar, antes era 26px */
 }
 
 .brand-logo:hover {
   opacity: 0.8;
-}
-
-header:not(.scrolled) .brand-logo {
-  background-color: var(--color-white);
 }
 
 /* ========================================
@@ -229,8 +219,8 @@ header:not(.scrolled) .brand-logo {
 ======================================== */
 .icon-mask {
   display: inline-block;
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 25px;
   background-color: var(--color-primary);
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;

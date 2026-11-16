@@ -54,6 +54,20 @@
           </span>
         </div>
 
+
+       <div class="adm-field">
+          <span class="adm-field__label">Imagen de portada (home)</span>
+          @if (shownImage()) {
+            <img [src]="shownImage()" alt="Portada" style="width:160px;aspect-ratio:3/4;object-fit:cover;border-radius:4px;display:block;margin-bottom:8px" />
+          }
+          <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFileSelected($event)" />
+          @if (shownImage()) {
+            <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" style="margin-top:8px" (click)="clearImage()">Quitar imagen</button>
+          }
+          <span class="adm-field__hint">JPEG, PNG o WEBP, máx. 8 MB. Recomendado vertical (3:4).</span>
+        </div>
+
+        
         <div class="adm-field">
           <span class="adm-field__label">Estado</span>
           <label class="adm-switch">

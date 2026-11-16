@@ -418,3 +418,7 @@
   color: var(--ink);
   line-height: 1;
 }
+
+.cat-card img.bg.bg-blur{ object-fit:cover; filter:blur(24px) brightness(.85); transform:scale(1.2); }
+.cat-card img.bg.bg-main{ object-fit:contain; background:transparent; }
+.cat-card:hover img.bg.bg-blur{ transform:scale(1.2); }

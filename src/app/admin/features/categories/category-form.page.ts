@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { catchError, of } from 'rxjs';
+import { catchError, of, switchMap } from 'rxjs';
 
 import { AdminCategoriesApi, type CategoryPayload } from '../../core/services/admin-categories.api';
 import { AdminDialog } from '../../core/services/admin-dialog';
@@ -62,6 +62,42 @@ export default class CategoryFormPage implements HasUnsavedChanges {
     isActive: new FormControl(true, { nonNullable: true }),
   });
 
+
+    // Imagen de portada: la actual (servidor), el archivo nuevo elegido y su preview.
+  protected currentImageUrl = signal<string | null>(null);
+  protected previewUrl = signal<string | null>(null);
+  private pendingFile: File | null = null;
+  private removeImage = false;
+  protected readonly shownImage = computed(() => this.previewUrl() ?? this.currentImageUrl());
+
+  onFileSelected(ev: Event): void {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      this.dialog.error('Usa una imagen JPEG, PNG o WEBP.');
+      input.value = '';
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      this.dialog.error('La imagen supera 8 MB.');
+      input.value = '';
+      return;
+    }
+    this.pendingFile = file;
+    this.removeImage = false;
+    this.previewUrl.set(URL.createObjectURL(file));
+    this.form.markAsDirty();
+  }
+
+  clearImage(): void {
+    this.pendingFile = null;
+    this.previewUrl.set(null);
+    this.removeImage = !!this.currentImageUrl();
+    this.currentImageUrl.set(null);
+    this.form.markAsDirty();
+  }
+  
   protected title = computed(() => (this.isEdit ? 'Editar categoría' : 'Nueva categoría'));
 
   constructor() {
@@ -82,6 +118,10 @@ export default class CategoryFormPage implements HasUnsavedChanges {
           description: cat.description ?? '',
           isActive: cat.isActive,
         });
+
+        this.currentImageUrl.set(cat.image?.url ?? null);
+        this.form.markAsPristine();
+
         this.form.markAsPristine();
         this.state.set('ready');
       });
@@ -124,11 +164,18 @@ export default class CategoryFormPage implements HasUnsavedChanges {
       isActive: v.isActive,
     };
 
-    this.submitting.set(true);
-    const req$ = this.isEdit
+      this.submitting.set(true);
+    const req$ = (this.isEdit
       ? this.api.update(this.id!, payload)
-      : this.api.create(payload);
-
+      : this.api.create(payload)
+    ).pipe(
+      // Tras guardar los datos: sube la imagen nueva o quita la actual.
+      switchMap((cat) => {
+        if (this.pendingFile) return this.api.uploadImage(cat._id, this.pendingFile);
+        if (this.removeImage) return this.api.deleteImage(cat._id);
+        return of(cat);
+      }),
+    );
     req$.subscribe({
       next: () => {
         this.saved.set(true);
