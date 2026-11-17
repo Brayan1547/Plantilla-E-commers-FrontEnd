@@ -1,0 +1,107 @@
+<adm-page-header title="Deudas" subtitle="Quién te debe, a quién le prestaste y lo que tú debes.">
+  @if (perms.can('debts.create')) {
+    <button actions type="button" class="adm-btn" (click)="goNew()">
+      <adm-icon name="plus" [size]="15" /> Nueva deuda
+    </button>
+  }
+</adm-page-header>
+
+@if (state() === 'ready') {
+  <div class="adm-kpi-grid" style="margin-bottom:20px">
+    <adm-kpi-card label="Me deben" [value]="money(summary().meDeben.total)"
+      [compare]="summary().meDeben.count + ' deuda(s) con saldo'" />
+    <adm-kpi-card label="Yo debo" [value]="money(summary().yoDebo.total)"
+      [compare]="summary().yoDebo.count + ' deuda(s) con saldo'" />
+    <adm-kpi-card label="Vencidas"
+      [value]="summary().meDeben.overdue + summary().yoDebo.overdue"
+      [compare]="summary().meDeben.overdue + ' por cobrar · ' + summary().yoDebo.overdue + ' por pagar'" />
+  </div>
+}
+
+<div class="adm-filter-bar adm-filter-bar--labeled">
+  <label class="adm-field adm-field--grow">
+    <span class="adm-field__label">Buscar</span>
+    <input type="search" class="adm-input" placeholder="Persona, teléfono o concepto"
+      [ngModel]="search()" (ngModelChange)="search.set($event); page.set(1)" />
+  </label>
+
+  <label class="adm-field">
+    <span class="adm-field__label">Tipo</span>
+    <select class="adm-select" [ngModel]="directionFilter()"
+      (ngModelChange)="directionFilter.set($event); page.set(1)">
+      <option value="">Todos</option>
+      <option value="ME_DEBEN">Me deben</option>
+      <option value="YO_DEBO">Yo debo</option>
+    </select>
+  </label>
+
+  <label class="adm-field">
+    <span class="adm-field__label">Estado</span>
+    <select class="adm-select" [ngModel]="statusFilter()"
+      (ngModelChange)="statusFilter.set($event); page.set(1)">
+      <option value="OPEN">Con saldo pendiente</option>
+      <option value="OVERDUE">Vencidas</option>
+      <option value="PAGADA">Pagadas</option>
+      <option value="">Todas</option>
+    </select>
+  </label>
+
+  <button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" (click)="resetFilters()">
+    Limpiar
+  </button>
+</div>
+
+<adm-data-table
+  [columns]="columns"
+  [rows]="view().rows"
+  [state]="tableState()"
+  [sort]="sort()"
+  [errorMessage]="errorMsg()"
+  emptyTitle="Sin deudas"
+  emptyMessage="No hay deudas que coincidan con los filtros."
+  (sortChange)="onSort($event)"
+  (retry)="load()">
+  <ng-template #admRow let-debt>
+    <td>
+      <a [routerLink]="['/admin/debts', debt._id]"><strong>{{ debt.personName }}</strong></a>
+      @if (debt.personPhone) {
+        <div class="adm-muted adm-mono">{{ debt.personPhone }}</div>
+      }
+    </td>
+    <td>
+      <adm-status-badge [label]="directionLabel(debt.direction)"
+        [tone]="debt.direction === 'ME_DEBEN' ? 'info' : 'warn'" />
+    </td>
+    <td class="adm-truncate adm-muted">{{ debt.concept || '—' }}</td>
+    <td class="adm-mono" style="text-align:right">{{ money(debt.amount) }}</td>
+    <td class="adm-mono" style="text-align:right"><strong>{{ money(debt.balance) }}</strong></td>
+    <td class="adm-muted adm-mono">{{ formatDateOnly(debt.dueDate) }}</td>
+    <td><adm-status-badge [label]="statusText(debt)" [tone]="statusTone(debt)" /></td>
+    <td>
+      <div class="adm-table__actions">
+        <a class="adm-icon-btn" [routerLink]="['/admin/debts', debt._id]" aria-label="Ver detalle y abonos">
+          <adm-icon name="external" [size]="15" />
+        </a>
+        @if (perms.can('debts.update')) {
+          <a class="adm-icon-btn" [routerLink]="['/admin/debts', debt._id, 'edit']" aria-label="Editar deuda">
+            <adm-icon name="edit" [size]="15" />
+          </a>
+        }
+        @if (perms.can('debts.delete')) {
+          <button type="button" class="adm-icon-btn adm-icon-btn--danger" aria-label="Eliminar deuda"
+            (click)="remove(debt)">
+            <adm-icon name="trash" [size]="15" />
+          </button>
+        }
+      </div>
+    </td>
+  </ng-template>
+</adm-data-table>
+
+@if (tableState() === 'ready') {
+  <adm-pagination
+    [page]="view().page"
+    [pageSize]="pageSize"
+    [totalItems]="view().total"
+    (pageChange)="page.set($event)" />
+}

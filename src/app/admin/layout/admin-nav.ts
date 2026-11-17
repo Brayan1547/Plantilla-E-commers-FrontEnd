@@ -55,6 +55,13 @@ export const ADMIN_NAV: NavSection[] = [
       { label: 'Categorías', route: '/admin/categories', icon: 'tag', permissions: ['categories.read'] },
     ],
   },
+    {
+    title: 'Finanzas',
+    items: [
+      { label: 'Deudas', route: '/admin/debts', icon: 'wallet', permissions: ['debts.read'] },
+    ],
+  },
+
   {
     title: 'Personas',
     items: [

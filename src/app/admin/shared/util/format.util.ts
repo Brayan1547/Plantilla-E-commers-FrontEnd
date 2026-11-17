@@ -51,3 +51,11 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, '')
     .slice(0, 80);
 }
+
+
+/** 'AAAA-MM-DD' -> fecha legible, sin desfase por zona horaria. */
+export function formatDateOnly(value?: string | null): string {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return '—';
+  const [y, m, d] = value.split('-').map(Number);
+  return DATE_FMT.format(new Date(y, m - 1, d));
+}

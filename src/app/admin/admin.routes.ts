@@ -44,6 +44,12 @@ export const ADMIN_ROUTES: Routes = [
         canActivate: [permissionGuard],
         data: { breadcrumb: 'Pedidos', permissions: ['orders.read'] },
       },
+            {
+        path: 'debts',
+        loadChildren: () => import('./features/debts/debts.routes').then((m) => m.DEBTS_ROUTES),
+        canActivate: [permissionGuard],
+        data: { breadcrumb: 'Deudas', permissions: ['debts.read'] },
+      },
       {
         path: 'products',
         loadChildren: () => import('./features/products/products.routes').then((m) => m.PRODUCTS_ROUTES),

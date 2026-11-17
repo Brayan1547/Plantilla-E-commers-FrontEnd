@@ -1,0 +1,103 @@
+<adm-page-header [title]="title()" subtitle="Persona, monto, fecha límite y concepto.">
+  <a actions class="adm-btn adm-btn--ghost adm-btn--sm" routerLink="/admin/debts">
+    <adm-icon name="chevron-left" [size]="14" /> Volver
+  </a>
+</adm-page-header>
+
+@switch (state()) {
+  @case ('loading') {
+    <div class="adm-card"><div class="adm-card__body"><adm-skeleton [count]="5" /></div></div>
+  }
+  @case ('error') {
+    <div class="adm-card"><adm-error-state [message]="errorMsg()" (retry)="retry()" /></div>
+  }
+  @default {
+    <form class="adm-card" style="max-width:680px" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="adm-card__body">
+        <div class="adm-field">
+          <label class="adm-field__label" for="df-direction">Tipo de deuda</label>
+          <select id="df-direction" class="adm-select" formControlName="direction">
+            <option value="ME_DEBEN">Me deben (le presté o le fié a alguien)</option>
+            <option value="YO_DEBO">Yo debo (me prestaron o le debo a alguien)</option>
+          </select>
+          @if (isEdit) {
+            <span class="adm-field__hint">El tipo no se puede cambiar. Si te equivocaste, elimina la deuda y créala de nuevo.</span>
+          }
+        </div>
+
+        <div class="adm-grid-2" style="gap:16px">
+          <div class="adm-field">
+            <label class="adm-field__label" for="df-name">Persona</label>
+            <input id="df-name" class="adm-input" type="text" formControlName="personName"
+              [attr.aria-invalid]="ctrl('personName').touched && ctrl('personName').invalid" />
+            <span class="adm-field__error">
+              @if (ctrl('personName').touched && ctrl('personName').invalid) {
+                @if (ctrl('personName').errors?.['required']) { El nombre es obligatorio. }
+                @else { Entre 2 y 80 caracteres. }
+              }
+            </span>
+          </div>
+
+          <div class="adm-field">
+            <label class="adm-field__label" for="df-phone">Teléfono (opcional)</label>
+            <input id="df-phone" class="adm-input" type="tel" formControlName="personPhone" />
+            <span class="adm-field__error">
+              @if (ctrl('personPhone').touched && ctrl('personPhone').invalid) { Máximo 30 caracteres. }
+            </span>
+          </div>
+        </div>
+
+        <div class="adm-grid-2" style="gap:16px">
+          <div class="adm-field">
+            <label class="adm-field__label" for="df-amount">Monto total (COP)</label>
+            <input id="df-amount" class="adm-input" type="number" min="1" step="1" formControlName="amount"
+              [attr.aria-invalid]="ctrl('amount').touched && ctrl('amount').invalid" />
+            <span class="adm-field__error">
+              @if (ctrl('amount').touched && ctrl('amount').invalid) {
+                @if (ctrl('amount').errors?.['required']) { El monto es obligatorio. }
+                @else { Debe ser un número entero mayor que 0. }
+              }
+            </span>
+          </div>
+
+          <div class="adm-field">
+            <label class="adm-field__label" for="df-due">Fecha límite (opcional)</label>
+            <input id="df-due" class="adm-input" type="date" formControlName="dueDate" />
+            <span class="adm-field__hint">Pasada esa fecha, la deuda se marca como vencida.</span>
+          </div>
+        </div>
+
+        <div class="adm-field">
+          <label class="adm-field__label" for="df-concept">Concepto</label>
+          <textarea id="df-concept" class="adm-textarea" formControlName="concept" rows="2"
+            placeholder="Ej: 3 labiales y 1 base a crédito"></textarea>
+          <span class="adm-field__hint">{{ form.controls.concept.value.length }}/250</span>
+          <span class="adm-field__error">
+            @if (ctrl('concept').touched && ctrl('concept').errors?.['maxlength']) { Máximo 250 caracteres. }
+          </span>
+        </div>
+
+        <div class="adm-field">
+          <label class="adm-field__label" for="df-notes">Notas (opcional)</label>
+          <textarea id="df-notes" class="adm-textarea" formControlName="notes" rows="3"></textarea>
+          <span class="adm-field__hint">{{ form.controls.notes.value.length }}/500</span>
+          <span class="adm-field__error">
+            @if (ctrl('notes').touched && ctrl('notes').errors?.['maxlength']) { Máximo 500 caracteres. }
+          </span>
+        </div>
+      </div>
+
+      <div class="adm-card__footer">
+        <span class="adm-note">
+          @if (form.dirty && !submitting()) { Cambios sin guardar }
+        </span>
+        <div class="adm-inline">
+          <a class="adm-btn adm-btn--ghost adm-btn--sm" routerLink="/admin/debts">Cancelar</a>
+          <button type="submit" class="adm-btn adm-btn--sm" [disabled]="submitting() || form.invalid">
+            @if (submitting()) { Guardando… } @else { {{ isEdit ? 'Guardar cambios' : 'Registrar deuda' }} }
+          </button>
+        </div>
+      </div>
+    </form>
+  }
+}

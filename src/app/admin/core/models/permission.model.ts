@@ -69,6 +69,12 @@ export const PERMISSIONS = [
 
   // Dashboard — agregados de solo lectura sobre los recursos anteriores
   'dashboard.read',
+  // Deudas: solo administrador
+  'debts.read',
+  'debts.create',
+  'debts.update',
+  'debts.delete',
+  'debts.addPayment',
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];

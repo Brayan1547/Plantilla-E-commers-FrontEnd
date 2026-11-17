@@ -34,6 +34,8 @@ import { TopProductsComponent } from './components/top-products';
 import { InventorySummaryComponent } from './components/inventory-summary';
 import { OperationalAlertsComponent } from './components/operational-alerts';
 
+import { DebtsSummaryComponent } from './components/debts-summary';
+
 /**
  * UI-5.3 / UI-5.4 — Dashboard principal del administrador.
  *
@@ -69,6 +71,7 @@ import { OperationalAlertsComponent } from './components/operational-alerts';
     TopProductsComponent,
     InventorySummaryComponent,
     OperationalAlertsComponent,
+    DebtsSummaryComponent,
   ],
   template: `
     <adm-page-header
@@ -187,6 +190,7 @@ import { OperationalAlertsComponent } from './components/operational-alerts';
     }
 
     @if (state() === 'ready' || state() === 'forbidden') {
+            <adm-dash-debts />
       <div style="margin-top:28px">
         <h2 style="margin-bottom:14px">Accesos rápidos</h2>
         <div class="adm-kpi-grid">
